@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎵 Editor de Músicas - Completo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Arial,sans-serif;background:#0b0b12;color:#e8e8f0;padding:20px}
+.app{max-width:1500px;margin:0 auto}
+h1{font-size:24px;color:#c084fc;margin-bottom:8px}
+.sub{font-size:13px;color:#7a7a9e;margin-bottom:20px}
+.stats{background:#13131f;padding:14px 20px;border-radius:12px;margin-bottom:16px;font-size:14px;display:flex;gap:20px;flex-wrap:wrap;border:1px solid #1f1f30}
+.stats b{color:#fff}
+.stats .warn{color:#f59e0b}
+.stats .ok{color:#34b87a}
+.zona{border:3px dashed #3a3a5a;border-radius:16px;padding:50px 20px;text-align:center;cursor:pointer;background:#0f0f1a;margin-bottom:16px;transition:all .2s}
+.zona:hover,.zona.drag{border-color:#c084fc;background:#1a1a2e}
+.zona .ic{font-size:50px;display:block;margin-bottom:12px}
+.zona .t1{font-size:17px;font-weight:bold;color:#ddd}
+.zona .t2{font-size:13px;color:#8888aa;margin-top:6px}
+.zona input{display:none}
+.toolbar{background:#13131f;padding:14px 18px;border-radius:12px;margin-bottom:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;border:1px solid #1f1f30}
+button{padding:9px 16px;border-radius:8px;border:none;font-size:13px;font-weight:bold;cursor:pointer;font-family:inherit;transition:all .2s}
+button:hover{transform:translateY(-1px);filter:brightness(1.1)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.b1{background:#7c6cf0;color:#fff}
+.b2{background:#34b87a;color:#fff}
+.b3{background:#f59e0b;color:#fff}
+.b4{background:#e05a5a;color:#fff}
+.b5{background:#2a2a4a;color:#d0d0f0}
+.inp-small{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:7px;padding:7px 10px;color:#eee;font-size:13px;outline:none}
+.inp-small:focus{border-color:#7c6cf0}
+label.lbl{font-size:12px;color:#8888aa;font-weight:500}
+.lista{background:#0f0f1a;border-radius:12px;overflow:hidden;border:1px solid #1f1f30}
+.head{display:grid;grid-template-columns:40px 1.5fr 1fr 1fr 0.8fr 1.3fr 50px;gap:8px;padding:12px 16px;background:#18182a;font-size:11px;font-weight:bold;text-transform:uppercase;color:#6a6a8e;letter-spacing:.5px;border-bottom:1px solid #1f1f30}
+.corpo{max-height:500px;overflow-y:auto}
+.linha{display:grid;grid-template-columns:40px 1.5fr 1fr 1fr 0.8fr 1.3fr 50px;gap:8px;padding:8px 16px;align-items:center;border-bottom:1px solid #1a1a2e}
+.linha:hover{background:#13131f}
+.linha.cor{border-left:3px solid #f59e0b;background:rgba(245,158,11,.05)}
+.linha.ok{border-left:3px solid #34b87a}
+.idx{color:#5a5a7e;font-size:12px;text-align:center}
+.orig{font-size:12px;color:#a8a8c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.linha input{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;padding:5px 9px;color:#eee;font-size:12px;width:100%;outline:none;font-family:inherit}
+.linha input:focus{border-color:#7c6cf0;box-shadow:0 0 0 2px rgba(124,108,240,.15)}
+.st{font-size:18px;text-align:center}
+.vazio{padding:60px 20px;text-align:center;color:#4a4a6e;font-size:15px}
+.vazio .big{font-size:48px;display:block;margin-bottom:12px;opacity:.5}
+.acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.progresso{height:6px;background:#2a2a4a;border-radius:4px;overflow:hidden;margin-top:12px;display:none}
+.progresso.on{display:block}
+.progresso .fill{height:100%;background:linear-gradient(90deg,#7c6cf0,#a855f7);width:0%;transition:width .3s}
+
+/* PAINEL JSON */
+.json-painel{margin-top:20px;background:#0f0f1a;border-radius:12px;border:1px solid #1f1f30;overflow:hidden;display:none}
+.json-painel.on{display:block}
+.json-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#18182a;border-bottom:1px solid #1f1f30;flex-wrap:wrap;gap:10px}
+.json-head .tt{font-size:14px;font-weight:bold;color:#c084fc;display:flex;align-items:center;gap:8px}
+.json-head .tt .badge{background:#2a2a4a;color:#a8a8c8;font-size:11px;padding:3px 8px;border-radius:10px;font-weight:normal}
+.json-head .acoes-json{display:flex;gap:8px;flex-wrap:wrap}
+.json-corpo{position:relative}
+.json-corpo textarea{width:100%;min-height:220px;max-height:400px;background:#0a0a14;border:none;color:#a8d8a8;font-family:'Courier New',monospace;font-size:12px;padding:16px 18px;resize:vertical;outline:none;white-space:pre;line-height:1.5}
+.json-info{padding:10px 18px;background:#13131f;border-top:1px solid #1f1f30;font-size:11px;color:#6a6a8e;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.json-info .aviso{color:#f59e0b}
+.json-info .ok{color:#34b87a}
+
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:400px}
+.toast{padding:12px 18px;border-radius:12px;background:#1c1c32;border:1px solid #333;color:#eee;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideIn .3s;font-weight:500}
+.toast.s{border-left:4px solid #34b87a}
+.toast.e{border-left:4px solid #e05a5a}
+.toast.w{border-left:4px solid #f59e0b}
+.toast.i{border-left:4px solid #60a5fa}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@media(max-width:900px){.head,.linha{grid-template-columns:30px 1fr 1fr 60px}.head span:nth-child(5),.linha input:nth-child(5){display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<h1>🎵 Editor de Músicas</h1>
+<div class="sub">Arraste → edita → JSON atualiza sozinho → baixa ZIP com tags</div>
+
+<div class="stats">
+  <span>📁 Total: <b id="stTotal">0</b></span>
+  <span>✅ Prontas: <b class="ok" id="stOk">0</b></span>
+  <span>⚠️ Corrompidas: <b class="warn" id="stCor">0</b></span>
+</div>
+
+<div class="zona" id="zona">
+  <span class="ic">📂</span>
+  <div class="t1">Arraste os arquivos aqui ou clique</div>
+  <div class="t2">Suporta: .mp3, .opus, .m4a, .flac, .ogg, .wav</div>
+  <input type="file" id="inp" multiple accept="audio/*">
+</div>
+
+<div class="toolbar">
+  <button class="b3" id="btnLimpar">🧹 Limpar nomes corrompidos</button>
+  <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
+  <button class="b5" id="btnReset">↺ Resetar campos</button>
+  <button class="b4" id="btnClear">🗑️ Limpar tudo</button>
+  <button class="b5" id="btnDemo">🎯 Testar exemplo</button>
+  <span style="flex:1"></span>
+  <label class="lbl">ID inicial:</label>
+  <input type="number" id="idInicial" value="1" min="1" class="inp-small" style="width:70px">
+  <label class="lbl">Gênero:</label>
+  <input type="text" id="generoGeral" value="POP" class="inp-small" style="width:90px">
+  <button class="b1" id="btnGenero">Aplicar</button>
+  <button class="b1" id="btnToggleJson">📋 Mostrar JSON</button>
+</div>
+
+<div class="lista">
+  <div class="head">
+    <span>#</span>
+    <span>Arquivo</span>
+    <span>Artista</span>
+    <span>Título</span>
+    <span>Gênero</span>
+    <span>Novo nome</span>
+    <span>OK</span>
+  </div>
+  <div class="corpo" id="corpo">
+    <div class="vazio"><span class="big">🎶</span>Nenhuma música carregada ainda.<br>Arraste arquivos ou clique na área acima.</div>
+  </div>
+</div>
+
+<div class="acoes">
+  <button class="b2" id="btnZip" disabled>⬇️ Baixar ZIP com tags</button>
+  <button class="b5" id="btnJson" disabled>⬇️ Baixar JSON</button>
+</div>
+
+<div class="progresso" id="prog"><div class="fill" id="progFill"></div></div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     PAINEL JSON - SEMPRE VISÍVEL
+     ═══════════════════════════════════════════════════════════ -->
+<div class="json-painel on" id="jsonPainel">
+  <div class="json-head">
+    <div class="tt">
+      📋 JSON (PLAY 12) <span class="badge" id="jsonBadge">0 músicas</span>
+    </div>
+    <div class="acoes-json">
+      <button class="b2" id="btnCopyJson2">📋 Copiar</button>
+      <button class="b5" id="btnDownloadJson2">⬇️ Baixar</button>
+      <button class="b5" id="btnMinificar">🔀 Minificar / Expandir</button>
+    </div>
+  </div>
+  <div class="json-corpo">
+    <textarea id="jsonTexto" readonly placeholder="Arraste músicas para gerar o JSON..."></textarea>
+  </div>
+  <div class="json-info">
+    <span id="jsonInfo">Aguardando músicas...</span>
+    <span id="jsonTamanho">0 caracteres</span>
+  </div>
+</div>
+
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ═══════════════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════════════
+var musicas = [];
+var idc = 0;
+var jsonMinificado = false;
+var jsonAtual = '';
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function $(id){ return document.getElementById(id); }
+function semExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(0,i) : n; }
+function comExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(i) : ''; }
+function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function escAttr(s){ return String(s == null ? '' : s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// ═══════════════════════════════════════════════════════════
+// LIMPAR NOME
+// ═══════════════════════════════════════════════════════════
+function limpar(txt){
+  if(!txt) return '';
+  var s = String(txt).replace(/_/g,' ');
+  var lixo = [
+    /\b\d+\s*kbps\b/gi, /\bmp3\b/gi, /\bopus\b/gi, /\bflac\b/gi, /\bm4a\b/gi,
+    /\bofficial\s+music\s+video\b/gi, /\bofficial\s+lyric\s+video\b/gi,
+    /\bofficial\s+video\b/gi, /\bofficial\s+audio\b/gi, /\bofficial\b/gi,
+    /\blyric\s+video\b/gi, /\bmusic\s+video\b/gi, /\bvideo\s+clipe\b/gi,
+    /\bvideo\b/gi, /\bvídeo\b/gi, /\baudio\b/gi, /\báudio\b/gi,
+    /\blive\b/gi, /\bao\s+vivo\b/gi, /\bperformance\b/gi,
+    /\bhd\b/gi, /\b4k\b/gi, /\bremaster(ed)?\b/gi, /\bcover\b/gi, /\bmp\b/gi
+  ];
+  for(var i=0;i<lixo.length;i++) s = s.replace(lixo[i],' ');
+  s = s.replace(/\(\s*\)/g,' ').replace(/\[\s*\]/g,' ');
+  s = s.replace(/^\s*\d+\s*[-–—.]?\s*/,'');
+  s = s.replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:.]+$/,'');
+  return s.replace(/\s+/g,' ').trim();
+}
+
+function ehLixo(t){
+  if(!t) return true;
+  var x = String(t).toLowerCase().trim();
+  if(/^\d+\s*kbps/.test(x)) return true;
+  if(/^(official|performance|video|audio|mp3|hd)$/.test(x)) return true;
+  if(x.length <= 2) return true;
+  return false;
+}
+
+function parseNome(nome){
+  var b = limpar(semExt(nome));
+  var m = b.match(/^(.+?)\s*[-–—]\s*(.+)$/);
+  if(m) return { a: limpar(m[1]), t: limpar(m[2]) };
+  m = b.match(/^(.+?)\s*\((.+?)\)\s*$/);
+  if(m) return { a: limpar(m[2]), t: limpar(m[1]) };
+  return { a:'', t:b };
+}
+
+// ═══════════════════════════════════════════════════════════
+// LER TAGS ID3
+// ═══════════════════════════════════════════════════════════
+function lerTags(file, cb){
+  if(comExt(file.name).toLowerCase() !== '.mp3'){ cb(null); return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var buf = e.target.result;
+      var v = new DataView(buf);
+      if(v.getUint8(0)!==0x49 || v.getUint8(1)!==0x44 || v.getUint8(2)!==0x33){ cb(null); return; }
+      var tagSize = ((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
+      var total = 10 + tagSize;
+      var dec = new TextDecoder('utf-8');
+      var off = 10;
+      var tags = { artist:'', title:'', genre:'' };
+      while(off < total - 10){
+        try{
+          var fid = String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
+          var fsz = (v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
+          if(fsz <= 0 || fsz > 10000) break;
+          if(fid==='TIT2' || fid==='TPE1' || fid==='TCON'){
+            var enc = v.getUint8(off+10);
+            var bytes = new Uint8Array(buf, off+11, fsz-1);
+            var txt = '';
+            if(enc===0 || enc===3){
+              txt = dec.decode(bytes);
+            } else {
+              var c = [];
+              for(var k=0;k<bytes.length;k+=2) c.push(String.fromCharCode(bytes[k]|(bytes[k+1]<<8)));
+              txt = c.join('');
+            }
+            txt = txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
+            if(fid==='TIT2') tags.title = txt;
+            if(fid==='TPE1') tags.artist = txt;
+            if(fid==='TCON') tags.genre = txt;
+          }
+          off += 10 + fsz;
+        }catch(err){ break; }
+      }
+      cb(tags);
+    }catch(err){ cb(null); }
+  };
+  reader.onerror = function(){ cb(null); };
+  reader.readAsArrayBuffer(file.slice(0, 500000));
+}
+
+function escreverTags(buffer, tags){
+  if(typeof ID3Writer === 'undefined') return buffer;
+  try{
+    var w = new ID3Writer(buffer);
+    w.setFrame('TIT2', tags.title || 'Sem título');
+    w.setFrame('TPE1', tags.artist || 'Desconhecido');
+    if(tags.genre) w.setFrame('TCON', tags.genre);
+    return w.addTag();
+  }catch(err){ console.error('Erro ID3:', err); return buffer; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOME LIMPO
+// ═══════════════════════════════════════════════════════════
+function sanitize(s){
+  if(!s) return '';
+  var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  x = x.replace(/[^A-Za-z0-9\s]/g,'');
+  x = x.replace(/\s+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  return x;
+}
+
+function gerarNome(m, ext){
+  var t = sanitize(m.title) || 'sem_titulo';
+  var a = sanitize(m.artist) || 'desconhecido';
+  return t + '_' + a + ext;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADICIONAR
+// ═══════════════════════════════════════════════════════════
+function addArquivos(fileList){
+  var arr = [];
+  for(var i=0;i<fileList.length;i++){
+    if(/\.(mp3|opus|m4a|flac|ogg|wav)$/i.test(fileList[i].name)) arr.push(fileList[i]);
+  }
+  if(arr.length === 0){ toast('Nenhum arquivo suportado.', 'e'); return; }
+  toast('Lendo ' + arr.length + ' arquivo(s)...', 'i');
+  var pendentes = arr.length;
+  arr.forEach(function(file){
+    var p = parseNome(file.name);
+    lerTags(file, function(tags){
+      var artist = (tags && tags.artist) ? limpar(tags.artist) : '';
+      var title = (tags && tags.title) ? limpar(tags.title) : '';
+      var genero = (tags && tags.genre) ? tags.genre : '';
+      if(!artist && p.a) artist = p.a;
+      if(!title && p.t) title = p.t;
+      var m = {
+        id: 'm_' + (++idc) + '_' + Date.now(),
+        file: file,
+        originalName: file.name,
+        artist: artist || '',
+        title: title || '',
+        genero: genero || '',
+        corrompido: ehLixo(artist) || ehLixo(title)
+      };
+      m.newName = gerarNome(m, comExt(file.name));
+      musicas.push(m);
+      pendentes--;
+      if(pendentes === 0){
+        render();
+        toast('✅ ' + arr.length + ' arquivo(s) carregado(s)', 's');
+      }
+    });
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function render(){
+  var corpo = $('corpo');
+  if(musicas.length === 0){
+    corpo.innerHTML = '<div class="vazio"><span class="big">🎶</span>Nenhuma música carregada ainda.<br>Arraste arquivos ou clique na área acima.</div>';
+    stats();
+    atualizarJson();
+    return;
+  }
+
+  var html = '';
+  for(var i=0;i<musicas.length;i++){
+    var m = musicas[i];
+    var cls = m.corrompido ? 'cor' : 'ok';
+    var st = m.corrompido ? '⚠️' : '✅';
+    html += '<div class="linha ' + cls + '">';
+    html += '<span class="idx">' + (i+1) + '</span>';
+    html += '<span class="orig" title="' + escAttr(m.originalName) + '">' + esc(m.originalName) + '</span>';
+    html += '<input data-id="' + m.id + '" data-campo="artist" value="' + escAttr(m.artist) + '" placeholder="Artista">';
+    html += '<input data-id="' + m.id + '" data-campo="title" value="' + escAttr(m.title) + '" placeholder="Título">';
+    html += '<input data-id="' + m.id + '" data-campo="genero" value="' + escAttr(m.genero) + '" placeholder="Gênero">';
+    html += '<span class="orig" title="' + escAttr(m.newName) + '">' + esc(m.newName) + '</span>';
+    html += '<span class="st">' + st + '</span>';
+    html += '</div>';
+  }
+  corpo.innerHTML = html;
+
+  var inputs = corpo.querySelectorAll('input');
+  for(var k=0;k<inputs.length;k++){
+    inputs[k].addEventListener('input', onInputEdit);
+  }
+
+  stats();
+  atualizarJson();
+}
+
+function onInputEdit(e){
+  var inp = e.target;
+  var m = buscar(inp.dataset.id);
+  if(!m) return;
+  m[inp.dataset.campo] = inp.value;
+  if(inp.dataset.campo === 'artist' || inp.dataset.campo === 'title'){
+    m.corrompido = ehLixo(m.artist) || ehLixo(m.title);
+    m.newName = gerarNome(m, comExt(m.originalName));
+    var linha = inp.closest('.linha');
+    linha.className = 'linha ' + (m.corrompido ? 'cor' : 'ok');
+    linha.querySelector('.st').textContent = m.corrompido ? '⚠️' : '✅';
+    var origs = linha.querySelectorAll('.orig');
+    if(origs.length >= 2){
+      origs[1].textContent = m.newName;
+      origs[1].title = m.newName;
+    }
+  }
+  stats();
+  atualizarJson();
+}
+
+function buscar(id){
+  for(var i=0;i<musicas.length;i++) if(musicas[i].id === id) return musicas[i];
+  return null;
+}
+
+function stats(){
+  $('stTotal').textContent = musicas.length;
+  $('stOk').textContent = musicas.filter(function(m){ return !m.corrompido; }).length;
+  $('stCor').textContent = musicas.filter(function(m){ return m.corrompido; }).length;
+  $('btnZip').disabled = musicas.length === 0;
+  $('btnJson').disabled = musicas.length === 0;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📋 ATUALIZAR PAINEL JSON (em tempo real)
+// ═══════════════════════════════════════════════════════════
+function atualizarJson(){
+  var txt = $('jsonTexto');
+  var badge = $('jsonBadge');
+  var info = $('jsonInfo');
+  var tam = $('jsonTamanho');
+
+  if(musicas.length === 0){
+    txt.value = '';
+    txt.placeholder = 'Arraste músicas para gerar o JSON...';
+    badge.textContent = '0 músicas';
+    info.textContent = 'Aguardando músicas...';
+    info.className = '';
+    tam.textContent = '0 caracteres';
+    jsonAtual = '';
+    return;
+  }
+
+  var idIni = parseInt($('idInicial').value, 10) || 1;
+  var gen = $('generoGeral').value.trim() || 'POP';
+
+  var arr = musicas.map(function(m, i){
+    return {
+      id: idIni + i,
+      artist: m.artist || 'Desconhecido',
+      title: m.title || 'Sem título',
+      genero: m.genero || gen,
+      src: m.newName
+    };
+  });
+
+  jsonAtual = jsonMinificado
+    ? JSON.stringify(arr)
+    : '[\n' + arr.map(function(o){ return JSON.stringify(o); }).join(',\n') + '\n]';
+
+  txt.value = jsonAtual;
+
+  badge.textContent = arr.length + ' música' + (arr.length === 1 ? '' : 's');
+
+  var corr = musicas.filter(function(m){ return m.corrompido; }).length;
+  if(corr > 0){
+    info.textContent = '⚠️ ' + corr + ' música(s) com nomes corrompidos — corrija antes de usar';
+    info.className = 'aviso';
+  } else {
+    info.textContent = '✅ JSON pronto para uso';
+    info.className = 'ok';
+  }
+
+  tam.textContent = jsonAtual.length.toLocaleString('pt-BR') + ' caracteres';
+}
+
+// ═══════════════════════════════════════════════════════════
+// AÇÕES
+// ═══════════════════════════════════════════════════════════
+function limparTodos(){
+  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  var n = 0;
+  musicas.forEach(function(m){
+    var a = limpar(m.artist);
+    var t = limpar(m.title);
+    if(a !== m.artist || t !== m.title) n++;
+    if(a) m.artist = a;
+    if(t) m.title = t;
+    m.corrompido = ehLixo(m.artist) || ehLixo(m.title);
+    m.newName = gerarNome(m, comExt(m.originalName));
+  });
+  render();
+  toast('🧹 ' + n + ' nome(s) limpo(s)', 's');
+}
+
+function resetarCampos(){
+  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  if(!confirm('Resetar todos os campos?')) return;
+  musicas.forEach(function(m){
+    var p = parseNome(m.originalName);
+    m.artist = p.a;
+    m.title = p.t;
+    m.genero = '';
+    m.corrompido = ehLixo(m.artist) || ehLixo(m.title);
+    m.newName = gerarNome(m, comExt(m.originalName));
+  });
+  render();
+  toast('↺ Campos resetados', 'i');
+}
+
+function limparTudo(){
+  if(musicas.length === 0) return;
+  if(!confirm('Remover todas as músicas?')) return;
+  musicas = [];
+  jsonAtual = '';
+  render();
+  toast('🗑️ Tudo limpo', 'i');
+}
+
+function reanalisar(){
+  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  toast('Re-analisando...', 'i');
+  var pendentes = musicas.length;
+  musicas.forEach(function(m){
+    var p = parseNome(m.originalName);
+    lerTags(m.file, function(tags){
+      var artist = (tags && tags.artist) ? limpar(tags.artist) : '';
+      var title = (tags && tags.title) ? limpar(tags.title) : '';
+      if(!artist) artist = p.a;
+      if(!title) title = p.t;
+      m.artist = artist || '';
+      m.title = title || '';
+      m.genero = (tags && tags.genre) ? tags.genre : m.genero;
+      m.corrompido = ehLixo(m.artist) || ehLixo(m.title);
+      m.newName = gerarNome(m, comExt(m.originalName));
+      pendentes--;
+      if(pendentes === 0){
+        render();
+        toast('🔄 Re-análise concluída', 's');
+      }
+    });
+  });
+}
+
+function aplicarGenero(){
+  var g = $('generoGeral').value.trim();
+  if(!g){ toast('Digite um gênero.', 'w'); return; }
+  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  musicas.forEach(function(m){ m.genero = g; });
+  render();
+  toast('🎼 Gênero aplicado!', 's');
+}
+
+// ═══════════════════════════════════════════════════════════
+// BAIXAR ZIP
+// ═══════════════════════════════════════════════════════════
+function baixarZip(){
+  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  if(typeof JSZip === 'undefined'){ toast('JSZip não carregou.', 'e'); return; }
+
+  toast('Preparando ZIP...', 'i');
+  $('prog').classList.add('on');
+  var zip = new JSZip();
+  var total = musicas.length;
+  var i = 0;
+
+  function proximo(){
+    if(i >= total){
+      zip.generateAsync({ type:'blob' }).then(function(blob){
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'musicas_corrigidas.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+        $('prog').classList.remove('on');
+        $('progFill').style.width = '0%';
+        toast('✅ ZIP gerado: ' + total + ' música(s)', 's');
+      });
+      return;
+    }
+    var m = musicas[i];
+    $('progFill').style.width = ((i+1)/total*100) + '%';
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var buf = e.target.result;
+      if(comExt(m.originalName).toLowerCase() === '.mp3'){
+        buf = escreverTags(buf, { artist:m.artist, title:m.title, genre:m.genero });
+      }
+      zip.file(m.newName, buf);
+      i++;
+      proximo();
+    };
+    reader.onerror = function(){ i++; proximo(); };
+    reader.readAsArrayBuffer(m.file);
+  }
+  proximo();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BAIXAR JSON (arquivo)
+// ═══════════════════════════════════════════════════════════
+function baixarJson(){
+  if(!jsonAtual){ toast('Nenhuma música.', 'w'); return; }
+  var blob = new Blob([jsonAtual], { type:'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'play12.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  toast('📋 JSON baixado!', 's');
+}
+
+// ═══════════════════════════════════════════════════════════
+// COPIAR JSON
+// ═══════════════════════════════════════════════════════════
+function copiarJson(){
+  if(!jsonAtual){ toast('Nada pra copiar.', 'w'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(jsonAtual)
+      .then(function(){ toast('📋 JSON copiado!', 's'); })
+      .catch(function(){
+        // Fallback
+        $('jsonTexto').select();
+        document.execCommand('copy');
+        toast('📋 JSON copiado!', 's');
+      });
+  } else {
+    $('jsonTexto').select();
+    document.execCommand('copy');
+    toast('📋 JSON copiado!', 's');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// MINIFICAR / EXPANDIR
+// ═══════════════════════════════════════════════════════════
+function toggleMinificar(){
+  jsonMinificado = !jsonMinificado;
+  $('btnMinificar').textContent = jsonMinificado ? '🔀 Expandir' : '🔀 Minificar';
+  atualizarJson();
+  toast(jsonMinificado ? '📦 JSON minificado' : '📄 JSON expandido', 'i');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEMO
+// ═══════════════════════════════════════════════════════════
+function demo(){
+  var exemplos = [
+    'kbps_a.mp3',
+    'waterloo_Official_music_video_mp3_320kbps_Abba.mp3',
+    '320kbps 1.mp3',
+    'i_m_not_in_love_mp_kbps_cc.mp3',
+    'Official_Wham.mp3',
+    'Wings_Silly.mp3',
+    'what_s_up_Official_music_video_mp_kbps_Non_blondes.mp3'
+  ];
+  musicas = exemplos.map(function(nome){
+    var p = parseNome(nome);
+    var m = {
+      id: 'm_' + (++idc) + '_' + Date.now(),
+      file: null,
+      originalName: nome,
+      artist: p.a,
+      title: p.t,
+      genero: 'POP',
+      corrompido: ehLixo(p.a) || ehLixo(p.t)
+    };
+    m.newName = gerarNome(m, comExt(nome));
+    return m;
+  });
+  render();
+  toast('🎯 Exemplo carregado!', 'i');
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function toast(msg, tipo){
+  var wrap = $('toastWrap');
+  var el = document.createElement('div');
+  el.className = 'toast ' + (tipo || 'i');
+  var ic = { s:'✅', e:'❌', w:'⚠️', i:'ℹ️' };
+  el.textContent = (ic[tipo] || 'ℹ️') + ' ' + msg;
+  wrap.appendChild(el);
+  setTimeout(function(){
+    el.style.transition = 'all .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(40px)';
+    setTimeout(function(){ el.remove(); }, 300);
+  }, 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+function init(){
+  var zona = $('zona');
+  var inp = $('inp');
+
+  zona.addEventListener('click', function(e){
+    if(e.target !== inp) inp.click();
+  });
+  zona.addEventListener('dragover', function(e){
+    e.preventDefault(); e.stopPropagation();
+    zona.classList.add('drag');
+  });
+  zona.addEventListener('dragleave', function(e){
+    e.preventDefault(); e.stopPropagation();
+    zona.classList.remove('drag');
+  });
+  zona.addEventListener('drop', function(e){
+    e.preventDefault(); e.stopPropagation();
+    zona.classList.remove('drag');
+    if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+      addArquivos(e.dataTransfer.files);
+    }
+  });
+  inp.addEventListener('change', function(e){
+    if(e.target.files && e.target.files.length) addArquivos(e.target.files);
+    inp.value = '';
+  });
+  document.addEventListener('dragover', function(e){ e.preventDefault(); });
+  document.addEventListener('drop', function(e){ e.preventDefault(); });
+
+  // Botões
+  $('btnLimpar').addEventListener('click', limparTodos);
+  $('btnReanalisar').addEventListener('click', reanalisar);
+  $('btnReset').addEventListener('click', resetarCampos);
+  $('btnClear').addEventListener('click', limparTudo);
+  $('btnDemo').addEventListener('click', demo);
+  $('btnZip').addEventListener('click', baixarZip);
+  $('btnJson').addEventListener('click', baixarJson);
+  $('btnGenero').addEventListener('click', aplicarGenero);
+  $('btnCopyJson2').addEventListener('click', copiarJson);
+  $('btnDownloadJson2').addEventListener('click', baixarJson);
+  $('btnMinificar').addEventListener('click', toggleMinificar);
+
+  // Botão toggle do painel JSON (agora sempre visível, mas deixa como atalho)
+  $('btnToggleJson').addEventListener('click', function(){
+    var p = $('jsonPainel');
+    p.classList.toggle('on');
+    var visivel = p.classList.contains('on');
+    $('btnToggleJson').textContent = visivel ? '📋 Esconder JSON' : '📋 Mostrar JSON';
+    if(visivel) $('jsonPainel').scrollIntoView({ behavior:'smooth' });
+  });
+
+  // Atualiza JSON quando muda ID inicial ou gênero
+  $('idInicial').addEventListener('input', atualizarJson);
+  $('generoGeral').addEventListener('input', atualizarJson);
+
+  setTimeout(function(){
+    var ok = { JSZip: typeof JSZip !== 'undefined', ID3Writer: typeof ID3Writer !== 'undefined' };
+    console.log('🎵 Libs:', ok);
+    if(!ok.JSZip) toast('⚠️ JSZip não carregou', 'w');
+    if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
+  }, 500);
+
+  console.log('🎵 Editor iniciado');
+}
+
+init();
+})();
+</script>
+</body>
+</html>
