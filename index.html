@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas - Completo</title>
+<title>🎵 Editor de Músicas - Limpeza Agressiva</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -53,7 +53,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 .progresso.on{display:block}
 .progresso .fill{height:100%;background:linear-gradient(90deg,#7c6cf0,#a855f7);width:0%;transition:width .3s}
 
-/* PAINEL JSON */
 .json-painel{margin-top:20px;background:#0f0f1a;border-radius:12px;border:1px solid #1f1f30;overflow:hidden;display:none}
 .json-painel.on{display:block}
 .json-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:#18182a;border-bottom:1px solid #1f1f30;flex-wrap:wrap;gap:10px}
@@ -80,7 +79,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <div class="app">
 
 <h1>🎵 Editor de Músicas</h1>
-<div class="sub">Arraste → edita → JSON atualiza sozinho → baixa ZIP com tags</div>
+<div class="sub">Limpeza agressiva — remove lixo, mantém só Artista + Título</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -132,9 +131,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 
 <div class="progresso" id="prog"><div class="fill" id="progFill"></div></div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PAINEL JSON - SEMPRE VISÍVEL
-     ═══════════════════════════════════════════════════════════ -->
 <div class="json-painel on" id="jsonPainel">
   <div class="json-head">
     <div class="tt">
@@ -163,17 +159,11 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 (function(){
 'use strict';
 
-// ═══════════════════════════════════════════════════════════
-// ESTADO
-// ═══════════════════════════════════════════════════════════
 var musicas = [];
 var idc = 0;
 var jsonMinificado = false;
 var jsonAtual = '';
 
-// ═══════════════════════════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════════════════════════
 function $(id){ return document.getElementById(id); }
 function semExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(0,i) : n; }
 function comExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(i) : ''; }
@@ -181,24 +171,47 @@ function esc(s){ var d = document.createElement('div'); d.textContent = s == nul
 function escAttr(s){ return String(s == null ? '' : s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ═══════════════════════════════════════════════════════════
-// LIMPAR NOME
+// 🔥 LIMPEZA AGRESSIVA
 // ═══════════════════════════════════════════════════════════
 function limpar(txt){
   if(!txt) return '';
-  var s = String(txt).replace(/_/g,' ');
+  var s = String(txt).replace(/_/g,' ').replace(/\s+/g,' ');
+
+  // 1) Remove tudo entre parênteses/colchetes que seja lixo
+  var lixoDentro = /\b(official|video|audio|clip|clipe|lyric|lyrics|cover|hd|hq|4k|mp3|320kbps|128kbps|256kbps|remaster|remastered|ao vivo|live|performance|version|original|full|mv|m\/v|letra|legendado|tradução|traduzido)\b/gi;
+  s = s.replace(/\(([^)]*)\)/g, function(m, dentro){
+    return lixoDentro.test(dentro) ? ' ' : m;
+  });
+  s = s.replace(/\[([^\]]*)\]/g, function(m, dentro){
+    return lixoDentro.test(dentro) ? ' ' : m;
+  });
+
+  // 2) Remove palavras-lixo soltas
   var lixo = [
-    /\b\d+\s*kbps\b/gi, /\bmp3\b/gi, /\bopus\b/gi, /\bflac\b/gi, /\bm4a\b/gi,
+    /\b\d+\s*kbps\b/gi, /\bkbps\b/gi,
+    /\bmp3\b/gi, /\bopus\b/gi, /\bflac\b/gi, /\bm4a\b/gi, /\bwav\b/gi, /\bogg\b/gi,
     /\bofficial\s+music\s+video\b/gi, /\bofficial\s+lyric\s+video\b/gi,
     /\bofficial\s+video\b/gi, /\bofficial\s+audio\b/gi, /\bofficial\b/gi,
     /\blyric\s+video\b/gi, /\bmusic\s+video\b/gi, /\bvideo\s+clipe\b/gi,
-    /\bvideo\b/gi, /\bvídeo\b/gi, /\baudio\b/gi, /\báudio\b/gi,
-    /\blive\b/gi, /\bao\s+vivo\b/gi, /\bperformance\b/gi,
-    /\bhd\b/gi, /\b4k\b/gi, /\bremaster(ed)?\b/gi, /\bcover\b/gi, /\bmp\b/gi
+    /\bvideo\b/gi, /\bvídeo\b/gi, /\baudio\b/gi, /\báudio\b/gi, /\bclip\b/gi, /\bclipe\b/gi,
+    /\blive\b/gi, /\bao\s+vivo\b/gi, /\bperformance\b/gi, /\bversion\b/gi, /\boriginal\b/gi,
+    /\bhd\b/gi, /\bhq\b/gi, /\b4k\b/gi, /\bremaster(ed)?\b/gi, /\bcover\b/gi,
+    /\bfeat\.?\b/gi, /\bft\.?\b/gi, /\bmp\b/gi
   ];
   for(var i=0;i<lixo.length;i++) s = s.replace(lixo[i],' ');
+
+  // 3) Remove pontuação solta, parênteses vazios, etc
   s = s.replace(/\(\s*\)/g,' ').replace(/\[\s*\]/g,' ');
+  s = s.replace(/[!?'"`´~^]/g,' ');
+  s = s.replace(/\s*-\s*$/, ' ').replace(/^\s*-\s*/, ' ');
+
+  // 4) Remove número no início (ex: "01 - ")
   s = s.replace(/^\s*\d+\s*[-–—.]?\s*/,'');
+
+  // 5) Remove separadores soltos
   s = s.replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:.]+$/,'');
+
+  // 6) Junta espaços múltiplos
   return s.replace(/\s+/g,' ').trim();
 }
 
@@ -206,25 +219,45 @@ function ehLixo(t){
   if(!t) return true;
   var x = String(t).toLowerCase().trim();
   if(/^\d+\s*kbps/.test(x)) return true;
-  if(/^(official|performance|video|audio|mp3|hd)$/.test(x)) return true;
+  if(/^(official|performance|video|audio|mp3|hd|hq|kbps)$/.test(x)) return true;
   if(x.length <= 2) return true;
   return false;
 }
 
+// ═══════════════════════════════════════════════════════════
+// PARSER — separa ARTISTA e TÍTULO
+// Regra: se tiver " - " → artista antes, título depois
+//        se NÃO tiver  → o nome todo vira ARTISTA e TÍTULO iguais
+// ═══════════════════════════════════════════════════════════
 function parseNome(nome){
   var b = limpar(semExt(nome));
-  var m = b.match(/^(.+?)\s*[-–—]\s*(.+)$/);
-  if(m) return { a: limpar(m[1]), t: limpar(m[2]) };
-  m = b.match(/^(.+?)\s*\((.+?)\)\s*$/);
-  if(m) return { a: limpar(m[2]), t: limpar(m[1]) };
-  return { a:'', t:b };
+
+  // Tenta separar por " - " (com espaço)
+  var m = b.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+  if(m){
+    var a = limpar(m[1]);
+    var t = limpar(m[2]);
+    if(a && t) return { a: a, t: t };
+  }
+
+  // Tenta separar por "-" sem espaço (ex: "JENNIFER PAIGE-CRUSH")
+  m = b.match(/^([A-ZÀ-Ú][^\-]+?)-([A-ZÀ-Ú].+)$/);
+  if(m){
+    var a2 = limpar(m[1]);
+    var t2 = limpar(m[2]);
+    if(a2 && t2) return { a: a2, t: t2 };
+  }
+
+  // NÃO tem separador → o nome TODO vira artista E título
+  var nome_limpo = limpar(b);
+  return { a: nome_limpo, t: nome_limpo };
 }
 
 // ═══════════════════════════════════════════════════════════
 // LER TAGS ID3
 // ═══════════════════════════════════════════════════════════
 function lerTags(file, cb){
-  if(comExt(file.name).toLowerCase() !== '.mp3'){ cb(null); return; }
+  if(!file || comExt(file.name).toLowerCase() !== '.mp3'){ cb(null); return; }
   var reader = new FileReader();
   reader.onload = function(e){
     try{
@@ -279,13 +312,16 @@ function escreverTags(buffer, tags){
 }
 
 // ═══════════════════════════════════════════════════════════
-// NOME LIMPO
+// SANITIZAR NOME DE ARQUIVO
+// Mantém hífens como separador (ex: "JENNIFER-PAIGE-CRUSH")
 // ═══════════════════════════════════════════════════════════
 function sanitize(s){
   if(!s) return '';
   var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x = x.replace(/[^A-Za-z0-9\s]/g,'');
+  // Remove acentos, mantém letras, números, espaço e hífen
+  x = x.replace(/[^A-Za-z0-9\s\-]/g,'');
   x = x.replace(/\s+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  x = x.replace(/-+/g,'-').replace(/^-|-$/g,'');
   return x;
 }
 
@@ -296,7 +332,7 @@ function gerarNome(m, ext){
 }
 
 // ═══════════════════════════════════════════════════════════
-// ADICIONAR
+// ADICIONAR ARQUIVOS
 // ═══════════════════════════════════════════════════════════
 function addArquivos(fileList){
   var arr = [];
@@ -312,8 +348,12 @@ function addArquivos(fileList){
       var artist = (tags && tags.artist) ? limpar(tags.artist) : '';
       var title = (tags && tags.title) ? limpar(tags.title) : '';
       var genero = (tags && tags.genre) ? tags.genre : '';
-      if(!artist && p.a) artist = p.a;
-      if(!title && p.t) title = p.t;
+
+      // ⚠️ REGRA: se tag não tiver artista/título, usa o parser do NOME
+      // Se o parser retornou a === t (sem separador), usa os dois iguais
+      if(!artist) artist = p.a;
+      if(!title) title = p.t;
+
       var m = {
         id: 'm_' + (++idc) + '_' + Date.now(),
         file: file,
@@ -407,7 +447,7 @@ function stats(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📋 ATUALIZAR PAINEL JSON (em tempo real)
+// ATUALIZAR JSON
 // ═══════════════════════════════════════════════════════════
 function atualizarJson(){
   var txt = $('jsonTexto');
@@ -584,9 +624,6 @@ function baixarZip(){
   proximo();
 }
 
-// ═══════════════════════════════════════════════════════════
-// BAIXAR JSON (arquivo)
-// ═══════════════════════════════════════════════════════════
 function baixarJson(){
   if(!jsonAtual){ toast('Nenhuma música.', 'w'); return; }
   var blob = new Blob([jsonAtual], { type:'application/json' });
@@ -601,16 +638,12 @@ function baixarJson(){
   toast('📋 JSON baixado!', 's');
 }
 
-// ═══════════════════════════════════════════════════════════
-// COPIAR JSON
-// ═══════════════════════════════════════════════════════════
 function copiarJson(){
   if(!jsonAtual){ toast('Nada pra copiar.', 'w'); return; }
   if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(jsonAtual)
       .then(function(){ toast('📋 JSON copiado!', 's'); })
       .catch(function(){
-        // Fallback
         $('jsonTexto').select();
         document.execCommand('copy');
         toast('📋 JSON copiado!', 's');
@@ -622,9 +655,6 @@ function copiarJson(){
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// MINIFICAR / EXPANDIR
-// ═══════════════════════════════════════════════════════════
 function toggleMinificar(){
   jsonMinificado = !jsonMinificado;
   $('btnMinificar').textContent = jsonMinificado ? '🔀 Expandir' : '🔀 Minificar';
@@ -632,18 +662,16 @@ function toggleMinificar(){
   toast(jsonMinificado ? '📦 JSON minificado' : '📄 JSON expandido', 'i');
 }
 
-// ═══════════════════════════════════════════════════════════
-// DEMO
-// ═══════════════════════════════════════════════════════════
 function demo(){
   var exemplos = [
+    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
+    'George Michael - Freedom! \'90 (Official Video).mp3',
+    "JENNIFER PAIGE- 'CRUSH' - Original Version (Official Video) HQ.mp3",
+    'We Are Family.mp3',
+    'ABBA - Dancing Queen (Official Music Video).mp3',
     'kbps_a.mp3',
-    'waterloo_Official_music_video_mp3_320kbps_Abba.mp3',
     '320kbps 1.mp3',
-    'i_m_not_in_love_mp_kbps_cc.mp3',
-    'Official_Wham.mp3',
-    'Wings_Silly.mp3',
-    'what_s_up_Official_music_video_mp_kbps_Non_blondes.mp3'
+    'i_m_not_in_love_mp_kbps_cc.mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
@@ -660,12 +688,9 @@ function demo(){
     return m;
   });
   render();
-  toast('🎯 Exemplo carregado!', 'i');
+  toast('🎯 Exemplo carregado!', 's');
 }
 
-// ═══════════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════════
 function toast(msg, tipo){
   var wrap = $('toastWrap');
   var el = document.createElement('div');
@@ -681,9 +706,6 @@ function toast(msg, tipo){
   }, 3500);
 }
 
-// ═══════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════
 function init(){
   var zona = $('zona');
   var inp = $('inp');
@@ -713,7 +735,6 @@ function init(){
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
   document.addEventListener('drop', function(e){ e.preventDefault(); });
 
-  // Botões
   $('btnLimpar').addEventListener('click', limparTodos);
   $('btnReanalisar').addEventListener('click', reanalisar);
   $('btnReset').addEventListener('click', resetarCampos);
@@ -726,7 +747,6 @@ function init(){
   $('btnDownloadJson2').addEventListener('click', baixarJson);
   $('btnMinificar').addEventListener('click', toggleMinificar);
 
-  // Botão toggle do painel JSON (agora sempre visível, mas deixa como atalho)
   $('btnToggleJson').addEventListener('click', function(){
     var p = $('jsonPainel');
     p.classList.toggle('on');
@@ -735,7 +755,6 @@ function init(){
     if(visivel) $('jsonPainel').scrollIntoView({ behavior:'smooth' });
   });
 
-  // Atualiza JSON quando muda ID inicial ou gênero
   $('idInicial').addEventListener('input', atualizarJson);
   $('generoGeral').addEventListener('input', atualizarJson);
 
