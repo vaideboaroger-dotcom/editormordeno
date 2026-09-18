@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas - Limpeza Agressiva</title>
+<title>🎵 Editor de Músicas - Inteligente</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -79,7 +79,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <div class="app">
 
 <h1>🎵 Editor de Músicas</h1>
-<div class="sub">Limpeza agressiva — remove lixo, mantém só Artista + Título</div>
+<div class="sub">Inteligente: separa artista/título, remove repetição, abrevia nomes grandes</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -163,6 +163,7 @@ var musicas = [];
 var idc = 0;
 var jsonMinificado = false;
 var jsonAtual = '';
+var LIMITE_NOME = 45; // 🔥 limite de caracteres (fora a extensão)
 
 function $(id){ return document.getElementById(id); }
 function semExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(0,i) : n; }
@@ -177,14 +178,10 @@ function limpar(txt){
   if(!txt) return '';
   var s = String(txt).replace(/_/g,' ').replace(/\s+/g,' ');
 
-  // 1) Remove tudo entre parênteses/colchetes que seja lixo
-  var lixoDentro = /\b(official|video|audio|clip|clipe|lyric|lyrics|cover|hd|hq|4k|mp3|320kbps|128kbps|256kbps|remaster|remastered|ao vivo|live|performance|version|original|full|mv|m\/v|letra|legendado|tradução|traduzido)\b/gi;
-  s = s.replace(/\(([^)]*)\)/g, function(m, dentro){
-    return lixoDentro.test(dentro) ? ' ' : m;
-  });
-  s = s.replace(/\[([^\]]*)\]/g, function(m, dentro){
-    return lixoDentro.test(dentro) ? ' ' : m;
-  });
+  // 1) Remove lixo entre parênteses/colchetes
+  var lixoDentro = /\b(official|video|audio|clip|clipe|lyric|lyrics|cover|hd|hq|4k|mp3|kbps|remaster|remastered|ao vivo|live|performance|version|original|full|mv|letra|legendado|tradução|traduzido)\b/gi;
+  s = s.replace(/\(([^)]*)\)/g, function(m, dentro){ return lixoDentro.test(dentro) ? ' ' : m; });
+  s = s.replace(/\[([^\]]*)\]/g, function(m, dentro){ return lixoDentro.test(dentro) ? ' ' : m; });
 
   // 2) Remove palavras-lixo soltas
   var lixo = [
@@ -196,20 +193,20 @@ function limpar(txt){
     /\bvideo\b/gi, /\bvídeo\b/gi, /\baudio\b/gi, /\báudio\b/gi, /\bclip\b/gi, /\bclipe\b/gi,
     /\blive\b/gi, /\bao\s+vivo\b/gi, /\bperformance\b/gi, /\bversion\b/gi, /\boriginal\b/gi,
     /\bhd\b/gi, /\bhq\b/gi, /\b4k\b/gi, /\bremaster(ed)?\b/gi, /\bcover\b/gi,
-    /\bfeat\.?\b/gi, /\bft\.?\b/gi, /\bmp\b/gi
+    /\bmp\b/gi
   ];
   for(var i=0;i<lixo.length;i++) s = s.replace(lixo[i],' ');
 
-  // 3) Remove pontuação solta, parênteses vazios, etc
+  // 3) Remove pontuação solta
   s = s.replace(/\(\s*\)/g,' ').replace(/\[\s*\]/g,' ');
   s = s.replace(/[!?'"`´~^]/g,' ');
   s = s.replace(/\s*-\s*$/, ' ').replace(/^\s*-\s*/, ' ');
 
-  // 4) Remove número no início (ex: "01 - ")
+  // 4) Remove número no início
   s = s.replace(/^\s*\d+\s*[-–—.]?\s*/,'');
 
   // 5) Remove separadores soltos
-  s = s.replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:.]+$/,'');
+  s = s.replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
 
   // 6) Junta espaços múltiplos
   return s.replace(/\s+/g,' ').trim();
@@ -225,14 +222,27 @@ function ehLixo(t){
 }
 
 // ═══════════════════════════════════════════════════════════
-// PARSER — separa ARTISTA e TÍTULO
-// Regra: se tiver " - " → artista antes, título depois
-//        se NÃO tiver  → o nome todo vira ARTISTA e TÍTULO iguais
+// 🔥 PARSER INTELIGENTE
 // ═══════════════════════════════════════════════════════════
 function parseNome(nome){
   var b = limpar(semExt(nome));
 
-  // Tenta separar por " - " (com espaço)
+  // 🔥 PASSO 1: remove repetição
+  // Ex: "Jota Quest - Sossego Jota Quest - Sossego" → "Jota Quest - Sossego"
+  var partes = b.split(/\s+/);
+  if(partes.length >= 4 && partes.length % 2 === 0){
+    var metade = partes.length / 2;
+    var metade1 = partes.slice(0, metade).join(' ');
+    var metade2 = partes.slice(metade).join(' ');
+    if(metade1 === metade2) b = metade1;
+  }
+  // Detecta repetição direta (sem espaço)
+  var meio = Math.floor(b.length / 2);
+  if(b.length >= 10 && b.slice(0, meio).trim() === b.slice(meio).trim()){
+    b = b.slice(0, meio).trim();
+  }
+
+  // 🔥 PASSO 2: separa por " - " (com espaço) — PADRÃO MUNDIAL
   var m = b.match(/^(.+?)\s+[-–—]\s+(.+)$/);
   if(m){
     var a = limpar(m[1]);
@@ -240,15 +250,15 @@ function parseNome(nome){
     if(a && t) return { a: a, t: t };
   }
 
-  // Tenta separar por "-" sem espaço (ex: "JENNIFER PAIGE-CRUSH")
-  m = b.match(/^([A-ZÀ-Ú][^\-]+?)-([A-ZÀ-Ú].+)$/);
+  // 🔥 PASSO 3: separa por "-" sem espaço (só se AMBOS lados começam com MAIÚSCULA)
+  m = b.match(/^([A-ZÀ-Ú][^\-]{1,40})-([A-ZÀ-Ú].+)$/);
   if(m){
     var a2 = limpar(m[1]);
     var t2 = limpar(m[2]);
     if(a2 && t2) return { a: a2, t: t2 };
   }
 
-  // NÃO tem separador → o nome TODO vira artista E título
+  // 🔥 PASSO 4: NÃO tem separador → artista = título (SEU JEITO)
   var nome_limpo = limpar(b);
   return { a: nome_limpo, t: nome_limpo };
 }
@@ -312,23 +322,44 @@ function escreverTags(buffer, tags){
 }
 
 // ═══════════════════════════════════════════════════════════
-// SANITIZAR NOME DE ARQUIVO
-// Mantém hífens como separador (ex: "JENNIFER-PAIGE-CRUSH")
+// 🔥 SANITIZAR + ABREVIAR
 // ═══════════════════════════════════════════════════════════
 function sanitize(s){
   if(!s) return '';
   var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  // Remove acentos, mantém letras, números, espaço e hífen
   x = x.replace(/[^A-Za-z0-9\s\-]/g,'');
   x = x.replace(/\s+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
   x = x.replace(/-+/g,'-').replace(/^-|-$/g,'');
   return x;
 }
 
+// 🔥 CORTA respeitando palavra inteira
+function abreviar(nome, limite){
+  if(nome.length <= limite) return nome;
+  var cortado = nome.slice(0, limite);
+  var ultimoUnder = cortado.lastIndexOf('_');
+  if(ultimoUnder > limite * 0.5){
+    cortado = cortado.slice(0, ultimoUnder);
+  }
+  return cortado;
+}
+
 function gerarNome(m, ext){
   var t = sanitize(m.title) || 'sem_titulo';
   var a = sanitize(m.artist) || 'desconhecido';
-  return t + '_' + a + ext;
+
+  // 🔥 Se artista = título (caso "We Are Family"), não duplica
+  var nomeCompleto;
+  if(t === a){
+    nomeCompleto = abreviar(t, LIMITE_NOME);
+  } else {
+    // Padrão: Título_Artista
+    nomeCompleto = abreviar(t, LIMITE_NOME - 15) + '_' + abreviar(a, 15);
+    if(nomeCompleto.length > LIMITE_NOME){
+      nomeCompleto = abreviar(nomeCompleto, LIMITE_NOME);
+    }
+  }
+  return nomeCompleto + ext;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -348,12 +379,8 @@ function addArquivos(fileList){
       var artist = (tags && tags.artist) ? limpar(tags.artist) : '';
       var title = (tags && tags.title) ? limpar(tags.title) : '';
       var genero = (tags && tags.genre) ? tags.genre : '';
-
-      // ⚠️ REGRA: se tag não tiver artista/título, usa o parser do NOME
-      // Se o parser retornou a === t (sem separador), usa os dois iguais
       if(!artist) artist = p.a;
       if(!title) title = p.t;
-
       var m = {
         id: 'm_' + (++idc) + '_' + Date.now(),
         file: file,
@@ -664,14 +691,13 @@ function toggleMinificar(){
 
 function demo(){
   var exemplos = [
-    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
+    'Jota Quest - Sossego Jota Quest - Sossego.mp3',
+    'Jota_Quest_part_Tony_Tornado-_Sossego_Jota_Quest_part_Tony_Tornado-_Sossego.mp3',
     'George Michael - Freedom! \'90 (Official Video).mp3',
     "JENNIFER PAIGE- 'CRUSH' - Original Version (Official Video) HQ.mp3",
     'We Are Family.mp3',
-    'ABBA - Dancing Queen (Official Music Video).mp3',
-    'kbps_a.mp3',
-    '320kbps 1.mp3',
-    'i_m_not_in_love_mp_kbps_cc.mp3'
+    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
+    'ABBA - Dancing Queen (Official Music Video).mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
@@ -765,7 +791,7 @@ function init(){
     if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
   }, 500);
 
-  console.log('🎵 Editor iniciado');
+  console.log('🎵 Editor iniciado | Limite de nome: ' + LIMITE_NOME + ' chars');
 }
 
 init();
