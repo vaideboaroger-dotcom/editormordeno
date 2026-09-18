@@ -79,7 +79,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <div class="app">
 
 <h1>🎵 Editor de Músicas</h1>
-<div class="sub">Inteligente: separa artista/título, remove repetição, abrevia nomes grandes</div>
+<div class="sub">Inteligente: separa artista/título, remove preposições, abrevia nomes grandes</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -172,7 +172,7 @@ function esc(s){ var d = document.createElement('div'); d.textContent = s == nul
 function escAttr(s){ return String(s == null ? '' : s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
 // ═══════════════════════════════════════════════════════════
-// 🔥 LIMPEZA AGRESSIVA
+// 🔥 LIMPEZA AGRESSIVA (com remoção de preposições)
 // ═══════════════════════════════════════════════════════════
 function limpar(txt){
   if(!txt) return '';
@@ -205,10 +205,15 @@ function limpar(txt){
   // 4) Remove número no início
   s = s.replace(/^\s*\d+\s*[-–—.]?\s*/,'');
 
-  // 5) Remove separadores soltos
+  // 5) 🔥 REMOVE PREPOSIÇÕES SOLTAS (o, a, de, da, do, e, em, no, na...)
+  s = s.replace(/\s+\b(o|a|os|as|de|da|do|das|dos|e|em|no|na|nos|nas|um|uma|com|por|para|pra)\b\s+/gi, ' ');
+  s = s.replace(/^\b(o|a|os|as|de|da|do|das|dos|e|em|no|na|nos|nas|um|uma|com|por|para|pra)\b\s+/gi, '');
+  s = s.replace(/\s+\b(o|a|os|as|de|da|do|das|dos|e|em|no|na|nos|nas|um|uma|com|por|para|pra)\b$/gi, '');
+
+  // 6) Remove separadores soltos
   s = s.replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
 
-  // 6) Junta espaços múltiplos
+  // 7) Junta espaços múltiplos
   return s.replace(/\s+/g,' ').trim();
 }
 
@@ -228,7 +233,6 @@ function parseNome(nome){
   var b = limpar(semExt(nome));
 
   // 🔥 PASSO 1: remove repetição
-  // Ex: "Jota Quest - Sossego Jota Quest - Sossego" → "Jota Quest - Sossego"
   var partes = b.split(/\s+/);
   if(partes.length >= 4 && partes.length % 2 === 0){
     var metade = partes.length / 2;
@@ -236,13 +240,12 @@ function parseNome(nome){
     var metade2 = partes.slice(metade).join(' ');
     if(metade1 === metade2) b = metade1;
   }
-  // Detecta repetição direta (sem espaço)
   var meio = Math.floor(b.length / 2);
   if(b.length >= 10 && b.slice(0, meio).trim() === b.slice(meio).trim()){
     b = b.slice(0, meio).trim();
   }
 
-  // 🔥 PASSO 2: separa por " - " (com espaço) — PADRÃO MUNDIAL
+  // 🔥 PASSO 2: separa por " - " (com espaço)
   var m = b.match(/^(.+?)\s+[-–—]\s+(.+)$/);
   if(m){
     var a = limpar(m[1]);
@@ -250,7 +253,7 @@ function parseNome(nome){
     if(a && t) return { a: a, t: t };
   }
 
-  // 🔥 PASSO 3: separa por "-" sem espaço (só se AMBOS lados começam com MAIÚSCULA)
+  // 🔥 PASSO 3: separa por "-" sem espaço (ambos lados com MAIÚSCULA)
   m = b.match(/^([A-ZÀ-Ú][^\-]{1,40})-([A-ZÀ-Ú].+)$/);
   if(m){
     var a2 = limpar(m[1]);
@@ -258,7 +261,7 @@ function parseNome(nome){
     if(a2 && t2) return { a: a2, t: t2 };
   }
 
-  // 🔥 PASSO 4: NÃO tem separador → artista = título (SEU JEITO)
+  // 🔥 PASSO 4: NÃO tem separador → artista = título
   var nome_limpo = limpar(b);
   return { a: nome_limpo, t: nome_limpo };
 }
@@ -333,13 +336,13 @@ function sanitize(s){
   return x;
 }
 
-// 🔥 CORTA respeitando palavra inteira
+// 🔥 CORTA em palavra inteira (mantém _ entre palavras)
 function abreviar(nome, limite){
   if(nome.length <= limite) return nome;
   var cortado = nome.slice(0, limite);
   var ultimoUnder = cortado.lastIndexOf('_');
   if(ultimoUnder > limite * 0.5){
-    cortado = cortado.slice(0, ultimoUnder);
+    return cortado.slice(0, ultimoUnder);
   }
   return cortado;
 }
@@ -348,17 +351,28 @@ function gerarNome(m, ext){
   var t = sanitize(m.title) || 'sem_titulo';
   var a = sanitize(m.artist) || 'desconhecido';
 
-  // 🔥 Se artista = título (caso "We Are Family"), não duplica
-  var nomeCompleto;
+  // 🔥 Se artista = título (ex: "We Are Family"), não duplica
   if(t === a){
-    nomeCompleto = abreviar(t, LIMITE_NOME);
-  } else {
-    // Padrão: Título_Artista
-    nomeCompleto = abreviar(t, LIMITE_NOME - 15) + '_' + abreviar(a, 15);
+    return abreviar(t, LIMITE_NOME) + ext;
+  }
+
+  // Padrão: Título_Artista
+  var nomeCompleto = t + '_' + a;
+
+  // Se passou do limite, reserva espaço pro artista
+  if(nomeCompleto.length > LIMITE_NOME){
+    var espacoTitulo = LIMITE_NOME - a.length - 1;
+    if(espacoTitulo < 10) espacoTitulo = LIMITE_NOME - 15;
+
+    var tCortado = abreviar(t, espacoTitulo);
+    var aCortado = abreviar(a, 15);
+
+    nomeCompleto = tCortado + '_' + aCortado;
     if(nomeCompleto.length > LIMITE_NOME){
       nomeCompleto = abreviar(nomeCompleto, LIMITE_NOME);
     }
   }
+
   return nomeCompleto + ext;
 }
 
@@ -697,7 +711,8 @@ function demo(){
     "JENNIFER PAIGE- 'CRUSH' - Original Version (Official Video) HQ.mp3",
     'We Are Family.mp3',
     'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
-    'ABBA - Dancing Queen (Official Music Video).mp3'
+    'ABBA - Dancing Queen (Official Music Video).mp3',
+    'Zé Cantor João Bandeira - Sabiá O Cheiro da Carolina Riacho do Navio (ao Vivo).mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
