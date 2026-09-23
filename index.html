@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas Inteligente v2</title>
+<title>🎵 Editor de Músicas Inteligente v3</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -87,8 +87,8 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <body>
 <div class="app">
 
-<h1>🎵 Editor de Músicas Inteligente v2</h1>
-<div class="sub">🧠 Aprende com você • Separa artista/título • Remove lixo • Abrevia nomes grandes</div>
+<h1>🎵 Editor de Músicas Inteligente v3</h1>
+<div class="sub">🧠 Aprende com você • Remove parênteses/colchetes automaticamente • Abrevia nomes grandes</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -206,10 +206,10 @@ var LIMITE_NOME = 45;
 // ═══════════════════════════════════════════════════════════
 // 🧠 CÉREBRO (aprendizado persistente)
 // ═══════════════════════════════════════════════════════════
-var BRAIN_KEY = 'editor_musicas_brain_v2';
+var BRAIN_KEY = 'editor_musicas_brain_v3';
 
 var brain = {
-  lixo: {},        // { "ai studio": true, "gusttavo lima -": true }
+  lixo: {},        // { "ai studio": true, "sistema loubet": true }
   artistas: {},    // { "gusttavo lima": "Gusttavo Lima" }
   titulos: {}      // { "voce ainda mora aqui": "VOCÊ AINDA MORA AQUI" }
 };
@@ -287,6 +287,15 @@ var LIXO_BASE = [
   'demo','demo version','outtake',
   'cover','cover oficial','official cover','cover by',
   'live version',
+  // 🔥 NOVO: Projetos/álbuns/eventos (blocos entre parênteses)
+  'sistema loubet','du nada','vocês e deus','voces e deus',
+  'revivem sua história','revivem sua historia','revivem',
+  'uberlândia','uberlandia','em goiânia','em goiania',
+  'the voice','the voice brasil','superstar','ídolos','idolos',
+  'festival','turnê','turne','tour','show','concerto',
+  'especial','especial de','edição especial','edicao especial',
+  'volume','vol','parte','part',
+  'ao vivo em','gravado em','direto de',
   // Qualidade
   'hd','hq','full hd','fullhd','4k','8k','1080p','720p',
   'kbps','320kbps','192kbps','128kbps','256kbps','1411kbps',
@@ -322,7 +331,6 @@ var LIXO_BASE = [
   'novo','nova','lançamento','lancamento','lançado','lancado',
   'exclusivo','exclusiva','exclusividade',
   'participação','participacao','part',
-  'ao vivo em','gravado em','direto de',
   'rip','cd rip','web rip','radio rip','vinyl rip',
   'fm','am','live fm','radio fm',
   // Música pt
@@ -362,14 +370,55 @@ function ehPalavraLixo(txt){
   return false;
 }
 
+// 🔥 Verifica se um BLOCO inteiro (entre parênteses) é lixo
+function blocoEhLixo(bloco){
+  if(!bloco) return true;
+  var b = String(bloco).trim();
+  if(!b) return true;
+  
+  var bNorm = norm(b);
+  
+  // 1. Aprendido como bloco inteiro
+  if(brain.lixo[bNorm]) return true;
+  
+  // 2. Está na base como bloco inteiro
+  if(ehPalavraLixo(b)) return true;
+  
+  // 3. Todas as palavras são lixo OU têm <=2 letras (conectivos)
+  var palavras = b.split(/[\s\/|,.\-_]+/).filter(Boolean);
+  if(palavras.length > 0){
+    var todasLixo = palavras.every(function(p){
+      var pn = norm(p).replace(/[^\w\s]/g,'').trim();
+      if(pn.length <= 2) return true; // conectivos: e, de, do, da, o, a
+      return ehPalavraLixo(p) || brain.lixo[pn];
+    });
+    if(todasLixo) return true;
+  }
+  
+  // 4. Contém alguma palavra-lixo conhecida (metadata misturada)
+  var temLixoConhecido = palavras.some(function(p){
+    var pn = norm(p).replace(/[^\w\s]/g,'').trim();
+    return (pn.length >= 3) && (ehPalavraLixo(p) || brain.lixo[pn]);
+  });
+  if(temLixoConhecido) return true;
+  
+  // 5. Múltiplas palavras (2+) — se não bate com nenhum título real, é metadata
+  // Heurística: blocos com 2+ palavras entre parênteses geralmente são álbum/projeto/evento
+  if(palavras.length >= 2){
+    // Se tem pelo menos uma palavra "capitalizada" que não é do título, é metadata
+    // Na dúvida, remove — o usuário pode re-adicionar se quiser
+    return true;
+  }
+  
+  return false;
+}
+
 // ═══════════════════════════════════════════════════════════
 // 🔥 LIMPEZA AGRESSIVA
 // ═══════════════════════════════════════════════════════════
 function removerSimbolos(s){
-  // Emojis e símbolos musicais/coração
   s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,' ');
   s = s.replace(/[♪♫♬♭♮♯🎵🎶🎤🎧🎼★☆✦✧✩✪✫✬✭✮✯❂❉❊❋✱✲✳✴✵✶✷✸✹♥♡❤💕💖💗💓💞💘💝✔✓✅☑❌✖✗⚠❗❓➤➥➦➨➩➪➫➬➭➮➯➱►▻▸▹▶◀◁◂◃●○◉◎◍◌■□▪▫◆◇◈◊→←↑↓↔⇄⇆⇒⇐⇔»«‹›⟨⟩•·‣⁃~˜^`´¨¸|¦‖]/g,' ');
-  // Caracteres invisíveis
   s = s.replace(/[\u00A0\u200B\u200C\u200D\uFEFF\u200E\u200F\u2028\u2029]/g,' ');
   return s;
 }
@@ -378,23 +427,20 @@ function limpar(txt){
   if(!txt) return '';
   var s = String(txt).replace(/_/g,' ');
 
-  // Símbolos
   s = removerSimbolos(s);
 
-  // Remove blocos (...) e [...] com lixo dentro
+  // 🔥 Remove TODOS os blocos (...) e [...] que são lixo
   var rePar = /\(([^)]*)\)|\[([^\]]*)\]/g;
   s = s.replace(rePar, function(m, d1, d2){
     var dentro = d1 != null ? d1 : d2;
     if(!dentro.trim()) return ' ';
-    if(ehPalavraLixo(dentro)) return ' ';
-    // Bloco só com palavras-lixo
-    var palavras = dentro.split(/[\s\/|,.\-_]+/).filter(Boolean);
-    if(palavras.length > 0 && palavras.every(function(p){
-      return ehPalavraLixo(p) || /^\d+$/.test(p);
-    })) return ' ';
-    // Aprende bloco se ainda tem lixo misturado? Remove lixo individual
+    
+    // Se o bloco é lixo → remove
+    if(blocoEhLixo(dentro)) return ' ';
+    
+    // Senão, tenta limpar dentro do bloco
     var limpoDentro = limparPalavras(dentro);
-    if(limpoDentro.trim()) return '(' + limpoDentro + ')';
+    if(limpoDentro.trim()) return ' ' + limpoDentro + ' ';
     return ' ';
   });
 
@@ -404,9 +450,6 @@ function limpar(txt){
   // Números de faixa no início
   s = s.replace(/^\s*\d{1,3}\s*[-–—._)\]]\s*/,'');
   s = s.replace(/\s*[-–—._(\[]\s*\d{1,3}\s*$/,'');
-
-  // Números de faixa entre parênteses/colchetes (já tratado, mas reforço)
-  s = s.replace(/\(\s*\d{1,3}\s*\)/g,' ').replace(/\[\s*\d{1,3}\s*\]/g,' ');
 
   // Pontuação solta
   s = s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
@@ -418,9 +461,7 @@ function limpar(txt){
 }
 
 function limparPalavras(s){
-  // Ordena lixo por tamanho desc
   var todos = LIXO_BASE.concat(Object.keys(brain.lixo));
-  // Remove duplicatas (case-insensitive)
   var seen = {};
   todos = todos.filter(function(p){
     var k = norm(p);
@@ -446,7 +487,6 @@ function ehLixo(t){
   if(!x) return true;
   if(/^\d+[\s._-]*kbps/.test(x)) return true;
   if(/^[\d\s.\-_]+$/.test(x)) return true;
-  // Não considera lixo títulos curtos legítimos (bug antigo corrigido)
   return false;
 }
 
@@ -468,7 +508,7 @@ function parseNome(nome){
   var artistaDetectado = '';
   var tituloDetectado = '';
 
-  // PASSO 1: procura -Artista- (referência explícita)
+  // PASSO 1: procura -Artista-
   var mRef = s.match(/[-–—]([^-–—]{2,50})[-–—]/);
   if(mRef){
     var cand = mRef[1].trim();
@@ -478,7 +518,7 @@ function parseNome(nome){
     }
   }
 
-  // PASSO 2: deduplicação (metade repetida)
+  // PASSO 2: deduplicação
   var partes = s.split(/\s+/);
   if(partes.length >= 4 && partes.length % 2 === 0){
     var metade = partes.length/2;
@@ -589,14 +629,12 @@ function abreviar(nome, limite){
   if(ultimoUnder > limite * 0.4){
     return cortado.slice(0, ultimoUnder);
   }
-  // Não corta no meio de palavra: tenta achar último espaço antes do limite
   return cortado;
 }
 
 function gerarNome(m, ext){
   var t = sanitize(m.title) || 'sem_titulo';
   var a = sanitize(m.artist) || 'desconhecido';
-  // Limite considera a extensão
   var limiteSemExt = LIMITE_NOME - ext.length;
   if(limiteSemExt < 10) limiteSemExt = 10;
 
@@ -626,7 +664,6 @@ function aprenderLixo(textoOriginal, textoLimpo){
   if(!textoOriginal) return;
   var orig = String(textoOriginal).trim();
   var limpo = String(textoLimpo || '').trim();
-  // Extrai o que sumiu
   var palavrasOrig = orig.split(/\s+/).filter(Boolean);
   var limpoNorm = norm(limpo);
   var aprendidos = [];
@@ -635,7 +672,6 @@ function aprenderLixo(textoOriginal, textoLimpo){
     var pn = norm(p).replace(/[^\w\s]/g,'').trim();
     if(!pn || pn.length < 3) return;
     if(limpoNorm.indexOf(pn) === -1){
-      // Essa palavra sumiu → lixo
       if(!brain.lixo[pn] && !ehPalavraLixo(pn) && pn.length >= 3 && pn.length <= 30){
         brain.lixo[pn] = true;
         aprendidos.push(p);
@@ -643,16 +679,23 @@ function aprenderLixo(textoOriginal, textoLimpo){
     }
   });
 
-  // Também captura blocos entre parênteses/colchetes que sumiram
+  // Aprende blocos entre parênteses/colchetes inteiros
   var blocos = orig.match(/\(([^)]*)\)|\[([^\]]*)\]/g) || [];
   blocos.forEach(function(b){
     var dentro = b.replace(/[\(\)\[\]]/g,'').trim();
     var dn = norm(dentro);
-    if(dn && limpoNorm.indexOf(dn) === -1 && dn.length >= 3 && dn.length <= 30){
+    if(dn && limpoNorm.indexOf(dn) === -1 && dn.length >= 3 && dn.length <= 40){
       if(!brain.lixo[dn] && !ehPalavraLixo(dn)){
         brain.lixo[dn] = true;
         aprendidos.push(b);
       }
+      // Aprende cada palavra do bloco
+      dentro.split(/\s+/).forEach(function(p){
+        var pn = norm(p).replace(/[^\w\s]/g,'').trim();
+        if(pn.length >= 3 && pn.length <= 25 && !ehPalavraLixo(pn) && !brain.lixo[pn]){
+          brain.lixo[pn] = true;
+        }
+      });
     }
   });
 
@@ -706,7 +749,6 @@ function addArquivos(fileList){
 
       var artist, title;
 
-      // Aplica artista aprendido
       var pNorm = norm(p.a);
       if(brain.artistas[pNorm]){
         artist = brain.artistas[pNorm];
@@ -716,7 +758,6 @@ function addArquivos(fileList){
         artist = p.a;
       }
 
-      // Aplica título aprendido
       var tNorm = norm(p.t);
       if(brain.titulos[tNorm]){
         title = brain.titulos[tNorm];
@@ -726,7 +767,6 @@ function addArquivos(fileList){
         title = p.t;
       }
 
-      // Remove artista repetido no título
       title = removerArtistaDoTitulo(title, artist);
 
       var m = {
@@ -809,7 +849,6 @@ function onInputEdit(e){
   atualizarJson();
 }
 
-// 🔥 Ao sair do campo, aprende
 function onInputBlur(e){
   var inp = e.target;
   var m = buscar(inp.dataset.id);
@@ -820,7 +859,6 @@ function onInputBlur(e){
 
   if(campo === 'artist'){
     aprenderArtista(valorAtual);
-    // Aprende o que foi removido (comparando com original)
     if(m.originalName){
       var p = parseNome(m.originalName);
       if(p.a && norm(p.a) !== norm(valorAtual)){
@@ -1033,7 +1071,6 @@ function baixarZip(){
       if(comExt(m.originalName).toLowerCase() === '.mp3'){
         buf = escreverTags(buf, { artist:m.artist, title:m.title, genre:m.genero });
       }
-      // Nome único
       var nomeFinal = m.newName;
       if(usados[nomeFinal]){
         var base = nomeFinal.replace(/(\.[^.]+)$/, '');
@@ -1157,19 +1194,22 @@ function resetarBrain(){
 // ═══════════════════════════════════════════════════════════
 function demo(){
   var exemplos = [
-    'DYOGO DELUCA - PRECISO TE ENCONTRAR _ HOJE EU QUERO TE AMAR _ CIUMENTO DEMAIS.mp3',
+    'Loubet - Bruta e Fina (Sistema Loubet).mp3',
+    'Murilo Huff - Borboletas (DU NADA).mp3',
+    'Murilo Huff - Humilde Residência Fugidinha (DU NADA).mp3',
+    'Ricky Martin Luan Santana - Estranho.mp3',
+    'Thales Lessa - Bebi Liguei theuzinhocantor AnaCatarina.mp3',
+    'Vh e Alexandre - Dói Né Ouve Aí.mp3',
+    'Zé Neto e Cristiano - Oi tudo bem (Vocês e Deus).mp3',
+    'Bruno Marrone - Só Pro Meu Prazer (Revivem Sua História - Uberlândia).mp3',
+    'Donas do Bar em Goiânia - O Bar Agradece.mp3',
+    'Humberto e Ronaldo - Só não embaça meus forró.mp3',
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
     'VOCÊ AINDA MORA AQUI -Gusttavo Lima- (Áudio Oficial).mp3',
-    'George Michael - Freedom! \'90 (Official Video).mp3',
-    'JENNIFER PAIGE- \'CRUSH\' - Original Version (Official Video) HQ.mp3',
-    'We Are Family.mp3',
-    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
     'ABBA - Dancing Queen (Official Music Video) [4K Remaster].mp3',
-    'Zé Cantor João Bandeira - Sabiá O Cheiro da Carolina Riacho do Navio (ao Vivo).mp3',
     'Track 01 - Artist Name - Song Title (1995 Remaster).mp3',
     'Song Title (Re-Recorded _ Remastered).mp3',
-    'Artist Name - Song Title (Original Long Version).mp3',
-    'Artist Name - Song Title (Long Version) [HD].mp3'
+    'Artist Name - Song Title (Original Long Version).mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
@@ -1180,7 +1220,7 @@ function demo(){
       originalName: nome,
       artist: tagLike.artist,
       title: tagLike.title,
-      genero: 'Music',
+      genero: 'SERTANEJO',
       corrompido: ehLixo(tagLike.artist) || ehLixo(tagLike.title)
     };
     m.newName = gerarNome(m, comExt(nome));
@@ -1263,7 +1303,6 @@ function init(){
     if(visivel) p.scrollIntoView({ behavior:'smooth' });
   });
 
-  // 🧠 Painel Cérebro
   $('btnBrain').addEventListener('click', function(){
     var p = $('brainPainel');
     p.classList.toggle('on');
@@ -1317,7 +1356,7 @@ function init(){
     if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
   }, 500);
 
-  console.log('🎵 Editor v2 iniciado | Cérebro com ' + (
+  console.log('🎵 Editor v3 iniciado | Cérebro com ' + (
     Object.keys(brain.lixo).length +
     Object.keys(brain.artistas).length +
     Object.keys(brain.titulos).length
