@@ -73,6 +73,13 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 .brain-chip button{background:none;color:#e05a5a;padding:0;font-size:14px;line-height:1;font-weight:bold}
 .brain-chip button:hover{color:#ff7070;transform:none}
 
+/* Caixa de "Adicionar lixo" */
+.lixo-box{background:#13131f;border:1px solid #1f1f30;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lixo-box label{font-size:13px;color:#c084fc;font-weight:bold}
+.lixo-box input{flex:1;min-width:200px;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:9px 12px;color:#eee;font-size:13px;outline:none;font-family:inherit}
+.lixo-box input:focus{border-color:#7c6cf0;box-shadow:0 0 0 2px rgba(124,108,240,.15)}
+.lixo-box .hint{font-size:11px;color:#6a6a8e;width:100%}
+
 .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:400px}
 .toast{padding:12px 18px;border-radius:12px;background:#1c1c32;border:1px solid #333;color:#eee;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideIn .3s;font-weight:500}
 .toast.s{border-left:4px solid #34b87a}
@@ -88,7 +95,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <div class="app">
 
 <h1>🎵 Editor de Músicas Inteligente v3</h1>
-<div class="sub">🧠 Aprende com você • Remove parênteses/colchetes automaticamente • Abrevia nomes grandes</div>
+<div class="sub">🧠 Aprende com você • Separa artista/título (início OU fim) • Remove lixo • Abrevia nomes grandes</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -102,6 +109,15 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
   <div class="t1">Arraste os arquivos aqui ou clique</div>
   <div class="t2">Suporta: .mp3, .opus, .m4a, .flac, .ogg, .wav</div>
   <input type="file" id="inp" multiple accept="audio/*">
+</div>
+
+<!-- 🆕 CAIXA DE APRENDIZADO MANUAL -->
+<div class="lixo-box">
+  <label>🗑️ Apagar sempre:</label>
+  <input type="text" id="lixoManual" placeholder="Digite uma palavra/frase que quer remover (ex: Chamego, Show ao vivo, 320kbps)...">
+  <button class="b6" id="btnAddLixo">➕ Adicionar</button>
+  <button class="b5" id="btnAddLixoAplicar">➕ Adicionar e aplicar agora</button>
+  <div class="hint">💡 Tudo que você adicionar aqui fica salvo no cérebro e será removido automaticamente dos próximos arquivos.</div>
 </div>
 
 <div class="toolbar">
@@ -209,9 +225,9 @@ var LIMITE_NOME = 45;
 var BRAIN_KEY = 'editor_musicas_brain_v3';
 
 var brain = {
-  lixo: {},        // { "ai studio": true, "sistema loubet": true }
-  artistas: {},    // { "gusttavo lima": "Gusttavo Lima" }
-  titulos: {}      // { "voce ainda mora aqui": "VOCÊ AINDA MORA AQUI" }
+  lixo: {},        // { "chamego": true, "show ao vivo": true }
+  artistas: {},    // { "alcione": "Alcione" }
+  titulos: {}      // { "a loba": "A Loba" }
 };
 
 function carregarBrain(){
@@ -279,29 +295,23 @@ var LIXO_BASE = [
   'extended version','versão estendida','versao estendida','extended',
   'original version','versão original','versao original',
   'radio edit','radio version','radio mix','radio',
-  'version','versão','versao',
+  'version','versão','versao','single version','album version',
   'original','original mix','original song',
   'remix','rework','re-work','bootleg','mashup',
-  'edit','edit version','single version','album version',
+  'edit','edit version',
   'instrumental','playback','karaoke','acapella','a cappella',
   'demo','demo version','outtake',
   'cover','cover oficial','official cover','cover by',
   'live version',
-  // 🔥 NOVO: Projetos/álbuns/eventos (blocos entre parênteses)
-  'sistema loubet','du nada','vocês e deus','voces e deus',
-  'revivem sua história','revivem sua historia','revivem',
-  'uberlândia','uberlandia','em goiânia','em goiania',
-  'the voice','the voice brasil','superstar','ídolos','idolos',
-  'festival','turnê','turne','tour','show','concerto',
-  'especial','especial de','edição especial','edicao especial',
-  'volume','vol','parte','part',
-  'ao vivo em','gravado em','direto de',
+  'show','show ao vivo','show completo','apresentação','apresentacao',
+  'turnê','turne','tour','em turnê','em turne',
   // Qualidade
   'hd','hq','full hd','fullhd','4k','8k','1080p','720p',
   'kbps','320kbps','192kbps','128kbps','256kbps','1411kbps',
   'mp3','mp4','m4a','flac','opus','ogg','wav','aac','wma',
   'lame','cbr','vbr','stereo','mono','joint stereo',
   'hires','hi-res','hi res','24bit','16bit',
+  '48kbps','64kbps','96kbps','160kbps','224kbps','320 kbps','48 kbps',
   // Mídia
   'dvd','cd','bluray','blu-ray','blu ray','vhs',
   'deluxe','deluxe edition','edição especial','edicao especial',
@@ -331,12 +341,15 @@ var LIXO_BASE = [
   'novo','nova','lançamento','lancamento','lançado','lancado',
   'exclusivo','exclusiva','exclusividade',
   'participação','participacao','part',
+  'ao vivo em','gravado em','direto de',
   'rip','cd rip','web rip','radio rip','vinyl rip',
   'fm','am','live fm','radio fm',
   // Música pt
   'música','musica','músicas','musicas','canção','cancao','canções','cancoes',
   'sucesso','sucessos','hit','hits',
-  // Nota: NÃO inclui 'com','feat','ft' (são preservados)
+  // Específicos v3
+  'chamego','single_version','single version','remastered version',
+  're-recorded version','video oficial','vídeo oficial',
 ];
 
 // Regex de canal (pra detectar tag ID3 ruim)
@@ -370,49 +383,6 @@ function ehPalavraLixo(txt){
   return false;
 }
 
-// 🔥 Verifica se um BLOCO inteiro (entre parênteses) é lixo
-function blocoEhLixo(bloco){
-  if(!bloco) return true;
-  var b = String(bloco).trim();
-  if(!b) return true;
-  
-  var bNorm = norm(b);
-  
-  // 1. Aprendido como bloco inteiro
-  if(brain.lixo[bNorm]) return true;
-  
-  // 2. Está na base como bloco inteiro
-  if(ehPalavraLixo(b)) return true;
-  
-  // 3. Todas as palavras são lixo OU têm <=2 letras (conectivos)
-  var palavras = b.split(/[\s\/|,.\-_]+/).filter(Boolean);
-  if(palavras.length > 0){
-    var todasLixo = palavras.every(function(p){
-      var pn = norm(p).replace(/[^\w\s]/g,'').trim();
-      if(pn.length <= 2) return true; // conectivos: e, de, do, da, o, a
-      return ehPalavraLixo(p) || brain.lixo[pn];
-    });
-    if(todasLixo) return true;
-  }
-  
-  // 4. Contém alguma palavra-lixo conhecida (metadata misturada)
-  var temLixoConhecido = palavras.some(function(p){
-    var pn = norm(p).replace(/[^\w\s]/g,'').trim();
-    return (pn.length >= 3) && (ehPalavraLixo(p) || brain.lixo[pn]);
-  });
-  if(temLixoConhecido) return true;
-  
-  // 5. Múltiplas palavras (2+) — se não bate com nenhum título real, é metadata
-  // Heurística: blocos com 2+ palavras entre parênteses geralmente são álbum/projeto/evento
-  if(palavras.length >= 2){
-    // Se tem pelo menos uma palavra "capitalizada" que não é do título, é metadata
-    // Na dúvida, remove — o usuário pode re-adicionar se quiser
-    return true;
-  }
-  
-  return false;
-}
-
 // ═══════════════════════════════════════════════════════════
 // 🔥 LIMPEZA AGRESSIVA
 // ═══════════════════════════════════════════════════════════
@@ -429,20 +399,10 @@ function limpar(txt){
 
   s = removerSimbolos(s);
 
-  // 🔥 Remove TODOS os blocos (...) e [...] que são lixo
-  var rePar = /\(([^)]*)\)|\[([^\]]*)\]/g;
-  s = s.replace(rePar, function(m, d1, d2){
-    var dentro = d1 != null ? d1 : d2;
-    if(!dentro.trim()) return ' ';
-    
-    // Se o bloco é lixo → remove
-    if(blocoEhLixo(dentro)) return ' ';
-    
-    // Senão, tenta limpar dentro do bloco
-    var limpoDentro = limparPalavras(dentro);
-    if(limpoDentro.trim()) return ' ' + limpoDentro + ' ';
-    return ' ';
-  });
+  // 🔥 REGRA v3: remove TUDO entre parênteses e colchetes
+  // (o usuário pediu: "tudo entre ( )")
+  s = s.replace(/\([^)]*\)/g,' ');
+  s = s.replace(/\[[^\]]*\]/g,' ');
 
   // Remove palavras-lixo soltas
   s = limparPalavras(s);
@@ -451,11 +411,10 @@ function limpar(txt){
   s = s.replace(/^\s*\d{1,3}\s*[-–—._)\]]\s*/,'');
   s = s.replace(/\s*[-–—._(\[]\s*\d{1,3}\s*$/,'');
 
-  // Pontuação solta
+  // Pontuação solta (inclui + e -)
   s = s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
   s = s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
 
-  // Espaços múltiplos
   s = s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
   return s.trim();
 }
@@ -491,7 +450,10 @@ function ehLixo(t){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🔥 PARSER INTELIGENTE
+// 🔥 PARSER INTELIGENTE v3
+// Regras:
+//  - Artista pode estar no INÍCIO ou no FINAL, separado por - ou +
+//  - Remove lixo: 48kbps, (Chamego), (Single_Version)_MP3_320kbps, etc.
 // ═══════════════════════════════════════════════════════════
 function removerArtistaDoTitulo(title, artist){
   if(!title || !artist) return title;
@@ -508,49 +470,120 @@ function parseNome(nome){
   var artistaDetectado = '';
   var tituloDetectado = '';
 
-  // PASSO 1: procura -Artista-
-  var mRef = s.match(/[-–—]([^-–—]{2,50})[-–—]/);
-  if(mRef){
-    var cand = mRef[1].trim();
-    if(cand && !ehPalavraLixo(cand) && /[A-Za-zÀ-Ú]/.test(cand) && cand.split(/\s+/).length <= 6){
-      artistaDetectado = cand;
-      s = s.replace(mRef[0],' ').replace(/\s+/g,' ').trim();
+  // 🔥 PRIMEIRO: remove tudo entre parênteses/colchetes (lixo garantido)
+  s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s = s.replace(/\s+/g,' ').trim();
+
+  // 🔥 Remove lixo avulso (48kbps, MP3, OPUS, etc.)
+  s = limparPalavras(s);
+  s = s.replace(/\b\d+\s*kbps\b/gi,' ');
+  s = s.replace(/\s+/g,' ').trim();
+
+  // 🔥 Separa por + ou - (com ou sem espaços)
+  // Ex: "A_Loba_OPUS_48kbps-Alcione" → ["A Loba OPUS", "Alcione"]
+  // Ex: "A_Loba_OPUS_48kbps+Alcione" → ["A Loba OPUS", "Alcione"]
+  // Ex: "Alcione- A_Loba_OPUS_48kbps" → ["Alcione", "A Loba OPUS"]
+
+  // Normaliza separadores + e - para um único caractere de split
+  var partes = s.split(/\s*[+\-–—]\s*/).filter(function(p){ return p.trim().length > 0; });
+  partes = partes.map(function(p){ return limpar(p); }).filter(function(p){ return p && !ehPalavraLixo(p); });
+
+  // ═══ LÓGICA DE DECISÃO ═══
+  // Se temos 2+ partes, precisamos decidir qual é artista e qual é título.
+  // Heurística: o ARTISTA geralmente é a parte MAIS CURTA e/ou com MENOS palavras.
+  // O TÍTULO geralmente é a parte MAIS LONGA.
+  // Mas se uma parte claramente contém lixo tipo "OPUS", já foi limpa.
+
+  if(partes.length >= 2){
+    // Pega as duas primeiras partes significativas
+    var p1 = partes[0];
+    var p2 = partes[1];
+
+    // Se a primeira parte tem só 1-2 palavras e a segunda tem 3+, primeira = artista
+    var w1 = p1.split(/\s+/).length;
+    var w2 = p2.split(/\s+/).length;
+
+    if(w1 <= 2 && w2 >= 2){
+      artistaDetectado = p1;
+      tituloDetectado = partes.slice(1).join(' ');
+    } else if(w2 <= 2 && w1 >= 2){
+      artistaDetectado = p2;
+      tituloDetectado = p1;
+    } else {
+      // Empate: assume que a PRIMEIRA é artista (comportamento comum)
+      artistaDetectado = p1;
+      tituloDetectado = partes.slice(1).join(' ');
+    }
+  } else if(partes.length === 1){
+    // Só uma parte: tenta separar por " - " clássico
+    var m = s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+    if(m){
+      artistaDetectado = limpar(m[1]);
+      tituloDetectado = limpar(m[2]);
+    } else {
+      tituloDetectado = partes[0];
     }
   }
 
-  // PASSO 2: deduplicação
-  var partes = s.split(/\s+/);
-  if(partes.length >= 4 && partes.length % 2 === 0){
-    var metade = partes.length/2;
-    var m1 = partes.slice(0,metade).join(' ');
-    var m2 = partes.slice(metade).join(' ');
-    if(m1 === m2) s = m1;
-  }
-  var meio = Math.floor(s.length/2);
-  if(s.length >= 10 && s.slice(0,meio).trim() === s.slice(meio).trim()){
-    s = s.slice(0,meio).trim();
-  }
-
-  // PASSO 3: separa por " - "
-  var m = s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
-  if(m){
-    var a = limpar(m[1]);
-    var t = limpar(m[2]);
-    if(a && t && !ehPalavraLixo(a) && !ehPalavraLixo(t)){
-      if(artistaDetectado){
-        return { a: limpar(artistaDetectado), t: limpar(s) };
+  // 🔥 Caso especial: "Alcione- A Loba" (artista no início, sem espaço antes do -)
+  if(!artistaDetectado && !tituloDetectado){
+    var m2 = s.match(/^([^\-–—+]+)\s*[-–—+]\s*(.+)$/);
+    if(m2){
+      var a = limpar(m2[1]);
+      var t = limpar(m2[2]);
+      if(a && t){
+        var wa = a.split(/\s+/).length;
+        var wt = t.split(/\s+/).length;
+        if(wa <= 2 && wt >= 1){
+          artistaDetectado = a;
+          tituloDetectado = t;
+        } else if(wt <= 2 && wa >= 1){
+          artistaDetectado = t;
+          tituloDetectado = a;
+        } else {
+          artistaDetectado = a;
+          tituloDetectado = t;
+        }
       }
-      return { a: a, t: t };
     }
   }
 
-  // PASSO 4: fallback
-  var limpo = limpar(s);
+  // Aplica artista aprendido
   if(artistaDetectado){
-    var tit = removerArtistaDoTitulo(limpo, artistaDetectado);
-    return { a: limpar(artistaDetectado), t: tit };
+    var aNorm = norm(artistaDetectado);
+    if(brain.artistas[aNorm]) artistaDetectado = brain.artistas[aNorm];
   }
-  return { a: limpo, t: limpo };
+
+  // Aplica título aprendido
+  if(tituloDetectado){
+    var tNorm = norm(tituloDetectado);
+    if(brain.titulos[tNorm]) tituloDetectado = brain.titulos[tNorm];
+  }
+
+  // Fallback final
+  if(!tituloDetectado){
+    tituloDetectado = limpar(s);
+  }
+  if(!artistaDetectado){
+    artistaDetectado = tituloDetectado;
+  }
+
+  // Remove artista repetido no título
+  tituloDetectado = removerArtistaDoTitulo(tituloDetectado, artistaDetectado);
+
+  // Capitaliza artista e título (primeira letra de cada palavra)
+  artistaDetectado = capitalizar(artistaDetectado);
+  tituloDetectado = capitalizar(tituloDetectado);
+
+  return { a: artistaDetectado, t: tituloDetectado };
+}
+
+function capitalizar(s){
+  if(!s) return '';
+  return s.split(/\s+/).map(function(p){
+    if(p.length <= 2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
+    return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+  }).join(' ');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -679,23 +712,15 @@ function aprenderLixo(textoOriginal, textoLimpo){
     }
   });
 
-  // Aprende blocos entre parênteses/colchetes inteiros
   var blocos = orig.match(/\(([^)]*)\)|\[([^\]]*)\]/g) || [];
   blocos.forEach(function(b){
     var dentro = b.replace(/[\(\)\[\]]/g,'').trim();
     var dn = norm(dentro);
-    if(dn && limpoNorm.indexOf(dn) === -1 && dn.length >= 3 && dn.length <= 40){
+    if(dn && limpoNorm.indexOf(dn) === -1 && dn.length >= 3 && dn.length <= 30){
       if(!brain.lixo[dn] && !ehPalavraLixo(dn)){
         brain.lixo[dn] = true;
         aprendidos.push(b);
       }
-      // Aprende cada palavra do bloco
-      dentro.split(/\s+/).forEach(function(p){
-        var pn = norm(p).replace(/[^\w\s]/g,'').trim();
-        if(pn.length >= 3 && pn.length <= 25 && !ehPalavraLixo(pn) && !brain.lixo[pn]){
-          brain.lixo[pn] = true;
-        }
-      });
     }
   });
 
@@ -1033,6 +1058,41 @@ function aplicarGenero(){
 }
 
 // ═══════════════════════════════════════════════════════════
+// 🆕 ADICIONAR LIXO MANUALMENTE
+// ═══════════════════════════════════════════════════════════
+function adicionarLixoManual(aplicarAgora){
+  var inp = $('lixoManual');
+  var val = inp.value.trim();
+  if(!val){ toast('Digite algo para remover.', 'w'); return; }
+
+  // Suporta múltiplos separados por vírgula
+  var itens = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos = 0;
+
+  itens.forEach(function(item){
+    var chave = norm(item);
+    if(chave && !brain.lixo[chave]){
+      brain.lixo[chave] = true;
+      novos++;
+    }
+  });
+
+  if(novos === 0){ toast('Já estava na lista.', 'w'); return; }
+
+  salvarBrain();
+  inp.value = '';
+  toast('🧠 ' + novos + ' item(ns) adicionado(s) ao cérebro!', 'b');
+
+  if(aplicarAgora && musicas.length > 0){
+    limparTodos();
+  }
+
+  if($('brainPainel').classList.contains('on')){
+    renderBrain();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
 // ZIP
 // ═══════════════════════════════════════════════════════════
 function baixarZip(){
@@ -1194,34 +1254,35 @@ function resetarBrain(){
 // ═══════════════════════════════════════════════════════════
 function demo(){
   var exemplos = [
-    'Loubet - Bruta e Fina (Sistema Loubet).mp3',
-    'Murilo Huff - Borboletas (DU NADA).mp3',
-    'Murilo Huff - Humilde Residência Fugidinha (DU NADA).mp3',
-    'Ricky Martin Luan Santana - Estranho.mp3',
-    'Thales Lessa - Bebi Liguei theuzinhocantor AnaCatarina.mp3',
-    'Vh e Alexandre - Dói Né Ouve Aí.mp3',
-    'Zé Neto e Cristiano - Oi tudo bem (Vocês e Deus).mp3',
-    'Bruno Marrone - Só Pro Meu Prazer (Revivem Sua História - Uberlândia).mp3',
-    'Donas do Bar em Goiânia - O Bar Agradece.mp3',
-    'Humberto e Ronaldo - Só não embaça meus forró.mp3',
+    'A_Loba_OPUS_48kbps-Alcione.opus',
+    'A_Loba_OPUS_48kbps+Alcione.opus',
+    'Alcione- A_Loba_OPUS_48kbps.opus',
+    'DYOGO DELUCA - PRECISO TE ENCONTRAR _ HOJE EU QUERO TE AMAR _ CIUMENTO DEMAIS.mp3',
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
     'VOCÊ AINDA MORA AQUI -Gusttavo Lima- (Áudio Oficial).mp3',
+    'George Michael - Freedom! \'90 (Official Video).mp3',
+    'JENNIFER PAIGE- \'CRUSH\' - Original Version (Official Video) HQ.mp3',
+    'We Are Family.mp3',
+    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
     'ABBA - Dancing Queen (Official Music Video) [4K Remaster].mp3',
+    'Zé Cantor João Bandeira - Sabiá O Cheiro da Carolina Riacho do Navio (ao Vivo).mp3',
     'Track 01 - Artist Name - Song Title (1995 Remaster).mp3',
     'Song Title (Re-Recorded _ Remastered).mp3',
-    'Artist Name - Song Title (Original Long Version).mp3'
+    'Artist Name - Song Title (Original Long Version).mp3',
+    'Artist Name - Song Title (Long Version) [HD].mp3',
+    'A_Loba_Alcione_(Chamego)_MP3_320kbps.opus',
+    'Alcione_A_Loba_(Single_Version)_MP3_320kbps.opus'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
-    var tagLike = { artist: p.a, title: p.t, genre: '' };
     var m = {
       id: 'm_' + (++idc) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
       file: null,
       originalName: nome,
-      artist: tagLike.artist,
-      title: tagLike.title,
-      genero: 'SERTANEJO',
-      corrompido: ehLixo(tagLike.artist) || ehLixo(tagLike.title)
+      artist: p.a,
+      title: p.t,
+      genero: 'Music',
+      corrompido: ehLixo(p.a) || ehLixo(p.t)
     };
     m.newName = gerarNome(m, comExt(nome));
     return m;
@@ -1282,6 +1343,13 @@ function init(){
   });
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
   document.addEventListener('drop', function(e){ e.preventDefault(); });
+
+  // 🆕 Campo de lixo manual
+  $('btnAddLixo').addEventListener('click', function(){ adicionarLixoManual(false); });
+  $('btnAddLixoAplicar').addEventListener('click', function(){ adicionarLixoManual(true); });
+  $('lixoManual').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') adicionarLixoManual(false);
+  });
 
   $('btnLimpar').addEventListener('click', limparTodos);
   $('btnReanalisar').addEventListener('click', reanalisar);
