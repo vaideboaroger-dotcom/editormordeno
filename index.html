@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas Inteligente v5</title>
+<title>🎵 Editor de Músicas Inteligente v7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -92,7 +92,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 .abrev-add input{flex:1;min-width:120px;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:7px 10px;color:#eee;font-size:13px;outline:none}
 .abrev-add input:focus{border-color:#7c6cf0}
 
-/* 🆕 Painel de artistas conhecidos */
 .art-box{background:#13131f;border:1px solid #1f1f30;border-radius:12px;padding:14px 18px;margin-bottom:16px}
 .art-box .art-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
 .art-box .art-head label{font-size:13px;color:#c084fc;font-weight:bold}
@@ -119,8 +118,8 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <body>
 <div class="app">
 
-<h1>🎵 Editor de Músicas Inteligente v5</h1>
-<div class="sub">🧠 Aprende • Separa artista/título • <b>Reconhece artistas conhecidos</b> • Abrevia títulos</div>
+<h1>🎵 Editor de Músicas Inteligente v7</h1>
+<div class="sub">🧠 Abrevia palavras inteiras • Remove números • Sem "..." • Aprende com você</div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -144,10 +143,9 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
   <div class="hint">💡 Salvo no cérebro e removido automaticamente dos próximos arquivos.</div>
 </div>
 
-<!-- 🆕 PAINEL DE ARTISTAS CONHECIDOS -->
 <div class="art-box">
   <div class="art-head">
-    <label>🎤 Artistas conhecidos (ajudam a separar corretamente):</label>
+    <label>🎤 Artistas conhecidos:</label>
     <button class="b5" id="btnToggleArt">👁️ Mostrar/Esconder</button>
     <button class="b6" id="btnAddArtAtual">➕ Adicionar artistas das músicas atuais</button>
   </div>
@@ -159,14 +157,14 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
       <button class="b5" id="btnResetArt">↺ Restaurar padrão</button>
     </div>
     <div class="hint" style="font-size:11px;color:#6a6a8e;margin-top:8px">
-      💡 Se uma das partes do nome do arquivo bater com um artista conhecido, ele será tratado como ARTISTA — não importa a posição.
+      💡 Se uma parte do nome do arquivo bater com um artista conhecido, ele será tratado como ARTISTA.
     </div>
   </div>
 </div>
 
 <div class="abrev-box">
   <div class="abrev-head">
-    <label>✂️ Abreviações automáticas (aplicadas quando título &gt; 45 caracteres):</label>
+    <label>✂️ Abreviações (só quando título &gt; 60 caracteres):</label>
     <button class="b5" id="btnToggleAbrev">👁️ Mostrar/Esconder</button>
   </div>
   <div id="abrevConteudo" style="display:none">
@@ -272,21 +270,18 @@ var musicas = [];
 var idc = 0;
 var jsonMinificado = false;
 var jsonAtual = '';
-var LIMITE_NOME = 45;
+var LIMITE_NOME = 60;
 
 // ═══════════════════════════════════════════════════════════
 // 🧠 CÉREBRO
 // ═══════════════════════════════════════════════════════════
-var BRAIN_KEY = 'editor_musicas_brain_v5';
-var ABREV_KEY = 'editor_musicas_abrev_v5';
-var ART_KEY   = 'editor_musicas_artistas_v5';
+var BRAIN_KEY = 'editor_musicas_brain_v7';
+var ABREV_KEY = 'editor_musicas_abrev_v7';
+var ART_KEY   = 'editor_musicas_artistas_v7';
 
 var brain = { lixo:{}, artistas:{}, titulos:{} };
 
-// 🆕 LISTA BASE DE ARTISTAS CONHECIDOS (brasileiros + internacionais)
-// Isso ajuda o parser a saber quem é artista mesmo quando o título é curto
 var ARTISTAS_BASE = [
-  // Brasileiros / MPB / Samba
   'Alcione','Alceu Valença','Alceu Valenca','Cartola','Clara Nunes','Djavan',
   'Emílio Santiago','Emilio Santiago','Wando','Xande de Pilares','Zé Cantor',
   'Zeca Pagodinho','Beth Carvalho','Martinho da Vila','Fundo de Quintal',
@@ -301,18 +296,17 @@ var ARTISTAS_BASE = [
   'Ludmilla','LUDMILLA','Anitta','Ivete Sangalo','Claudia Leitte','Bell Marques',
   'Chiclete com Banana','Asa de Águia','Asa de Aguia','Ara Ketu','É o Tchan',
   'E o Tchan','Harmonia do Samba','Psirico','Leo Santana','Wesley Safadão',
-  'Wesley Safadao','Aretuza Love','Gusttavo Lima','Luan Santana','Jorge e Mateus',
+  'Wesley Safadao','Gusttavo Lima','Luan Santana','Jorge e Mateus',
   'Matheus e Kauan','Henrique e Juliano','Zé Neto e Cristiano','Ze Neto e Cristiano',
   'Marília Mendonça','Marilia Mendonca','Maiara e Maraísa','Maiara e Maraisa',
-  'Chitãozinho e Xororó','Chitaozinho e Xororo','Miliona','Chrystian e Ralf',
+  'Chitãozinho e Xororó','Chitaozinho e Xororo','Chrystian e Ralf',
   'Leandro e Leonardo','João Paulo e Daniel','Joao Paulo e Daniel','Rick e Renner',
   'Chico Rey e Paraná','Chico Rey e Parana','Gino e Geno','Tião Carreiro e Pardinho',
   'Tiao Carreiro e Pardinho','Pena Branca e Xavantinho','Almir Sater','Renato Teixeira',
   'Sérgio Reis','Sergio Reis','Péricles','Pericles','Thiaguinho','Ferrugem',
   'Dilsinho','Mumuzinho','Sorriso Maroto','Exaltasamba','Revelação','Revelacao',
   'Katinguelê','Katinguele','Negritude Junior','Soweto','Raça Negra','Raca Negra',
-  'Grupo Fundo de Quintal','Grupo Sensação','Grupo Sensacao',
-  // Internacionais
+  'Brasas do Forró','Brasas do Forro','Augeboys','Fernandinha','Vitinho Imperador',
   'Madonna','Michael Jackson','Prince','Whitney Houston','Mariah Carey',
   'Celine Dion','Cher','Tina Turner','Aretha Franklin','Diana Ross',
   'The Weeknd','Drake','Beyoncé','Beyonce','Rihanna','Lady Gaga','Katy Perry',
@@ -321,33 +315,17 @@ var ARTISTAS_BASE = [
   'The Beatles','John Lennon','Paul McCartney','George Harrison','Ringo Starr',
   'Rolling Stones','Queen','Freddie Mercury','Led Zeppelin','Pink Floyd',
   'David Bowie','Elton John','Bob Dylan','Bob Marley','ABBA','Bee Gees',
-  'BeeGees','George Michael','Wham','Cyndi Lauper','Bon Jovi','U2',
+  'George Michael','Wham','Cyndi Lauper','Bon Jovi','U2',
   'Coldplay','Radiohead','Nirvana','Pearl Jam','Red Hot Chili Peppers',
   'Metallica','Iron Maiden','AC/DC','Guns N Roses','Aerosmith',
-  'Bob Sinclar','Kiesza','FISHER','Fisher','David Guetta','Calvin Harris',
-  'Tiësto','Tiesto','Avicii','Martin Garrix','Marshmello','Diplo',
-  'Jennifer Paige','Silly Love Songs','Wings','Paul McCartney e Wings',
-  'Jennifer Lopez','Shakira','Enrique Iglesias','Ricky Martin','Marc Anthony',
-  'Julio Iglesias','Roberto Carlos (BR)','Luis Miguel','Juanes','Juan Luis Guerra',
-  // Genéricos que ajudam
-  'Lado B','Gente da Antiga','Yaô','Yao','Meu Ébano','Meu Ebano'
+  'Bob Sinclar','Kiesza','FISHER','David Guetta','Calvin Harris',
+  'Tiësto','Avicii','Martin Garrix','Marshmello','Diplo',
+  'Jennifer Paige','Jennifer Lopez','Shakira','Enrique Iglesias','Ricky Martin',
+  'Marc Anthony','Julio Iglesias','Luis Miguel','Juanes','Juan Luis Guerra',
+  'Lado B','Gente da Antiga','Yaô'
 ];
 
 var artistasConhecidos = {};
-
-// Palavras que NÃO devem ser consideradas artistas (stopwords pra evitar falsos positivos)
-var PALAVRAS_NAO_ARTISTA = {
-  'a':'1','o':'1','e':'1','de':'1','da':'1','do':'1','das':'1','dos':'1',
-  'em':'1','no':'1','na':'1','nos':'1','nas':'1','um':'1','uma':'1',
-  'que':'1','com':'1','por':'1','para':'1','se':'1','me':'1','te':'1',
-  'mim':'1','ti':'1','si':'1','ja':'1','mais':'1','menos':'1','muito':'1',
-  'pouco':'1','todo':'1','toda':'1','todos':'1','todas':'1','este':'1',
-  'esta':'1','esse':'1','essa':'1','aquele':'1','aquela':'1','isso':'1',
-  'isto':'1','aquilo':'1','meu':'1','minha':'1','seu':'1','sua':'1',
-  'nosso':'1','nossa':'1','vou':'1','vai':'1','vamos':'1','vem':'1',
-  'vem':'1','vai':'1','faz':'1','fazem':'1','fez':'1','era':'1','foi':'1',
-  'ser':'1','estar':'1','ter':'1','ter':'1','ter':'1'
-};
 
 function carregarBrain(){
   try{
@@ -358,7 +336,6 @@ function carregarBrain(){
       brain.artistas = obj.artistas || {};
       brain.titulos = obj.titulos || {};
     }
-    // Carrega artistas conhecidos (base + usuário)
     var rawArt = localStorage.getItem(ART_KEY);
     if(rawArt){
       var arrArt = JSON.parse(rawArt);
@@ -390,24 +367,14 @@ function salvarArtistas(){
   }catch(e){ console.warn('Erro ao salvar artistas:', e); }
 }
 
-function ehArtistaConhecido(txt){
-  if(!txt) return null;
-  var n = norm(txt);
-  if(artistasConhecidos[n]) return artistasConhecidos[n];
-  return null;
-}
-
-// Procura artista conhecido dentro de uma string (ex: "Alceu Valença Girassol")
 function encontrarArtistaEm(txt){
   if(!txt) return null;
   var n = norm(txt);
   var chaves = Object.keys(artistasConhecidos);
-  // Ordena por tamanho (maiores primeiro pra pegar "Alceu Valença" antes de "Alceu")
   chaves.sort(function(a,b){ return b.length - a.length; });
   for(var i=0;i<chaves.length;i++){
     var k = chaves[i];
     if(!k || k.length < 3) continue;
-    // Testa se a string contém esse artista como palavra(s) inteira(s)
     var re = new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])' + escapeRegex(k) + '([\\s\\-_\\/|,;:.!?()\\[\\]]|$)', 'i');
     if(re.test(n)){
       return artistasConhecidos[k];
@@ -455,6 +422,19 @@ function norm(s){
   return String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .trim();
+}
+
+// 🆕 Remove QUALQUER número
+function removerNumeros(s){
+  if(!s) return '';
+  var x = String(s);
+  // Remove números soltos (com espaço antes/depois) → apaga
+  x = x.replace(/\b\d+\b/g, ' ');
+  // Remove números grudados em letras (ex: "Manha5") → remove o número
+  x = x.replace(/\d+/g, ' ');
+  // Junta espaços múltiplos
+  x = x.replace(/\s+/g, ' ').trim();
+  return x;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -563,8 +543,7 @@ function limpar(txt){
   s = s.replace(/\([^)]*\)/g,' ');
   s = s.replace(/\[[^\]]*\]/g,' ');
   s = limparPalavras(s);
-  s = s.replace(/^\s*\d{1,3}\s*[-–—._)\]]\s*/,'');
-  s = s.replace(/\s*[-–—._(\[]\s*\d{1,3}\s*$/,'');
+  s = removerNumeros(s);  // 🆕 remove todos os números
   s = s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
   s = s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
   s = s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
@@ -601,26 +580,25 @@ function ehLixo(t){
 }
 
 // ═══════════════════════════════════════════════════════════
-// ✂️ ABREVIAÇÃO
+// ✂️ ABREVIAÇÃO v7 — POR PALAVRA INTEIRA, SEM "..."
 // ═══════════════════════════════════════════════════════════
 var ABREV_PADRAO = {
   'você':'vc','voce':'vc','vocês':'vcs','voces':'vcs',
-  'por':'p.','para':'p/','com':'c/','sem':'s/',
+  'por':'p.','para':'pra','com':'c/','sem':'s/',
+  'meu':'m.','minha':'m.','meus':'m.','minhas':'m.',
+  'seu':'s.','sua':'s.','seus':'s.','suas':'s.',
+  'nosso':'n.','nossa':'n.','nossos':'n.','nossas':'n.',
+  'este':'st.','esta':'st.','esse':'ss.','essa':'ss.',
+  'aquele':'aq.','aquela':'aq.',
   'loucura':'louc.','saudade':'saúd.','saudades':'saúd.',
+  'coração':'cor.','coracao':'cor.','corações':'cors.','coracoes':'cors.',
   'música':'mús.','musica':'mús.','canção':'can.','cancao':'can.',
-  'versão':'vs.','versao':'vs.','parte':'pt.','feat':'ft.','featuring':'ft.',
-  'apresenta':'apre.','apresentação':'apre.','apresentacao':'apre.',
-  'remix':'rmx','extended':'ext.','remaster':'remast.','remastered':'remast.',
-  'original':'orig.','especial':'esp.','edição':'ed.','edicao':'ed.',
-  'volume':'vol.','número':'nº','numero':'nº','capítulo':'cap.','capitulo':'cap.',
-  'introdução':'intro','introducao':'intro','instrumental':'instr.',
-  'acompanha':'acomp.','produção':'prod.','producao':'prod.',
-  'direção':'dir.','direcao':'dir.','participação':'part.','participacao':'part.',
-  'coração':'coração','coracao':'coração',
-  'cabeça':'cabeça','cabeca':'cabeça',
+  'versão':'vs.','versao':'vs.','parte':'pt.',
+  'amor':'am.','paixão':'paix.','paixao':'paix.',
+  'cabeça':'cab.','cabeca':'cab.',
   'cidade':'cid.','história':'hist.','historia':'hist.',
   'memória':'mem.','memoria':'mem.',
-  'eternamente':'eternam.','simplesmente':'simpl.',
+  'eternamente':'etern.','simplesmente':'simpl.',
   'praticamente':'prat.','realmente':'real.',
   'finalmente':'final.','principalmente':'princ.',
   'novamente':'nov.','rapidamente':'rapid.',
@@ -631,50 +609,78 @@ var ABREV_PADRAO = {
   'pensamento':'pens.','sofrimento':'sofr.',
   'nascimento':'nasc.','crescimento':'cresc.',
   'conhecimento':'conhec.','entendimento':'entend.',
-  'compreensão':'compr.','compreensao':'compr.'
+  'compreensão':'compr.','compreensao':'compr.',
+  'separar':'sep.','separação':'sep.','separacao':'sep.',
+  'querem':'quer.','querer':'quer.','queria':'quer.',
+  'voltou':'volt.','voltar':'volt.','voltando':'volt.',
+  'manhã':'manhã','manha':'manhã',
+  'parabéns':'parab.','parabens':'parab.',
+  'pressão':'press.','pressao':'press.',
+  'paredão':'pared.','paredao':'pared.',
+  'aluguel':'alug.','vaqueira':'vaq.','vaqueiro':'vaq.',
+  'carinhoso':'carinh.','carinhosa':'carinh.',
+  'imperador':'imp.','fernandinha':'fernand.',
+  'embaixador':'embaix.'
 };
 var abrev = {};
 
+// 🆕 Abrevia UMA palavra sozinha
+function abreviarPalavra(p){
+  if(!p) return p;
+  var chave = norm(p);
+  // 1. Dicionário
+  if(abrev[chave]) return abrev[chave];
+  // 2. Palavra de 2 letras ou menos → mantém
+  if(p.length <= 2) return p;
+  // 3. Palavra de 3 letras → 1ª letra + ponto
+  if(p.length === 3){
+    return p.charAt(0).toUpperCase() + '.';
+  }
+  // 4. Palavra de 4-5 letras → tira vogais do meio (se sobrar 3+ letras)
+  if(p.length <= 5){
+    var semVogais = p.charAt(0) + p.slice(1, -1).replace(/[aeiouáéíóúâêôãõà]/gi,'') + p.slice(-1);
+    if(semVogais.length >= 3 && semVogais.length < p.length) return semVogais;
+    return p;
+  }
+  // 5. Palavra de 6+ letras → 4 letras + ponto
+  return p.slice(0, 4) + '.';
+}
+
+// 🆕 Abrevia o TEXTO INTEIRO (só se ultrapassar o limite)
 function abreviarTexto(txt, limite){
   if(!txt) return '';
-  if(txt.length <= limite) return txt;
+  if(txt.length <= limite) return txt;  // já cabe, não mexe
 
+  // 1ª tentativa: abrevia cada palavra inteira
   var palavras = txt.split(/\s+/);
   var abreviado = palavras.map(function(p){
-    var m = p.match(/^([\/\-–—]?)([A-Za-zÀ-Úà-ú]+)([\/\-–—,.]?)$/);
+    // Preserva pontuação nas bordas
+    var m = p.match(/^([\/\-–—(]?)([A-Za-zÀ-Úà-ú]+)([\/\-–—),.]?)$/);
     if(!m) return p;
-    var prefixo = m[1];
-    var palavra = m[2];
-    var sufixo = m[3];
-    var chave = norm(palavra);
-    if(abrev[chave]){
-      var ab = abrev[chave];
-      if(palavra[0] === palavra[0].toUpperCase() && palavra[0] !== palavra[0].toLowerCase()){
-        ab = ab.charAt(0).toUpperCase() + ab.slice(1);
-      }
-      return prefixo + ab + sufixo;
-    }
-    return p;
+    return m[1] + abreviarPalavra(m[2]) + m[3];
   }).join(' ');
 
   if(abreviado.length <= limite) return abreviado;
 
+  // 2ª tentativa: se ainda não couber, remove palavras do FINAL
   var palavras2 = abreviado.split(/\s+/);
-  for(var i=0; i<palavras2.length; i++){
-    if(abreviado.length <= limite) break;
-    var p = palavras2[i];
-    if(p.length >= 8 && /^[A-Za-zÀ-Úà-ú]+$/.test(p)){
-      palavras2[i] = p.slice(0, 5) + '.';
-    }
+  while(palavras2.length > 2 && palavras2.join(' ').length > limite){
+    palavras2.pop();
   }
   abreviado = palavras2.join(' ');
-  if(abreviado.length <= limite) return abreviado;
 
-  var palavras3 = abreviado.split(/\s+/);
-  if(palavras3.length > 6){
-    abreviado = palavras3.slice(0, 3).join(' ') + ' ... ' + palavras3.slice(-2).join(' ');
+  // 3ª tentativa: se MESMO ASSIM não couber, corta na última palavra inteira
+  if(abreviado.length > limite){
+    var corte = abreviado.slice(0, limite);
+    var ultimoEspaco = corte.lastIndexOf(' ');
+    if(ultimoEspaco > limite * 0.5){
+      abreviado = corte.slice(0, ultimoEspaco);
+    } else {
+      abreviado = corte;
+    }
   }
-  return abreviado;
+
+  return abreviado.trim();
 }
 
 function capitalizar(s){
@@ -686,7 +692,7 @@ function capitalizar(s){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🔥 PARSER v5 — COM ARTISTAS CONHECIDOS
+// 🔥 PARSER v7
 // ═══════════════════════════════════════════════════════════
 function removerArtistaDoTitulo(title, artist){
   if(!title || !artist) return title;
@@ -703,44 +709,27 @@ function parseNome(nome){
   var artistaDetectado = '';
   var tituloDetectado = '';
 
-  // Remove parênteses/colchetes
   s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
   s = s.replace(/\s+/g,' ').trim();
   s = limparPalavras(s);
+  s = removerNumeros(s);  // 🆕
   s = s.replace(/\b\d+\s*kbps\b/gi,' ');
   s = s.replace(/\s+/g,' ').trim();
 
-  // 🔥 ESTRATÉGIA v5:
-  // 1. Procura artista conhecido em TODO o nome
-  // 2. Separa o resto em partes por + e -
-  // 3. Decide artista/título com base no que sobrou
-
   var artistaConhecido = encontrarArtistaEm(s);
 
-  // Separa por + e - (com ou sem espaços)
   var partes = s.split(/\s*[+\-–—]\s*/).filter(function(p){ return p.trim().length > 0; });
   partes = partes.map(function(p){ return limpar(p); }).filter(function(p){ return p && !ehPalavraLixo(p); });
 
   if(artistaConhecido){
-    // 🎯 Temos um artista conhecido! Ele é o artista.
     artistaDetectado = artistaConhecido;
-
-    // Remove o artista das partes pra descobrir o título
     var restoTitulo = partes.filter(function(p){
       var pn = norm(p);
       var an = norm(artistaConhecido);
-      // Considera "parte igual ao artista" se contiver o artista ou for contida nele
       return pn !== an && pn.indexOf(an) === -1 && an.indexOf(pn) === -1;
     }).join(' ');
-
-    if(restoTitulo){
-      tituloDetectado = limpar(restoTitulo);
-    } else {
-      // Só tem o artista? Então usa o nome todo como título (caso raro)
-      tituloDetectado = limpar(s);
-    }
+    tituloDetectado = restoTitulo ? limpar(restoTitulo) : limpar(s);
   } else {
-    // ❌ Sem artista conhecido: usa a heurística antiga
     if(partes.length >= 2){
       var p1 = partes[0];
       var p2 = partes[1];
@@ -768,7 +757,6 @@ function parseNome(nome){
     }
   }
 
-  // Aplica artista aprendido
   if(artistaDetectado){
     var aNorm = norm(artistaDetectado);
     if(brain.artistas[aNorm]) artistaDetectado = brain.artistas[aNorm];
@@ -845,7 +833,7 @@ function escreverTags(buffer, tags){
 }
 
 // ═══════════════════════════════════════════════════════════
-// SANITIZE + GERAR NOME
+// SANITIZE + GERAR NOME v7
 // ═══════════════════════════════════════════════════════════
 function sanitize(s){
   if(!s) return '';
@@ -853,6 +841,7 @@ function sanitize(s){
   x = x.replace(/[^A-Za-z0-9\s\-\.]/g,'');
   x = x.replace(/\s+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
   x = x.replace(/-+/g,'-').replace(/^-|-$/g,'');
+  x = x.replace(/\.+/g,'.').replace(/^\.|\.$/g,'');
   return x;
 }
 
@@ -860,29 +849,53 @@ function gerarNome(m, ext){
   var t = sanitize(m.title) || 'sem_titulo';
   var a = sanitize(m.artist) || 'desconhecido';
   var limiteSemExt = LIMITE_NOME - ext.length;
-  if(limiteSemExt < 10) limiteSemExt = 10;
+  if(limiteSemExt < 15) limiteSemExt = 15;
 
+  // Caso especial: título == artista
   if(t === a){
-    return t.slice(0, limiteSemExt) + ext;
+    var tCorto = t;
+    if(tCorto.length > limiteSemExt){
+      tCorto = sanitize(abreviarTexto(m.title, limiteSemExt));
+    }
+    return tCorto + ext;
   }
 
+  // Tenta montar completo: TITULO_ARTISTA
   var nomeCompleto = t + '_' + a;
 
-  if(nomeCompleto.length > limiteSemExt){
-    var espacoTitulo = limiteSemExt - a.length - 1;
-    if(espacoTitulo < 15) espacoTitulo = Math.floor(limiteSemExt * 0.6);
-
-    var tAbrev = abreviarTexto(m.title, espacoTitulo);
-    tAbrev = sanitize(tAbrev);
-    if(!tAbrev) tAbrev = t.slice(0, espacoTitulo);
-
-    nomeCompleto = tAbrev + '_' + a;
-
-    if(nomeCompleto.length > limiteSemExt){
-      nomeCompleto = nomeCompleto.slice(0, limiteSemExt);
-      nomeCompleto = nomeCompleto.replace(/_+$/,'');
-    }
+  // Se já cabe → pronto
+  if(nomeCompleto.length <= limiteSemExt){
+    return nomeCompleto + ext;
   }
+
+  // 🆕 Estratégia: abrevia o TÍTULO com abreviarTexto()
+  // Reserva espaço pro artista (mínimo 15 chars)
+  var espacoTitulo = limiteSemExt - a.length - 1;
+  if(espacoTitulo < 15) espacoTitulo = Math.floor(limiteSemExt * 0.5);
+
+  // Abrevia o título (só se necessário)
+  var tAbrev = abreviarTexto(m.title, espacoTitulo);
+  tAbrev = sanitize(tAbrev);
+  if(!tAbrev) tAbrev = t.slice(0, espacoTitulo);
+
+  nomeCompleto = tAbrev + '_' + a;
+
+  // Se ainda não couber → abrevia o ARTISTA também
+  if(nomeCompleto.length > limiteSemExt){
+    var espacoArt = limiteSemExt - tAbrev.length - 1;
+    if(espacoArt < 5) espacoArt = 5;
+    var aAbrev = abreviarTexto(m.artist, espacoArt);
+    aAbrev = sanitize(aAbrev);
+    if(!aAbrev) aAbrev = a.slice(0, espacoArt);
+    nomeCompleto = tAbrev + '_' + aAbrev;
+  }
+
+  // Último recurso: corta na última palavra inteira
+  if(nomeCompleto.length > limiteSemExt){
+    nomeCompleto = nomeCompleto.slice(0, limiteSemExt);
+    nomeCompleto = nomeCompleto.replace(/[_\.]+$/,'');
+  }
+
   return nomeCompleto + ext;
 }
 
@@ -919,17 +932,14 @@ function aprenderArtista(nome){
   var n = String(nome).trim();
   if(n.length < 2) return;
   var chave = norm(n);
-  // Salva no cérebro
   if(brain.artistas[chave] !== n){
     brain.artistas[chave] = n;
     salvarBrain();
-    toast('🧠 Artista salvo no cérebro: ' + n, 'b');
   }
-  // 🆕 Salva também na lista de artistas conhecidos (ajuda o parser)
   if(!artistasConhecidos[chave]){
     artistasConhecidos[chave] = n;
     salvarArtistas();
-    toast('🎤 Artista conhecido adicionado: ' + n, 's');
+    toast('🎤 Artista conhecido: ' + n, 's');
   }
 }
 
@@ -1066,20 +1076,8 @@ function onInputBlur(e){
 
   if(campo === 'artist'){
     aprenderArtista(valorAtual);
-    if(m.originalName){
-      var p = parseNome(m.originalName);
-      if(p.a && norm(p.a) !== norm(valorAtual)){
-        aprenderLixo(p.a, valorAtual);
-      }
-    }
   } else if(campo === 'title'){
     aprenderTitulo(valorAtual);
-    if(m.originalName){
-      var p2 = parseNome(m.originalName);
-      if(p2.t && norm(p2.t) !== norm(valorAtual)){
-        aprenderLixo(p2.t, valorAtual);
-      }
-    }
   }
 }
 
@@ -1140,7 +1138,6 @@ function atualizarJson(){
   var corr = musicas.filter(function(m){ return m.corrompido; }).length;
   if(corr > 0){
     info.textContent = '⚠️ ' + corr + ' música(s) com nomes corrompidos';
-    info.className = 'aviso';
     info.style.color = '#f59e0b';
   } else {
     info.textContent = '✅ JSON pronto para uso';
@@ -1239,9 +1236,6 @@ function aplicarGenero(){
   toast('🎼 Gênero aplicado!', 's');
 }
 
-// ═══════════════════════════════════════════════════════════
-// LIXO MANUAL
-// ═══════════════════════════════════════════════════════════
 function adicionarLixoManual(aplicarAgora){
   var inp = $('lixoManual');
   var val = inp.value.trim();
@@ -1273,7 +1267,7 @@ function adicionarLixoManual(aplicarAgora){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🎤 PAINEL DE ARTISTAS CONHECIDOS
+// ARTISTAS
 // ═══════════════════════════════════════════════════════════
 function renderArtistas(){
   var lista = $('artLista');
@@ -1300,7 +1294,6 @@ function adicionarArtistaConhecido(){
   var inp = $('artNovo');
   var val = inp.value.trim();
   if(!val){ toast('Digite um nome.', 'w'); return; }
-  // Suporta múltiplos separados por vírgula ou ponto-e-vírgula
   var itens = val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
   var novos = 0;
   itens.forEach(function(item){
@@ -1314,16 +1307,6 @@ function adicionarArtistaConhecido(){
   salvarArtistas();
   inp.value = '';
   toast('🎤 ' + novos + ' artista(s) adicionado(s)!', 's');
-  // Reaplica nas músicas carregadas
-  if(musicas.length > 0){
-    musicas.forEach(function(m){
-      var p = parseNome(m.originalName);
-      m.artist = p.a;
-      m.title = p.t;
-      m.newName = gerarNome(m, comExt(m.originalName));
-    });
-    render();
-  }
 }
 
 function adicionarArtistasDasMusicas(){
@@ -1339,7 +1322,7 @@ function adicionarArtistasDasMusicas(){
   });
   if(novos === 0){ toast('Todos já estavam na lista.', 'w'); return; }
   salvarArtistas();
-  toast('🎤 ' + novos + ' artista(s) adicionado(s) da lista atual!', 's');
+  toast('🎤 ' + novos + ' artista(s) adicionado(s)!', 's');
 }
 
 function resetarArtistas(){
@@ -1348,19 +1331,10 @@ function resetarArtistas(){
   ARTISTAS_BASE.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
   salvarArtistas();
   toast('↺ Artistas restaurados', 's');
-  if(musicas.length > 0){
-    musicas.forEach(function(m){
-      var p = parseNome(m.originalName);
-      m.artist = p.a;
-      m.title = p.t;
-      m.newName = gerarNome(m, comExt(m.originalName));
-    });
-    render();
-  }
 }
 
 // ═══════════════════════════════════════════════════════════
-// ✂️ ABREVIAÇÕES
+// ABREVIAÇÕES
 // ═══════════════════════════════════════════════════════════
 function renderAbrev(){
   var lista = $('abrevLista');
@@ -1390,7 +1364,7 @@ function adicionarAbrev(){
   $('abrevDe').value = '';
   $('abrevPara').value = '';
   salvarAbrev();
-  toast('✂️ Abreviação adicionada: ' + de + ' → ' + para, 's');
+  toast('✂️ ' + de + ' → ' + para, 's');
   if(musicas.length > 0){
     musicas.forEach(function(m){
       m.newName = gerarNome(m, comExt(m.originalName));
@@ -1578,22 +1552,14 @@ function resetarBrain(){
 // ═══════════════════════════════════════════════════════════
 function demo(){
   var exemplos = [
+    'Meu Amor Voltou Querem Nos Separar 5 da Manha - Ze Cantor.mp3',
+    'Ze Cantor - Meu Amor Voltou Querem Nos Separar 5 da Manha.mp3',
+    'Boa Sorte Pra Voce Na Pressao do Paredao - Brasas do Forro.mp3',
     'Moça - Wando.m4a',
-    'Wando - Moça.m4a',
-    'Girassol - Alceu Valença.opus',
     'Alceu Valença - Girassol.opus',
-    'Pot - Alceu Valença.opus',
-    'Anunciação - Alceu Valença.opus',
-    'Alceu Valença - Anunciação.opus',
-    'Gente da Antiga - Yaô.m4a',
-    'Yaô - Gente da Antiga.m4a',
-    'Meu Ébano Alcione.opus',
     'LUDMILLA e Alcione - Faz uma Loucura por mim _ Você me vira a cabeça.mp3',
     'A_Loba_OPUS_48kbps-Alcione.opus',
-    'Alcione- A_Loba_OPUS_48kbps.opus',
-    'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
-    'VOCÊ AINDA MORA AQUI -Gusttavo Lima- (Áudio Oficial).mp3',
-    'Roberto Carlos - Eu Quero Apenas Que Você Seja Muito Feliz Comigo.mp3'
+    'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
@@ -1684,7 +1650,6 @@ function init(){
     if(e.key === 'Enter') adicionarAbrev();
   });
 
-  // 🆕 Artistas
   $('btnToggleArt').addEventListener('click', function(){
     var c = $('artConteudo');
     c.style.display = c.style.display === 'none' ? 'block' : 'none';
@@ -1778,7 +1743,7 @@ function init(){
     if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
   }, 500);
 
-  console.log('🎵 Editor v5 iniciado | Artistas conhecidos: ' + Object.keys(artistasConhecidos).length);
+  console.log('🎵 Editor v7 iniciado | Artistas: ' + Object.keys(artistasConhecidos).length);
 }
 
 init();
