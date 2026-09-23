@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas Inteligente v3</title>
+<title>🎵 Editor de Músicas Inteligente v4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -73,12 +73,25 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 .brain-chip button{background:none;color:#e05a5a;padding:0;font-size:14px;line-height:1;font-weight:bold}
 .brain-chip button:hover{color:#ff7070;transform:none}
 
-/* Caixa de "Adicionar lixo" */
 .lixo-box{background:#13131f;border:1px solid #1f1f30;border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .lixo-box label{font-size:13px;color:#c084fc;font-weight:bold}
 .lixo-box input{flex:1;min-width:200px;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:9px 12px;color:#eee;font-size:13px;outline:none;font-family:inherit}
 .lixo-box input:focus{border-color:#7c6cf0;box-shadow:0 0 0 2px rgba(124,108,240,.15)}
 .lixo-box .hint{font-size:11px;color:#6a6a8e;width:100%}
+
+/* 🆕 Painel de abreviações */
+.abrev-box{background:#13131f;border:1px solid #1f1f30;border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.abrev-box .abrev-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.abrev-box .abrev-head label{font-size:13px;color:#c084fc;font-weight:bold}
+.abrev-box .abrev-head button{padding:6px 12px;font-size:12px}
+.abrev-box .abrev-lista{display:flex;flex-wrap:wrap;gap:6px;max-height:180px;overflow-y:auto}
+.abrev-chip{background:#1a1a2e;border:1px solid #2a2a4a;padding:5px 10px;border-radius:6px;font-size:12px;color:#d0d0f0;display:flex;align-items:center;gap:6px}
+.abrev-chip b{color:#c084fc}
+.abrev-chip button{background:none;color:#e05a5a;padding:0;font-size:14px;line-height:1;font-weight:bold}
+.abrev-chip button:hover{color:#ff7070;transform:none}
+.abrev-add{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.abrev-add input{flex:1;min-width:120px;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:7px 10px;color:#eee;font-size:13px;outline:none}
+.abrev-add input:focus{border-color:#7c6cf0}
 
 .toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;max-width:400px}
 .toast{padding:12px 18px;border-radius:12px;background:#1c1c32;border:1px solid #333;color:#eee;font-size:13px;box-shadow:0 8px 32px rgba(0,0,0,.6);animation:slideIn .3s;font-weight:500}
@@ -94,8 +107,8 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <body>
 <div class="app">
 
-<h1>🎵 Editor de Músicas Inteligente v3</h1>
-<div class="sub">🧠 Aprende com você • Separa artista/título (início OU fim) • Remove lixo • Abrevia nomes grandes</div>
+<h1>🎵 Editor de Músicas Inteligente v4</h1>
+<div class="sub">🧠 Aprende • Separa artista/título • Remove lixo • <b>Abrevia títulos grandes</b></div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
@@ -111,13 +124,32 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
   <input type="file" id="inp" multiple accept="audio/*">
 </div>
 
-<!-- 🆕 CAIXA DE APRENDIZADO MANUAL -->
 <div class="lixo-box">
   <label>🗑️ Apagar sempre:</label>
   <input type="text" id="lixoManual" placeholder="Digite uma palavra/frase que quer remover (ex: Chamego, Show ao vivo, 320kbps)...">
   <button class="b6" id="btnAddLixo">➕ Adicionar</button>
   <button class="b5" id="btnAddLixoAplicar">➕ Adicionar e aplicar agora</button>
-  <div class="hint">💡 Tudo que você adicionar aqui fica salvo no cérebro e será removido automaticamente dos próximos arquivos.</div>
+  <div class="hint">💡 Tudo que você adicionar aqui fica salvo no cérebro e será removido automaticamente.</div>
+</div>
+
+<!-- 🆕 PAINEL DE ABREVIAÇÕES -->
+<div class="abrev-box">
+  <div class="abrev-head">
+    <label>✂️ Abreviações automáticas (aplicadas quando título &gt; 45 caracteres):</label>
+    <button class="b5" id="btnToggleAbrev">👁️ Mostrar/Esconder</button>
+  </div>
+  <div id="abrevConteudo" style="display:none">
+    <div class="abrev-lista" id="abrevLista"></div>
+    <div class="abrev-add">
+      <input type="text" id="abrevDe" placeholder="Palavra completa (ex: você)">
+      <input type="text" id="abrevPara" placeholder="Abreviação (ex: vc)">
+      <button class="b6" id="btnAddAbrev">➕ Adicionar</button>
+      <button class="b5" id="btnResetAbrev">↺ Restaurar padrão</button>
+    </div>
+    <div class="hint" style="font-size:11px;color:#6a6a8e;margin-top:8px">
+      💡 As abreviações são aplicadas palavra por palavra apenas no <b>título</b> quando ele ultrapassa 45 caracteres.
+    </div>
+  </div>
 </div>
 
 <div class="toolbar">
@@ -158,7 +190,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 
 <div class="progresso" id="prog"><div class="fill" id="progFill"></div></div>
 
-<!-- PAINEL JSON -->
 <div class="painel on" id="jsonPainel">
   <div class="painel-head">
     <div class="tt">
@@ -179,7 +210,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
   </div>
 </div>
 
-<!-- PAINEL APRENDIZADOS -->
 <div class="painel" id="brainPainel">
   <div class="painel-head">
     <div class="tt">
@@ -210,9 +240,6 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 (function(){
 'use strict';
 
-// ═══════════════════════════════════════════════════════════
-// ESTADO
-// ═══════════════════════════════════════════════════════════
 var musicas = [];
 var idc = 0;
 var jsonMinificado = false;
@@ -220,15 +247,48 @@ var jsonAtual = '';
 var LIMITE_NOME = 45;
 
 // ═══════════════════════════════════════════════════════════
-// 🧠 CÉREBRO (aprendizado persistente)
+// 🧠 CÉREBRO
 // ═══════════════════════════════════════════════════════════
-var BRAIN_KEY = 'editor_musicas_brain_v3';
+var BRAIN_KEY = 'editor_musicas_brain_v4';
+var ABREV_KEY = 'editor_musicas_abrev_v4';
 
-var brain = {
-  lixo: {},        // { "chamego": true, "show ao vivo": true }
-  artistas: {},    // { "alcione": "Alcione" }
-  titulos: {}      // { "a loba": "A Loba" }
+var brain = { lixo:{}, artistas:{}, titulos:{} };
+
+// 🆕 Dicionário de abreviações (padrão)
+var ABREV_PADRAO = {
+  'você':'vc','voce':'vc','vocês':'vcs','voces':'vcs',
+  'por':'p.','para':'p/','com':'c/','sem':'s/',
+  'loucura':'louc.','saudade':'saúd.','saudades':'saúd.',
+  'música':'mús.','musica':'mús.','canção':'can.','cancao':'can.',
+  'versão':'vs.','versao':'vs.','parte':'pt.','feat':'ft.','featuring':'ft.',
+  'apresenta':'apre.','apresentação':'apre.','apresentacao':'apre.',
+  'remix':'rmx','extended':'ext.','remaster':'remast.','remastered':'remast.',
+  'original':'orig.','especial':'esp.','edição':'ed.','edicao':'ed.',
+  'volume':'vol.','número':'nº','numero':'nº','capítulo':'cap.','capitulo':'cap.',
+  'introdução':'intro','introducao':'intro','instrumental':'instr.',
+  'acompanha':'acomp.','produção':'prod.','producao':'prod.',
+  'direção':'dir.','direcao':'dir.','participação':'part.','participacao':'part.',
+  'coração':'coração','coracao':'coração',
+  'amor':'amor','paixão':'paix.','paixao':'paix.',
+  'cabeça':'cabeça','cabeca':'cabeça',
+  'cidade':'cid.','corações':'corações','coracoes':'corações',
+  'história':'hist.','historia':'hist.',
+  'memória':'mem.','memoria':'mem.',
+  'eternamente':'eternam.','simplesmente':'simpl.',
+  'praticamente':'prat.','realmente':'real.',
+  'finalmente':'final.','principalmente':'princ.',
+  'novamente':'nov.','rapidamente':'rapid.',
+  'felicidade':'felic.','verdade':'verd.','liberdade':'lib.',
+  'oportunidade':'oport.','necessidade':'neces.',
+  'possibilidade':'possib.','responsabilidade':'resp.',
+  'universo':'univ.','sentimento':'sent.',
+  'pensamento':'pens.','sofrimento':'sofr.',
+  'nascimento':'nasc.','crescimento':'cresc.',
+  'conhecimento':'conhec.','entendimento':'entend.',
+  'compreensão':'compr.','compreensao':'compr.'
 };
+
+var abrev = {};
 
 function carregarBrain(){
   try{
@@ -239,7 +299,16 @@ function carregarBrain(){
       brain.artistas = obj.artistas || {};
       brain.titulos = obj.titulos || {};
     }
-  }catch(e){ console.warn('Erro ao carregar cérebro:', e); }
+    var rawAb = localStorage.getItem(ABREV_KEY);
+    if(rawAb){
+      abrev = JSON.parse(rawAb);
+    } else {
+      abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
+    }
+  }catch(e){
+    console.warn('Erro ao carregar cérebro:', e);
+    abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
+  }
 }
 
 function salvarBrain(){
@@ -247,6 +316,13 @@ function salvarBrain(){
     localStorage.setItem(BRAIN_KEY, JSON.stringify(brain));
     atualizarBrainStats();
   }catch(e){ console.warn('Erro ao salvar cérebro:', e); }
+}
+
+function salvarAbrev(){
+  try{
+    localStorage.setItem(ABREV_KEY, JSON.stringify(abrev));
+    renderAbrev();
+  }catch(e){ console.warn('Erro ao salvar abreviações:', e); }
 }
 
 function atualizarBrainStats(){
@@ -266,7 +342,6 @@ function atualizarBrainStats(){
 // UTILS
 // ═══════════════════════════════════════════════════════════
 function $(id){ return document.getElementById(id); }
-function semExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(0,i) : n; }
 function comExt(n){ var i = n.lastIndexOf('.'); return i > 0 ? n.slice(i) : ''; }
 function esc(s){ var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
 function escAttr(s){ return String(s == null ? '' : s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
@@ -278,16 +353,14 @@ function norm(s){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🗑️ LISTA DE PALAVRAS-LIXO (base + aprendidas)
+// 🗑️ LIXO
 // ═══════════════════════════════════════════════════════════
 var LIXO_BASE = [
-  // Áudio/vídeo
   'audio oficial','áudio oficial','official audio','audio','áudio',
   'official music video','official video','music video',
   'video clipe','vídeo clipe','video clip','videoclipe','clipe','clip',
   'lyric video','lyrics video','lyric','lyrics','letra','letras',
   'video','vídeo','mv',
-  // Versões
   'ao vivo','aovivo','live','acoustic','acústico','acustico','unplugged',
   'remaster','remastered','remasterização','remasterizacao','remasterizado',
   're-recorded','re recorded','rerecorded','regravado','regravação','regravacao',
@@ -305,37 +378,31 @@ var LIXO_BASE = [
   'live version',
   'show','show ao vivo','show completo','apresentação','apresentacao',
   'turnê','turne','tour','em turnê','em turne',
-  // Qualidade
   'hd','hq','full hd','fullhd','4k','8k','1080p','720p',
   'kbps','320kbps','192kbps','128kbps','256kbps','1411kbps',
   'mp3','mp4','m4a','flac','opus','ogg','wav','aac','wma',
   'lame','cbr','vbr','stereo','mono','joint stereo',
   'hires','hi-res','hi res','24bit','16bit',
   '48kbps','64kbps','96kbps','160kbps','224kbps','320 kbps','48 kbps',
-  // Mídia
   'dvd','cd','bluray','blu-ray','blu ray','vhs',
   'deluxe','deluxe edition','edição especial','edicao especial',
   'special edition','collector','collectors edition',
   'limited','limited edition',
-  // Sites
   'youtube','yt','y2mate','ytmp3','youtubetomp3',
   'spotify','deezer','soundcloud','tidal','amazon','apple music',
   '4shared','mediafire','mega','zippyshare','turbobit',
   'baixaki','baixemusica','musicas','musicasgratis',
   'palcomp3','palco mp3','suamusica','kuakua','vagalume',
   'letras.mus.br','cifraclub','cifra club',
-  // Promo
   'oficial','official','promo','promotional','promo only','promo cd',
   'single','album','ep','lp','mixtape',
   'best of','greatest hits','as melhores',
   'playlist','coletânea','coletanea','compilation','various artists','v.a.',
-  // Canal/Studio
   'ai studio','ai studios','studio','estúdio','estudio',
   'canal','channel','official channel','canal oficial',
   'records','record','music','música','musica','músicas','musicas',
   'tv','web','net','online','play','player',
   'prod','produção','producao','produzido por',
-  // Sujeira
   'download','baixar','baixe','grátis','gratis','free','free download',
   'full','completo','completa','inteiro','inteira',
   'novo','nova','lançamento','lancamento','lançado','lancado',
@@ -344,15 +411,12 @@ var LIXO_BASE = [
   'ao vivo em','gravado em','direto de',
   'rip','cd rip','web rip','radio rip','vinyl rip',
   'fm','am','live fm','radio fm',
-  // Música pt
   'música','musica','músicas','musicas','canção','cancao','canções','cancoes',
   'sucesso','sucessos','hit','hits',
-  // Específicos v3
   'chamego','single_version','single version','remastered version',
   're-recorded version','video oficial','vídeo oficial',
 ];
 
-// Regex de canal (pra detectar tag ID3 ruim)
 var RE_CANAL = /\b(sem filtro|oficial|canal|records|studio|estúdio|estudio|tv|web|play|top|best|hits|coletânea|coletanea|various|compilation|playlist|prod)\b/i;
 
 function tagPareceCanal(txt){
@@ -360,16 +424,11 @@ function tagPareceCanal(txt){
   return RE_CANAL.test(txt);
 }
 
-// Testa se string é lixo (base + aprendido)
 function ehPalavraLixo(txt){
   if(!txt) return false;
   var x = norm(txt);
   if(!x) return false;
-
-  // Aprendido
   if(brain.lixo[x]) return true;
-
-  // Base
   var i;
   for(i=0;i<LIXO_BASE.length;i++){
     var p = norm(LIXO_BASE[i]);
@@ -377,14 +436,13 @@ function ehPalavraLixo(txt){
     var re = new RegExp('^' + escapeRegex(p) + '[\\s\\d.\\-_]*$','i');
     if(re.test(x)) return true;
   }
-  // Só número ou N kbps
   if(/^\d+[\s._-]*kbps$/i.test(x)) return true;
   if(/^\d+$/.test(x)) return true;
   return false;
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🔥 LIMPEZA AGRESSIVA
+// 🔥 LIMPEZA
 // ═══════════════════════════════════════════════════════════
 function removerSimbolos(s){
   s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,' ');
@@ -396,25 +454,14 @@ function removerSimbolos(s){
 function limpar(txt){
   if(!txt) return '';
   var s = String(txt).replace(/_/g,' ');
-
   s = removerSimbolos(s);
-
-  // 🔥 REGRA v3: remove TUDO entre parênteses e colchetes
-  // (o usuário pediu: "tudo entre ( )")
   s = s.replace(/\([^)]*\)/g,' ');
   s = s.replace(/\[[^\]]*\]/g,' ');
-
-  // Remove palavras-lixo soltas
   s = limparPalavras(s);
-
-  // Números de faixa no início
   s = s.replace(/^\s*\d{1,3}\s*[-–—._)\]]\s*/,'');
   s = s.replace(/\s*[-–—._(\[]\s*\d{1,3}\s*$/,'');
-
-  // Pontuação solta (inclui + e -)
   s = s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
   s = s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
-
   s = s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
   return s.trim();
 }
@@ -429,7 +476,6 @@ function limparPalavras(s){
     return true;
   });
   todos.sort(function(a,b){ return b.length - a.length; });
-
   for(var i=0;i<todos.length;i++){
     var p = todos[i];
     if(!p) continue;
@@ -450,10 +496,70 @@ function ehLixo(t){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🔥 PARSER INTELIGENTE v3
-// Regras:
-//  - Artista pode estar no INÍCIO ou no FINAL, separado por - ou +
-//  - Remove lixo: 48kbps, (Chamego), (Single_Version)_MP3_320kbps, etc.
+// ✂️ ABREVIAÇÃO INTELIGENTE
+// ═══════════════════════════════════════════════════════════
+function abreviarTexto(txt, limite){
+  if(!txt) return '';
+  // Se já cabe, não abrevia
+  if(txt.length <= limite) return txt;
+
+  // 1ª tentativa: abrevia palavras conhecidas
+  var palavras = txt.split(/\s+/);
+  var abreviado = palavras.map(function(p){
+    // Preserva pontuação (barras, barras invertidas, vírgulas)
+    var m = p.match(/^([\/\-–—]?)([A-Za-zÀ-Úà-ú]+)([\/\-–—,.]?)$/);
+    if(!m) return p;
+    var prefixo = m[1];
+    var palavra = m[2];
+    var sufixo = m[3];
+    var chave = norm(palavra);
+    if(abrev[chave]){
+      // Preserva a capitalização original
+      var ab = abrev[chave];
+      if(palavra[0] === palavra[0].toUpperCase() && palavra[0] !== palavra[0].toLowerCase()){
+        ab = ab.charAt(0).toUpperCase() + ab.slice(1);
+      }
+      return prefixo + ab + sufixo;
+    }
+    return p;
+  }).join(' ');
+
+  if(abreviado.length <= limite) return abreviado;
+
+  // 2ª tentativa: corta palavras com mais de 6 letras para 5 letras + "."
+  var palavras2 = abreviado.split(/\s+/);
+  for(var i=0; i<palavras2.length; i++){
+    if(abreviado.length <= limite) break;
+    var p = palavras2[i];
+    // Só corta palavras com 8+ letras
+    if(p.length >= 8 && /^[A-Za-zÀ-Úà-ú]+$/.test(p)){
+      palavras2[i] = p.slice(0, 5) + '.';
+    }
+  }
+  abreviado = palavras2.join(' ');
+
+  if(abreviado.length <= limite) return abreviado;
+
+  // 3ª tentativa: remove palavras do meio (mantém as 2 primeiras e as 2 últimas)
+  var palavras3 = abreviado.split(/\s+/);
+  if(palavras3.length > 6){
+    abreviado = palavras3.slice(0, 3).join(' ') + ' ... ' + palavras3.slice(-2).join(' ');
+  }
+
+  return abreviado;
+}
+
+// Capitaliza (primeira letra de cada palavra)
+function capitalizar(s){
+  if(!s) return '';
+  return s.split(/\s+/).map(function(p){
+    if(p.length <= 2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
+    return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 🔥 PARSER v4
 // ═══════════════════════════════════════════════════════════
 function removerArtistaDoTitulo(title, artist){
   if(!title || !artist) return title;
@@ -470,36 +576,18 @@ function parseNome(nome){
   var artistaDetectado = '';
   var tituloDetectado = '';
 
-  // 🔥 PRIMEIRO: remove tudo entre parênteses/colchetes (lixo garantido)
   s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
   s = s.replace(/\s+/g,' ').trim();
-
-  // 🔥 Remove lixo avulso (48kbps, MP3, OPUS, etc.)
   s = limparPalavras(s);
   s = s.replace(/\b\d+\s*kbps\b/gi,' ');
   s = s.replace(/\s+/g,' ').trim();
 
-  // 🔥 Separa por + ou - (com ou sem espaços)
-  // Ex: "A_Loba_OPUS_48kbps-Alcione" → ["A Loba OPUS", "Alcione"]
-  // Ex: "A_Loba_OPUS_48kbps+Alcione" → ["A Loba OPUS", "Alcione"]
-  // Ex: "Alcione- A_Loba_OPUS_48kbps" → ["Alcione", "A Loba OPUS"]
-
-  // Normaliza separadores + e - para um único caractere de split
   var partes = s.split(/\s*[+\-–—]\s*/).filter(function(p){ return p.trim().length > 0; });
   partes = partes.map(function(p){ return limpar(p); }).filter(function(p){ return p && !ehPalavraLixo(p); });
 
-  // ═══ LÓGICA DE DECISÃO ═══
-  // Se temos 2+ partes, precisamos decidir qual é artista e qual é título.
-  // Heurística: o ARTISTA geralmente é a parte MAIS CURTA e/ou com MENOS palavras.
-  // O TÍTULO geralmente é a parte MAIS LONGA.
-  // Mas se uma parte claramente contém lixo tipo "OPUS", já foi limpa.
-
   if(partes.length >= 2){
-    // Pega as duas primeiras partes significativas
     var p1 = partes[0];
     var p2 = partes[1];
-
-    // Se a primeira parte tem só 1-2 palavras e a segunda tem 3+, primeira = artista
     var w1 = p1.split(/\s+/).length;
     var w2 = p2.split(/\s+/).length;
 
@@ -510,12 +598,10 @@ function parseNome(nome){
       artistaDetectado = p2;
       tituloDetectado = p1;
     } else {
-      // Empate: assume que a PRIMEIRA é artista (comportamento comum)
       artistaDetectado = p1;
       tituloDetectado = partes.slice(1).join(' ');
     }
   } else if(partes.length === 1){
-    // Só uma parte: tenta separar por " - " clássico
     var m = s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
     if(m){
       artistaDetectado = limpar(m[1]);
@@ -525,7 +611,6 @@ function parseNome(nome){
     }
   }
 
-  // 🔥 Caso especial: "Alcione- A Loba" (artista no início, sem espaço antes do -)
   if(!artistaDetectado && !tituloDetectado){
     var m2 = s.match(/^([^\-–—+]+)\s*[-–—+]\s*(.+)$/);
     if(m2){
@@ -548,42 +633,22 @@ function parseNome(nome){
     }
   }
 
-  // Aplica artista aprendido
   if(artistaDetectado){
     var aNorm = norm(artistaDetectado);
     if(brain.artistas[aNorm]) artistaDetectado = brain.artistas[aNorm];
   }
-
-  // Aplica título aprendido
   if(tituloDetectado){
     var tNorm = norm(tituloDetectado);
     if(brain.titulos[tNorm]) tituloDetectado = brain.titulos[tNorm];
   }
+  if(!tituloDetectado) tituloDetectado = limpar(s);
+  if(!artistaDetectado) artistaDetectado = tituloDetectado;
 
-  // Fallback final
-  if(!tituloDetectado){
-    tituloDetectado = limpar(s);
-  }
-  if(!artistaDetectado){
-    artistaDetectado = tituloDetectado;
-  }
-
-  // Remove artista repetido no título
   tituloDetectado = removerArtistaDoTitulo(tituloDetectado, artistaDetectado);
-
-  // Capitaliza artista e título (primeira letra de cada palavra)
   artistaDetectado = capitalizar(artistaDetectado);
   tituloDetectado = capitalizar(tituloDetectado);
 
   return { a: artistaDetectado, t: tituloDetectado };
-}
-
-function capitalizar(s){
-  if(!s) return '';
-  return s.split(/\s+/).map(function(p){
-    if(p.length <= 2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
-    return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
-  }).join(' ');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -644,25 +709,15 @@ function escreverTags(buffer, tags){
 }
 
 // ═══════════════════════════════════════════════════════════
-// SANITIZE + ABREVIAR
+// SANITIZE + GERAR NOME
 // ═══════════════════════════════════════════════════════════
 function sanitize(s){
   if(!s) return '';
   var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x = x.replace(/[^A-Za-z0-9\s\-]/g,'');
+  x = x.replace(/[^A-Za-z0-9\s\-\.]/g,'');
   x = x.replace(/\s+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'');
   x = x.replace(/-+/g,'-').replace(/^-|-$/g,'');
   return x;
-}
-
-function abreviar(nome, limite){
-  if(nome.length <= limite) return nome;
-  var cortado = nome.slice(0, limite);
-  var ultimoUnder = cortado.lastIndexOf('_');
-  if(ultimoUnder > limite * 0.4){
-    return cortado.slice(0, ultimoUnder);
-  }
-  return cortado;
 }
 
 function gerarNome(m, ext){
@@ -672,26 +727,35 @@ function gerarNome(m, ext){
   if(limiteSemExt < 10) limiteSemExt = 10;
 
   if(t === a){
-    return abreviar(t, limiteSemExt) + ext;
+    return t.slice(0, limiteSemExt) + ext;
   }
 
   var nomeCompleto = t + '_' + a;
-  if(nomeCompleto.length > limiteSemExt){
-    var espacoTitulo = limiteSemExt - a.length - 1;
-    if(espacoTitulo < 10) espacoTitulo = limiteSemExt - 15;
 
-    var tCortado = abreviar(t, espacoTitulo);
-    var aCortado = abreviar(a, 15);
-    nomeCompleto = tCortado + '_' + aCortado;
+  // Se ultrapassar, ABREVIA o título
+  if(nomeCompleto.length > limiteSemExt){
+    // Calcula quanto sobra pro título
+    var espacoTitulo = limiteSemExt - a.length - 1;
+    if(espacoTitulo < 15) espacoTitulo = Math.floor(limiteSemExt * 0.6);
+
+    // Abrevia o título com o dicionário
+    var tAbrev = abreviarTexto(m.title, espacoTitulo);
+    tAbrev = sanitize(tAbrev);
+    if(!tAbrev) tAbrev = t.slice(0, espacoTitulo);
+
+    nomeCompleto = tAbrev + '_' + a;
+
+    // Se ainda ultrapassar, aí sim corta
     if(nomeCompleto.length > limiteSemExt){
-      nomeCompleto = abreviar(nomeCompleto, limiteSemExt);
+      nomeCompleto = nomeCompleto.slice(0, limiteSemExt);
+      nomeCompleto = nomeCompleto.replace(/_+$/,'');
     }
   }
   return nomeCompleto + ext;
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🧠 APRENDIZADO
+// APRENDIZADO
 // ═══════════════════════════════════════════════════════════
 function aprenderLixo(textoOriginal, textoLimpo){
   if(!textoOriginal) return;
@@ -773,24 +837,15 @@ function addArquivos(fileList){
       var tagGenero = (tags && tags.genre) ? tags.genre : '';
 
       var artist, title;
-
       var pNorm = norm(p.a);
-      if(brain.artistas[pNorm]){
-        artist = brain.artistas[pNorm];
-      } else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)){
-        artist = tagArtist;
-      } else {
-        artist = p.a;
-      }
+      if(brain.artistas[pNorm]) artist = brain.artistas[pNorm];
+      else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
+      else artist = p.a;
 
       var tNorm = norm(p.t);
-      if(brain.titulos[tNorm]){
-        title = brain.titulos[tNorm];
-      } else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)){
-        title = tagTitle;
-      } else {
-        title = p.t;
-      }
+      if(brain.titulos[tNorm]) title = brain.titulos[tNorm];
+      else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
+      else title = p.t;
 
       title = removerArtistaDoTitulo(title, artist);
 
@@ -1058,14 +1113,13 @@ function aplicarGenero(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🆕 ADICIONAR LIXO MANUALMENTE
+// LIXO MANUAL
 // ═══════════════════════════════════════════════════════════
 function adicionarLixoManual(aplicarAgora){
   var inp = $('lixoManual');
   var val = inp.value.trim();
   if(!val){ toast('Digite algo para remover.', 'w'); return; }
 
-  // Suporta múltiplos separados por vírgula
   var itens = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
   var novos = 0;
 
@@ -1081,14 +1135,67 @@ function adicionarLixoManual(aplicarAgora){
 
   salvarBrain();
   inp.value = '';
-  toast('🧠 ' + novos + ' item(ns) adicionado(s) ao cérebro!', 'b');
+  toast('🧠 ' + novos + ' item(ns) adicionado(s)!', 'b');
 
   if(aplicarAgora && musicas.length > 0){
     limparTodos();
   }
-
   if($('brainPainel').classList.contains('on')){
     renderBrain();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// ✂️ ABREVIAÇÕES — painel
+// ═══════════════════════════════════════════════════════════
+function renderAbrev(){
+  var lista = $('abrevLista');
+  if(!lista) return;
+  var chaves = Object.keys(abrev).sort();
+  var html = '';
+  chaves.forEach(function(k){
+    html += '<div class="abrev-chip"><span>' + esc(k) + ' → <b>' + esc(abrev[k]) + '</b></span><button data-k="' + escAttr(k) + '" title="Remover">✕</button></div>';
+  });
+  lista.innerHTML = html || '<div style="color:#5a5a7e;font-size:12px;padding:10px">Nenhuma abreviação. Clique em "Restaurar padrão".</div>';
+
+  lista.querySelectorAll('.abrev-chip button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var k = btn.dataset.k;
+      delete abrev[k];
+      salvarAbrev();
+      toast('Removido: ' + k, 'i');
+    });
+  });
+}
+
+function adicionarAbrev(){
+  var de = $('abrevDe').value.trim();
+  var para = $('abrevPara').value.trim();
+  if(!de || !para){ toast('Preencha os dois campos.', 'w'); return; }
+  abrev[norm(de)] = para;
+  $('abrevDe').value = '';
+  $('abrevPara').value = '';
+  salvarAbrev();
+  toast('✂️ Abreviação adicionada: ' + de + ' → ' + para, 's');
+  // Reaplica nas músicas carregadas
+  if(musicas.length > 0){
+    musicas.forEach(function(m){
+      m.newName = gerarNome(m, comExt(m.originalName));
+    });
+    render();
+  }
+}
+
+function resetarAbrev(){
+  if(!confirm('Restaurar todas as abreviações padrão?')) return;
+  abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
+  salvarAbrev();
+  toast('↺ Abreviações restauradas', 's');
+  if(musicas.length > 0){
+    musicas.forEach(function(m){
+      m.newName = gerarNome(m, comExt(m.originalName));
+    });
+    render();
   }
 }
 
@@ -1189,7 +1296,7 @@ function toggleMinificar(){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🧠 PAINEL APRENDIZADOS
+// CÉREBRO — painel
 // ═══════════════════════════════════════════════════════════
 var brainTabAtual = 'lixo';
 
@@ -1224,7 +1331,7 @@ function renderBrain(){
 }
 
 function exportarBrain(){
-  var data = JSON.stringify(brain, null, 2);
+  var data = JSON.stringify({ brain: brain, abrev: abrev }, null, 2);
   var blob = new Blob([data], { type:'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
@@ -1254,6 +1361,7 @@ function resetarBrain(){
 // ═══════════════════════════════════════════════════════════
 function demo(){
   var exemplos = [
+    'LUDMILLA e Alcione - Faz uma Loucura por mim _ Você me vira a cabeça.mp3',
     'A_Loba_OPUS_48kbps-Alcione.opus',
     'A_Loba_OPUS_48kbps+Alcione.opus',
     'Alcione- A_Loba_OPUS_48kbps.opus',
@@ -1261,17 +1369,12 @@ function demo(){
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
     'VOCÊ AINDA MORA AQUI -Gusttavo Lima- (Áudio Oficial).mp3',
     'George Michael - Freedom! \'90 (Official Video).mp3',
-    'JENNIFER PAIGE- \'CRUSH\' - Original Version (Official Video) HQ.mp3',
-    'We Are Family.mp3',
-    'Silly_Love_Songs__(WINGS)_Cover_by_The-HSCC-MP3_320kbps (1).mp3',
     'ABBA - Dancing Queen (Official Music Video) [4K Remaster].mp3',
     'Zé Cantor João Bandeira - Sabiá O Cheiro da Carolina Riacho do Navio (ao Vivo).mp3',
-    'Track 01 - Artist Name - Song Title (1995 Remaster).mp3',
-    'Song Title (Re-Recorded _ Remastered).mp3',
-    'Artist Name - Song Title (Original Long Version).mp3',
-    'Artist Name - Song Title (Long Version) [HD].mp3',
     'A_Loba_Alcione_(Chamego)_MP3_320kbps.opus',
-    'Alcione_A_Loba_(Single_Version)_MP3_320kbps.opus'
+    'Alcione_A_Loba_(Single_Version)_MP3_320kbps.opus',
+    'Roberto Carlos - Eu Quero Apenas Que Você Seja Muito Feliz Comigo.mp3',
+    'Legião Urbana - Tempo Perdido (Ao Vivo no Rio de Janeiro em 1995).mp3'
   ];
   musicas = exemplos.map(function(nome){
     var p = parseNome(nome);
@@ -1315,6 +1418,7 @@ function toast(msg, tipo){
 function init(){
   carregarBrain();
   atualizarBrainStats();
+  renderAbrev();
 
   var zona = $('zona');
   var inp = $('inp');
@@ -1344,11 +1448,21 @@ function init(){
   document.addEventListener('dragover', function(e){ e.preventDefault(); });
   document.addEventListener('drop', function(e){ e.preventDefault(); });
 
-  // 🆕 Campo de lixo manual
   $('btnAddLixo').addEventListener('click', function(){ adicionarLixoManual(false); });
   $('btnAddLixoAplicar').addEventListener('click', function(){ adicionarLixoManual(true); });
   $('lixoManual').addEventListener('keydown', function(e){
     if(e.key === 'Enter') adicionarLixoManual(false);
+  });
+
+  // 🆕 Abreviações
+  $('btnToggleAbrev').addEventListener('click', function(){
+    var c = $('abrevConteudo');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+  });
+  $('btnAddAbrev').addEventListener('click', adicionarAbrev);
+  $('btnResetAbrev').addEventListener('click', resetarAbrev);
+  $('abrevPara').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') adicionarAbrev();
   });
 
   $('btnLimpar').addEventListener('click', limparTodos);
@@ -1400,10 +1514,18 @@ function init(){
     r.onload = function(ev){
       try{
         var obj = JSON.parse(ev.target.result);
-        brain.lixo = obj.lixo || {};
-        brain.artistas = obj.artistas || {};
-        brain.titulos = obj.titulos || {};
+        if(obj.brain){
+          brain.lixo = obj.brain.lixo || {};
+          brain.artistas = obj.brain.artistas || {};
+          brain.titulos = obj.brain.titulos || {};
+        } else {
+          brain.lixo = obj.lixo || {};
+          brain.artistas = obj.artistas || {};
+          brain.titulos = obj.titulos || {};
+        }
+        if(obj.abrev) abrev = obj.abrev;
         salvarBrain();
+        salvarAbrev();
         renderBrain();
         toast('🧠 Cérebro importado!', 's');
       }catch(err){
@@ -1424,11 +1546,7 @@ function init(){
     if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
   }, 500);
 
-  console.log('🎵 Editor v3 iniciado | Cérebro com ' + (
-    Object.keys(brain.lixo).length +
-    Object.keys(brain.artistas).length +
-    Object.keys(brain.titulos).length
-  ) + ' itens');
+  console.log('🎵 Editor v4 iniciado');
 }
 
 init();
