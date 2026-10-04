@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎵 Editor de Músicas Inteligente v8</title>
+<title>🎵 Editor de Músicas Inteligente v9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -17,6 +17,9 @@ h1{font-size:24px;color:#c084fc;margin-bottom:8px}
 .stats .warn{color:#f59e0b}
 .stats .ok{color:#34b87a}
 .stats .brain{color:#c084fc;margin-left:auto;font-size:12px}
+.stats .save-status{font-size:11px;padding:3px 10px;border-radius:8px;background:#1a1a2e;color:#6a6a8e;border:1px solid #2a2a4a;transition:all .3s}
+.stats .save-status.saved{background:rgba(52,184,122,.15);color:#34b87a;border-color:#34b87a}
+.stats .save-status.saving{background:rgba(245,158,11,.15);color:#f59e0b;border-color:#f59e0b}
 .zona{border:3px dashed #3a3a5a;border-radius:16px;padding:50px 20px;text-align:center;cursor:pointer;background:#0f0f1a;margin-bottom:16px;transition:all .2s}
 .zona:hover,.zona.drag{border-color:#c084fc;background:#1a1a2e}
 .zona .ic{font-size:50px;display:block;margin-bottom:12px}
@@ -140,6 +143,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 .toast.w{border-left:4px solid #f59e0b}
 .toast.i{border-left:4px solid #60a5fa}
 .toast.b{border-left:4px solid #c084fc}
+.toast.save{border-left:4px solid #34b87a;background:linear-gradient(90deg,rgba(52,184,122,.15),#1c1c32)}
 @keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
 @media(max-width:900px){.head,.linha{grid-template-columns:30px 1fr 1fr 60px}.head span:nth-child(5),.linha input:nth-child(5){display:none}}
 </style>
@@ -147,14 +151,15 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
 <body>
 <div class="app">
 
-<h1>🎵 Editor de Músicas Inteligente v8</h1>
-<div class="sub">🧠 Abrevia palavras • Remove números • Artistas turbinados • Aprende com você</div>
+<h1>🎵 Editor de Músicas Inteligente v9</h1>
+<div class="sub">🧠 Abrevia palavras • Remove números • Artistas turbinados • <b style="color:#34b87a">💾 Salvamento blindado</b></div>
 
 <div class="stats">
   <span>📁 Total: <b id="stTotal">0</b></span>
   <span>✅ Prontas: <b class="ok" id="stOk">0</b></span>
   <span>⚠️ Corrompidas: <b class="warn" id="stCor">0</b></span>
   <span class="brain">🧠 Aprendizados: <b id="stBrain">0</b></span>
+  <span class="save-status" id="saveStatus">💾 Pronto</span>
 </div>
 
 <div class="zona" id="zona">
@@ -194,7 +199,7 @@ label.lbl{font-size:12px;color:#8888aa;font-weight:500}
     <!-- ➕ ADICIONAR 1 -->
     <div class="art-add">
       <input type="text" id="artNovo" placeholder="Nome do artista ou banda (ex: Alceu Valença)">
-      <button class="b6" id="btnAddArt">➕ Adicionar</button>
+      <button class="b6" id="btnAddArt">➕ Adicionar e salvar</button>
     </div>
 
     <!-- 📥 ADICIONAR EM MASSA -->
@@ -207,7 +212,7 @@ Alceu Valença, Gusttavo Lima, Ludmilla
 Zeca Pagodinho
 Wando; Alcione"></textarea>
       <div class="art-massa-acoes">
-        <button class="b2" id="btnAddMassa">➕ Adicionar todos</button>
+        <button class="b2" id="btnAddMassa">➕ Adicionar todos e salvar</button>
         <button class="b5" id="btnLimparMassa">🗑️ Limpar campo</button>
       </div>
     </div>
@@ -241,7 +246,8 @@ Wando; Alcione"></textarea>
     </div>
 
     <div class="hint" style="font-size:11px;color:#6a6a8e;margin-top:8px">
-      💡 Se uma parte do nome do arquivo bater com um artista conhecido, ele será tratado como ARTISTA.
+      💡 Se uma parte do nome do arquivo bater com um artista conhecido, ele será tratado como ARTISTA.<br>
+      💾 <b style="color:#34b87a">Salvamento automático ativo</b> — toda alteração é salva na hora + backup espelho.
     </div>
   </div>
 </div>
@@ -361,14 +367,15 @@ var LIMITE_NOME = 60;
 // ═══════════════════════════════════════════════════════════
 // 🧠 CÉREBRO
 // ═══════════════════════════════════════════════════════════
-var BRAIN_KEY = 'editor_musicas_brain_v8';
-var ABREV_KEY = 'editor_musicas_abrev_v8';
-var ART_KEY   = 'editor_musicas_artistas_v8';
-var ALIAS_KEY = 'editor_musicas_aliases_v8';
+var BRAIN_KEY = 'editor_musicas_brain_v9';
+var ABREV_KEY = 'editor_musicas_abrev_v9';
+var ART_KEY   = 'editor_musicas_artistas_v9';
+var ALIAS_KEY = 'editor_musicas_aliases_v9';
 
 var brain = { lixo:{}, artistas:{}, titulos:{} };
 var aliases = {};
 var artBuscaAtual = '';
+var _temAlteracao = false;
 
 var ARTISTAS_BASE = [
   'Alcione','Alceu Valença','Alceu Valenca','Cartola','Clara Nunes','Djavan',
@@ -416,35 +423,148 @@ var ARTISTAS_BASE = [
 
 var artistasConhecidos = {};
 
+// ═══════════════════════════════════════════════════════════
+// 💾 STATUS DE SALVAMENTO (feedback visual)
+// ═══════════════════════════════════════════════════════════
+function setSaveStatus(status){
+  var el = $('saveStatus');
+  if(!el) return;
+  el.className = 'save-status ' + status;
+  if(status === 'saving'){
+    el.textContent = '⏳ Salvando...';
+  } else if(status === 'saved'){
+    el.textContent = '✅ Salvo!';
+    setTimeout(function(){
+      el.textContent = '💾 Pronto';
+      el.className = 'save-status';
+    }, 2000);
+  } else {
+    el.textContent = '💾 Pronto';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// 💾 SALVAMENTO BLINDADO DE ARTISTAS
+// ═══════════════════════════════════════════════════════════
+function salvarArtistas(){
+  setSaveStatus('saving');
+  try{
+    var arr = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; });
+    var json = JSON.stringify(arr);
+
+    // ✅ Chave principal
+    localStorage.setItem(ART_KEY, json);
+
+    // ✅ BACKUP ESPELHO
+    try{
+      localStorage.setItem(ART_KEY + '_backup', json);
+      localStorage.setItem(ART_KEY + '_backup_data', String(Date.now()));
+    }catch(e){}
+
+    // ✅ Backup dos aliases também
+    try{
+      localStorage.setItem(ALIAS_KEY + '_backup', JSON.stringify(aliases || {}));
+    }catch(e){}
+
+    console.log('💾 Artistas salvos:', arr.length);
+    setSaveStatus('saved');
+    renderArtistas();
+    _temAlteracao = false;
+    return true;
+  }catch(e){
+    console.error('❌ ERRO ao salvar artistas:', e);
+
+    // ✅ Fallback: tenta salvar sem backup
+    try{
+      var arr2 = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; });
+      localStorage.setItem(ART_KEY, JSON.stringify(arr2));
+      toast('⚠️ Salvo sem backup (espaço cheio)', 'w');
+      setSaveStatus('saved');
+      renderArtistas();
+      return true;
+    }catch(e2){
+      toast('❌ Espaço cheio! Não foi possível salvar.', 'e');
+      setSaveStatus('');
+      return false;
+    }
+  }
+}
+
 function carregarBrain(){
   try{
+    // ✅ CARREGA CÉREBRO
     var raw = localStorage.getItem(BRAIN_KEY);
     if(raw){
-      var obj = JSON.parse(raw);
-      brain.lixo = obj.lixo || {};
-      brain.artistas = obj.artistas || {};
-      brain.titulos = obj.titulos || {};
+      try{
+        var obj = JSON.parse(raw);
+        brain.lixo = obj.lixo || {};
+        brain.artistas = obj.artistas || {};
+        brain.titulos = obj.titulos || {};
+      }catch(e){}
     }
+
+    // ✅ CARREGA ARTISTAS (com fallback pro backup)
     var rawArt = localStorage.getItem(ART_KEY);
+    var rawArtBackup = localStorage.getItem(ART_KEY + '_backup');
+
+    var arrArt = null;
     if(rawArt){
-      var arrArt = JSON.parse(rawArt);
+      try{ arrArt = JSON.parse(rawArt); }catch(e){}
+    }
+
+    // ✅ Se a principal falhar, usa o backup
+    if(!arrArt || !Array.isArray(arrArt) || arrArt.length === 0){
+      if(rawArtBackup){
+        try{
+          var arrBackup = JSON.parse(rawArtBackup);
+          if(Array.isArray(arrBackup) && arrBackup.length > 0){
+            arrArt = arrBackup;
+            console.log('♻️ Recuperado do backup:', arrBackup.length, 'artistas');
+            setTimeout(function(){ toast('♻️ Artistas recuperados do backup', 's'); }, 1000);
+          }
+        }catch(e){}
+      }
+    }
+
+    if(arrArt && Array.isArray(arrArt) && arrArt.length > 0){
       artistasConhecidos = {};
-      arrArt.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
+      arrArt.forEach(function(a){
+        if(a && typeof a === 'string'){
+          artistasConhecidos[norm(a)] = a;
+        }
+      });
+      console.log('✅ Artistas carregados:', arrArt.length);
     } else {
+      // Primeira vez: usa a lista base
       artistasConhecidos = {};
       ARTISTAS_BASE.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
+      console.log('📦 Usando lista base:', ARTISTAS_BASE.length, 'artistas');
+      salvarArtistas();
     }
+
+    // ✅ CARREGA ABREVIAÇÕES
     var rawAb = localStorage.getItem(ABREV_KEY);
     if(rawAb){
-      abrev = JSON.parse(rawAb);
+      try{ abrev = JSON.parse(rawAb); }catch(e){ abrev = JSON.parse(JSON.stringify(ABREV_PADRAO)); }
     } else {
       abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
     }
+
+    // ✅ CARREGA ALIASES (com fallback)
+    var rawAlias = localStorage.getItem(ALIAS_KEY);
+    var rawAliasBackup = localStorage.getItem(ALIAS_KEY + '_backup');
+    if(rawAlias){
+      try{ aliases = JSON.parse(rawAlias); }catch(e){ aliases = {}; }
+    } else if(rawAliasBackup){
+      try{ aliases = JSON.parse(rawAliasBackup); }catch(e){ aliases = {}; }
+    }
+
   }catch(e){
     console.warn('Erro ao carregar cérebro:', e);
     artistasConhecidos = {};
     ARTISTAS_BASE.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
     abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
+    aliases = {};
   }
 }
 
@@ -457,16 +577,13 @@ function carregarAliases(){
 function salvarAliases(){
   try{
     localStorage.setItem(ALIAS_KEY, JSON.stringify(aliases));
+    try{
+      localStorage.setItem(ALIAS_KEY + '_backup', JSON.stringify(aliases));
+    }catch(e){}
     renderAliases();
-  }catch(e){}
-}
-
-function salvarArtistas(){
-  try{
-    var arr = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; });
-    localStorage.setItem(ART_KEY, JSON.stringify(arr));
-    renderArtistas();
-  }catch(e){ console.warn('Erro ao salvar artistas:', e); }
+  }catch(e){
+    toast('⚠️ Erro ao salvar aliases', 'w');
+  }
 }
 
 function normalizarComAlias(nome){
@@ -507,6 +624,9 @@ function encontrarArtistaEm(txt){
 function salvarBrain(){
   try{
     localStorage.setItem(BRAIN_KEY, JSON.stringify(brain));
+    try{
+      localStorage.setItem(BRAIN_KEY + '_backup', JSON.stringify(brain));
+    }catch(e){}
     atualizarBrainStats();
   }catch(e){ console.warn('Erro ao salvar cérebro:', e); }
 }
@@ -1031,14 +1151,21 @@ function aprenderArtista(nome){
   var n = String(nome).trim();
   if(n.length < 2) return;
   var chave = norm(n);
+  var salvou = false;
+
+  // Salva no cérebro
   if(brain.artistas[chave] !== n){
     brain.artistas[chave] = n;
     salvarBrain();
   }
+
+  // Salva na lista de artistas conhecidos
   if(!artistasConhecidos[chave]){
     artistasConhecidos[chave] = n;
-    salvarArtistas();
-    toast('🎤 Artista conhecido: ' + n, 's');
+    salvou = salvarArtistas();
+    if(salvou){
+      toast('🎤 Artista salvo: ' + n, 'save');
+    }
   }
 }
 
@@ -1167,6 +1294,7 @@ function onInputEdit(e){
   atualizarJson();
 }
 
+// ✅ APRENDIZADO AUTOMÁTICO ao sair do campo
 function onInputBlur(e){
   var inp = e.target;
   var m = buscar(inp.dataset.id);
@@ -1370,7 +1498,7 @@ function adicionarLixoManual(aplicarAgora){
 }
 
 // ═══════════════════════════════════════════════════════════
-// 🎤 ARTISTAS TURBINADO
+// 🎤 ARTISTAS TURBINADO — SALVAMENTO REFORÇADO
 // ═══════════════════════════════════════════════════════════
 function renderArtistas(){
   var lista = $('artLista');
@@ -1399,9 +1527,12 @@ function renderArtistas(){
   lista.querySelectorAll('.art-chip button').forEach(function(btn){
     btn.addEventListener('click', function(){
       var k = btn.dataset.k;
+      var nome = artistasConhecidos[k];
       delete artistasConhecidos[k];
-      salvarArtistas();
-      toast('Removido: ' + k, 'i');
+      var salvou = salvarArtistas();
+      if(salvou){
+        toast('🗑️ Removido: ' + nome, 'i');
+      }
     });
   });
 
@@ -1409,68 +1540,137 @@ function renderArtistas(){
   if(cont) cont.textContent = Object.keys(artistasConhecidos).length;
 }
 
+// ✅ ADICIONAR 1 COM SALVAMENTO BLINDADO
 function adicionarArtistaConhecido(){
   var inp = $('artNovo');
   var val = inp.value.trim();
   if(!val){ toast('Digite um nome.', 'w'); return; }
+
   var itens = val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
   var novos = 0, duplicados = 0;
+  var adicionados = [];
+
   itens.forEach(function(item){
     var k = norm(item);
     if(!k || k.length < 2){ return; }
     if(artistasConhecidos[k]){ duplicados++; return; }
+
     var similares = Object.keys(artistasConhecidos).filter(function(exist){
       return exist !== k && (exist.indexOf(k) !== -1 || k.indexOf(exist) !== -1) && Math.abs(exist.length - k.length) <= 3;
     });
+
     if(similares.length > 0){
       var existente = artistasConhecidos[similares[0]];
       if(!confirm('"' + item + '" é parecido com "' + existente + '". Adicionar mesmo assim?')){ return; }
     }
+
     artistasConhecidos[k] = item;
     novos++;
+    adicionados.push(item);
   });
+
   if(novos === 0){
     toast(duplicados > 0 ? 'Já estava na lista.' : 'Nada válido.', 'w');
     return;
   }
-  salvarArtistas();
+
+  // ✅ SALVA E CONFIRMA
+  var salvou = salvarArtistas();
+  if(!salvou){
+    toast('❌ Não foi possível salvar! Espaço cheio.', 'e');
+    return;
+  }
+
+  // ✅ Dupla proteção: salva no cérebro também
+  adicionados.forEach(function(a){
+    var k = norm(a);
+    if(!brain.artistas[k]){
+      brain.artistas[k] = a;
+    }
+  });
+  salvarBrain();
+
   inp.value = '';
-  toast('🎤 ' + novos + ' artista(s) adicionado(s)!' + (duplicados > 0 ? ' (' + duplicados + ' já existia)' : ''), 's');
+  toast('🎤 ' + novos + ' artista(s) salvo(s)!' + (duplicados > 0 ? ' (' + duplicados + ' já existia)' : ''), 'save');
 }
 
+// ✅ ADICIONAR EM MASSA COM SALVAMENTO BLINDADO
 function adicionarMassa(){
   var ta = $('artMassa');
   var texto = ta.value;
   if(!texto.trim()){ toast('Cole algo no campo.', 'w'); return; }
+
   var itens = texto.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
   var novos = 0, duplicados = 0;
+  var adicionados = [];
+
   itens.forEach(function(item){
     var k = norm(item);
     if(!k || k.length < 2) return;
     if(artistasConhecidos[k]){ duplicados++; return; }
     artistasConhecidos[k] = item;
     novos++;
+    adicionados.push(item);
   });
+
   if(novos === 0){ toast('Nada novo pra adicionar.', 'w'); return; }
-  salvarArtistas();
+
+  // ✅ SALVA E CONFIRMA
+  var salvou = salvarArtistas();
+  if(!salvou){
+    toast('❌ Não foi possível salvar! Espaço cheio.', 'e');
+    return;
+  }
+
+  // ✅ Dupla proteção
+  adicionados.forEach(function(a){
+    var k = norm(a);
+    if(!brain.artistas[k]){
+      brain.artistas[k] = a;
+    }
+  });
+  salvarBrain();
+
   ta.value = '';
-  toast('📥 ' + novos + ' artista(s) adicionado(s)!' + (duplicados > 0 ? ' (' + duplicados + ' já existia)' : ''), 's');
+  toast('📥 ' + novos + ' artista(s) salvo(s)!' + (duplicados > 0 ? ' (' + duplicados + ' já existia)' : ''), 'save');
 }
 
+// ✅ ADICIONAR DAS MÚSICAS COM SALVAMENTO BLINDADO
 function adicionarArtistasDasMusicas(){
   if(musicas.length === 0){ toast('Nenhuma música carregada.', 'w'); return; }
+
   var novos = 0;
+  var adicionados = [];
+
   musicas.forEach(function(m){
     if(!m.artist) return;
     var k = norm(m.artist);
     if(k && !artistasConhecidos[k]){
       artistasConhecidos[k] = m.artist;
       novos++;
+      adicionados.push(m.artist);
     }
   });
+
   if(novos === 0){ toast('Todos já estavam na lista.', 'w'); return; }
-  salvarArtistas();
-  toast('🎤 ' + novos + ' artista(s) adicionado(s)!', 's');
+
+  // ✅ SALVA E CONFIRMA
+  var salvou = salvarArtistas();
+  if(!salvou){
+    toast('❌ Não foi possível salvar! Espaço cheio.', 'e');
+    return;
+  }
+
+  // ✅ Dupla proteção
+  adicionados.forEach(function(a){
+    var k = norm(a);
+    if(!brain.artistas[k]){
+      brain.artistas[k] = a;
+    }
+  });
+  salvarBrain();
+
+  toast('🎤 ' + novos + ' artista(s) salvo(s) das músicas!', 'save');
 }
 
 function resetarArtistas(){
@@ -1481,15 +1681,19 @@ function resetarArtistas(){
     base[k] = artistasConhecidos[k];
   });
   artistasConhecidos = base;
-  salvarArtistas();
-  toast('↺ Lista padrão restaurada (seus artistas foram mantidos)', 's');
+  var salvou = salvarArtistas();
+  if(salvou){
+    toast('↺ Lista padrão restaurada (seus artistas foram mantidos)', 'save');
+  }
 }
 
 function zerarArtistas(){
   if(!confirm('⚠️ Apagar TODOS os artistas conhecidos? Essa ação não pode ser desfeita.')) return;
   artistasConhecidos = {};
-  salvarArtistas();
-  toast('🗑️ Lista de artistas zerada', 'i');
+  var salvou = salvarArtistas();
+  if(salvou){
+    toast('🗑️ Lista de artistas zerada', 'i');
+  }
 }
 
 function exportarArtistas(){
@@ -1504,7 +1708,7 @@ function exportarArtistas(){
   a.click();
   a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('📤 Lista exportada: ' + arr.length + ' artistas', 's');
+  toast('📤 Lista exportada: ' + arr.length + ' artistas', 'save');
 }
 
 function importarArtistas(){
@@ -1536,9 +1740,11 @@ function processarImportArt(file){
           if(k && !artistasConhecidos[k]){ artistasConhecidos[k] = a; novos++; }
         });
       }
-      salvarArtistas();
+      var salvou = salvarArtistas();
       salvarAliases();
-      toast('📥 ' + novos + ' artista(s) importado(s)!', 's');
+      if(salvou){
+        toast('📥 ' + novos + ' artista(s) importado(s)!', 'save');
+      }
     }catch(err){
       toast('Arquivo inválido.', 'e');
     }
@@ -1777,7 +1983,7 @@ function exportarBrain(){
   a.click();
   a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('🧠 Cérebro exportado!', 's');
+  toast('🧠 Cérebro exportado!', 'save');
 }
 
 function importarBrain(){
@@ -1831,7 +2037,7 @@ function toast(msg, tipo){
   var wrap = $('toastWrap');
   var el = document.createElement('div');
   el.className = 'toast ' + (tipo || 'i');
-  var ic = { s:'✅', e:'❌', w:'⚠️', i:'ℹ️', b:'🧠' };
+  var ic = { s:'✅', e:'❌', w:'⚠️', i:'ℹ️', b:'🧠', save:'💾' };
   el.textContent = (ic[tipo] || 'ℹ️') + ' ' + msg;
   wrap.appendChild(el);
   setTimeout(function(){
@@ -2002,7 +2208,7 @@ function init(){
         salvarAliases();
         renderBrain();
         renderAliases();
-        toast('🧠 Cérebro importado!', 's');
+        toast('🧠 Cérebro importado!', 'save');
       }catch(err){
         toast('Arquivo inválido.', 'e');
       }
@@ -2014,6 +2220,57 @@ function init(){
   $('idInicial').addEventListener('input', atualizarJson);
   $('generoGeral').addEventListener('input', atualizarJson);
 
+  // ══════════════════════════════════════════════════════
+  // 💾 SALVAMENTO DE EMERGÊNCIA (REFORÇADO)
+  // ══════════════════════════════════════════════════════
+
+  // ✅ Salva ao fechar/atualizar a página
+  window.addEventListener('beforeunload', function(){
+    try{
+      if(Object.keys(artistasConhecidos).length > 0) salvarArtistas();
+      if(Object.keys(aliases).length > 0) salvarAliases();
+      salvarBrain();
+      console.log('💾 Salvamento ao sair OK');
+    }catch(e){
+      console.warn('Erro no salvamento ao sair:', e);
+    }
+  });
+
+  // ✅ Salva quando trocar de aba
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden'){
+      try{
+        salvarArtistas();
+        salvarAliases();
+        salvarBrain();
+      }catch(e){}
+    }
+  });
+
+  // ✅ Auto-save a cada 30 segundos
+  setInterval(function(){
+    try{
+      if(Object.keys(artistasConhecidos).length > 0){
+        salvarArtistas();
+      }
+    }catch(e){}
+  }, 30000);
+
+  // ✅ Backup semanal automático (pergunta 1x/semana)
+  var ultimoBackup = parseInt(localStorage.getItem('ultimo_backup_artistas') || '0');
+  var agora = Date.now();
+  var umaSemana = 7 * 24 * 60 * 60 * 1000;
+  if(agora - ultimoBackup > umaSemana && Object.keys(artistasConhecidos).length > 0){
+    setTimeout(function(){
+      if(confirm('💾 Fazer backup dos artistas agora? (recomendado 1x/semana)\n\n' + Object.keys(artistasConhecidos).length + ' artistas na lista.')){
+        exportarArtistas();
+        localStorage.setItem('ultimo_backup_artistas', String(agora));
+      } else {
+        localStorage.setItem('ultimo_backup_artistas', String(agora));
+      }
+    }, 5000);
+  }
+
   setTimeout(function(){
     var ok = { JSZip: typeof JSZip !== 'undefined', ID3Writer: typeof ID3Writer !== 'undefined' };
     console.log('🎵 Libs:', ok);
@@ -2021,7 +2278,8 @@ function init(){
     if(!ok.ID3Writer) toast('⚠️ ID3Writer não carregou', 'w');
   }, 500);
 
-  console.log('🎵 Editor v8 iniciado | Artistas: ' + Object.keys(artistasConhecidos).length);
+  console.log('🎵 Editor v9 iniciado | Artistas: ' + Object.keys(artistasConhecidos).length + ' | Salvamento blindado ativo');
+  toast('💾 Salvamento blindado ativo!', 'save');
 }
 
 init();
