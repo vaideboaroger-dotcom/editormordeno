@@ -1,10 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b12">
+<title>🎵 Editor de Músicas v11</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
+<style>
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#0b0b12;--bg2:#13131f;--bg3:#0f0f1a;--bg4:#1a1a2e;
+  --border:#1f1f30;--border2:#2a2a4a;
+  --txt:#e8e8f0;--txt2:#a8a8c8;--txt3:#6a6a8e;
+  --purple:#c084fc;--purple2:#7c6cf0;
+  --green:#34b87a;--red:#e05a5a;--orange:#f59e0b;--blue:#60a5fa;--cyan:#22d3ee;
+  --touch:44px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{padding:calc(8px + var(--safe-top)) 12px calc(90px + var(--safe-bottom));
+  overflow-x:hidden}
+input,textarea,button,select{font-family:inherit;font-size:16px}
+.header{position:sticky;top:calc(-1 * var(--safe-top));z-index:100;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 90%,transparent 100%);
+  margin:0 -12px 12px;padding:8px 12px 12px}
+.header h1{font-size:20px;color:var(--purple);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.header .sub{font-size:12px;color:var(--txt3);margin-bottom:10px}
+.stats{background:var(--bg2);padding:10px 12px;border-radius:12px;
+  font-size:13px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid var(--border);
+  align-items:center}
+.stats b{color:#fff}
+.stats .ok{color:var(--green)}
+.stats .warn{color:var(--orange)}
+.stats .save-status{font-size:11px;padding:4px 10px;border-radius:8px;
+  background:var(--bg4);color:var(--txt3);border:1px solid var(--border2);
+  transition:all .3s;margin-left:auto;white-space:nowrap}
+.stats .save-status.saved{background:rgba(52,184,122,.15);color:var(--green);border-color:var(--green)}
+.stats .save-status.saving{background:rgba(245,158,11,.15);color:var(--orange);border-color:var(--orange)}
+.zona{border:2px dashed var(--border2);border-radius:16px;padding:32px 16px;
+  text-align:center;cursor:pointer;background:var(--bg3);margin-bottom:12px;
+  transition:all .2s;min-height:140px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.zona:active,.zona.drag{border-color:var(--purple);background:var(--bg4)}
+.zona .ic{font-size:42px;display:block;margin-bottom:10px}
+.zona .t1{font-size:15px;font-weight:600;color:#ddd;margin-bottom:4px}
+.zona .t2{font-size:12px;color:var(--txt3)}
+.zona input{display:none}
+button{border:none;font-weight:600;cursor:pointer;
+  transition:transform .1s,filter .2s;display:inline-flex;align-items:center;
+  justify-content:center;gap:6px;min-height:var(--touch);border-radius:10px;
+  padding:10px 16px;font-size:14px}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.b1{background:var(--purple2);color:#fff}
+.b2{background:var(--green);color:#fff}
+.b3{background:var(--orange);color:#fff}
+.b4{background:var(--red);color:#fff}
+.b5{background:var(--border2);color:var(--txt2)}
+.b6{background:var(--purple);color:#1a0033}
+.b-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border2)}
+.box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+  padding:12px;margin-bottom:12px}
+.box-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.box-head label{font-size:13px;color:var(--purple);font-weight:700;flex:1;min-width:0}
+.box-head .badge{background:var(--border2);color:var(--txt2);font-size:11px;
+  padding:2px 8px;border-radius:8px;font-weight:700}
+.box-conteudo{display:none}
+.box-conteudo.on{display:block}
+.inp{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:12px 14px;color:var(--txt);font-size:16px;
+  outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--purple2);box-shadow:0 0 0 3px rgba(124,108,240,.15)}
+.inp-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.inp-row .inp{flex:1;min-width:0}
+.hint{font-size:11px;color:var(--txt3);line-height:1.4;margin-top:6px}
+.hint b{color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding:2px}
+.chip{background:var(--bg4);border:1px solid var(--border2);
+  padding:6px 10px;border-radius:8px;font-size:13px;color:var(--txt);
+  display:flex;align-items:center;gap:6px;max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.chip b{color:var(--purple);font-weight:700}
+.chip button{background:transparent;color:var(--red);padding:2px;min-height:auto;
+  font-size:16px;line-height:1;border-radius:4px}
+.chip button:active{transform:scale(1.2)}
+.chip-vazio{color:var(--txt3);font-size:12px;padding:16px;text-align:center;width:100%}
+textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
+.lista{margin-bottom:12px}
+.card-mus{background:var(--bg3);border-radius:12px;padding:12px;
+  margin-bottom:10px;border:1px solid var(--border);position:relative;
+  border-left:3px solid var(--green);transition:border-color .2s}
+.card-mus.cor{border-left-color:var(--orange);background:rgba(245,158,11,.04)}
+.card-mus .topo{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.card-mus .num{background:var(--bg4);color:var(--txt2);font-size:11px;
+  font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.card-mus .orig{flex:1;min-width:0;font-size:11px;color:var(--txt3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-mus .st{font-size:20px;flex-shrink:0}
+.card-mus .campo{margin-bottom:8px}
+.card-mus .campo:last-child{margin-bottom:0}
+.card-mus .campo label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.card-mus .campo input{width:100%;background:var(--bg4);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none}
+.card-mus .campo input:focus{border-color:var(--purple2)}
+.card-mus .novo-nome{font-size:11px;color:var(--txt3);margin-top:8px;
+  padding:8px 10px;background:var(--bg4);border-radius:8px;
+  font-family:'Courier New',monospace;word-break:break-all;line-height:1.3}
+.card-mus .novo-nome b{color:var(--cyan)}
+.barra-fixa{position:fixed;bottom:0;left:0;right:0;
+  padding:8px 12px calc(8px + var(--safe-bottom));
+  background:linear-gradient(0deg,var(--bg) 60%,transparent 100%);
+  display:flex;gap:8px;z-index:90;border-top:1px solid var(--border)}
+.barra-fixa button{flex:1;font-size:13px;padding:12px 8px}
+.barra-fixa button span{display:none}
+.painel{background:var(--bg3);border-radius:12px;border:1px solid var(--border);
+  margin-bottom:12px;overflow:hidden;display:none}
+.painel.on{display:block}
+.painel-head{padding:12px;background:var(--bg4);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.painel-head .tt{font-size:13px;font-weight:700;color:var(--purple);
+  display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.painel-head .badge{background:var(--border2);color:var(--txt2);font-size:10px;
+  padding:2px 8px;border-radius:8px;font-weight:600}
+.painel-head .acoes{display:flex;gap:6px;flex-wrap:wrap}
+.painel-head .acoes button{padding:8px 12px;font-size:12px;min-height:36px}
+.painel-corpo{padding:0}
+.painel-corpo textarea{width:100%;min-height:200px;max-height:400px;
+  background:var(--bg);border:none;color:#a8d8a8;
+  font-family:'Courier New',monospace;font-size:12px;padding:14px;
+  resize:vertical;outline:none;line-height:1.5}
+.painel-info{padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);
+  font-size:11px;color:var(--txt3);display:flex;justify-content:space-between;
+  flex-wrap:wrap;gap:6px}
+.brain-tabs{display:flex;gap:6px;padding:10px;flex-wrap:wrap;
+  background:var(--bg2);border-bottom:1px solid var(--border)}
+.brain-tab{padding:8px 12px;border-radius:8px;background:var(--bg4);
+  border:1px solid var(--border2);color:var(--txt2);font-size:12px;
+  cursor:pointer;font-weight:600;min-height:36px}
+.brain-tab.on{background:var(--purple2);color:#fff;border-color:var(--purple2)}
+.brain-lista{padding:10px;display:flex;flex-wrap:wrap;gap:6px;
+  max-height:300px;overflow-y:auto}
+.toast-wrap{position:fixed;top:calc(12px + var(--safe-top));
+  left:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none}
+.toast{padding:12px 16px;border-radius:12px;background:var(--bg4);
+  border:1px solid var(--border2);color:var(--txt);font-size:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.7);font-weight:500;
+  animation:slideDown .3s;pointer-events:auto}
+.toast.s{border-left:4px solid var(--green)}
+.toast.e{border-left:4px solid var(--red)}
+.toast.w{border-left:4px solid var(--orange)}
+.toast.i{border-left:4px solid var(--blue)}
+.toast.b{border-left:4px solid var(--purple)}
+.toast.save{border-left:4px solid var(--green);
+  background:linear-gradient(90deg,rgba(52,184,122,.15),var(--bg4))}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:99999;display:none;align-items:flex-end;justify-content:center;
+  padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;
+  padding:20px 20px calc(20px + var(--safe-bottom));
+  width:100%;max-width:500px;border:1px solid var(--border2);
+  transform:translateY(100%);transition:transform .3s}
+.modal-overlay.on .modal{transform:translateY(0)}
+.modal::before{content:'';display:block;width:40px;height:4px;
+  background:var(--border2);border-radius:4px;margin:0 auto 16px}
+.modal h3{color:var(--txt);font-size:16px;margin-bottom:12px;text-align:center}
+.modal p{color:var(--txt2);font-size:14px;text-align:center;margin-bottom:16px;white-space:pre-wrap}
+.modal input{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:14px;color:var(--txt);font-size:16px;
+  text-align:center;outline:none;margin-bottom:14px}
+.modal .btns{display:flex;gap:8px}
+.modal .btns button{flex:1;min-height:48px;font-size:15px}
+.modal .btn-ok{background:var(--purple2);color:#fff}
+.modal .btn-cancel{background:var(--bg4);color:var(--txt2)}
+.progresso{height:8px;background:var(--border2);border-radius:8px;
+  overflow:hidden;margin:12px 0;display:none}
+.progresso.on{display:block}
+.progresso .fill{height:100%;background:linear-gradient(90deg,var(--purple2),var(--purple));
+  width:0%;transition:width .3s;border-radius:8px}
+.acoes-sec{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.acoes-sec button{font-size:13px;padding:12px 8px}
+.acoes-sec button.full{grid-column:1/-1}
+.acoes-sec .b3{grid-column:1/-1}
+.inp-small{background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;
+  outline:none;width:100%}
+.inp-small:focus{border-color:var(--purple2)}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.row-2 label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;font-weight:600}
+.vazio-card{background:var(--bg3);border-radius:12px;padding:48px 20px;
+  text-align:center;color:var(--txt3);border:1px dashed var(--border2)}
+.vazio-card .big{font-size:52px;display:block;margin-bottom:12px;opacity:.5}
+.vazio-card .t{font-size:14px;line-height:1.5}
+@media(min-width:768px){
+  body{padding:20px;max-width:900px;margin:0 auto;padding-bottom:20px}
+  .header{position:relative;top:0}
+  .barra-fixa{position:relative;background:transparent;
+    border:none;padding:0;margin-bottom:12px}
+  .barra-fixa button span{display:inline}
+  .card-mus{padding:14px}
+  .card-mus .campos{display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:10px}
+  .card-mus .campo{margin-bottom:0}
+  .acoes-sec{grid-template-columns:repeat(4,1fr)}
+  .acoes-sec .b3{grid-column:auto}
+  .toast-wrap{top:20px;left:auto;right:20px;max-width:400px}
+  .modal-overlay{align-items:center}
+  .modal{border-radius:16px;transform:scale(.9);opacity:0}
+  .modal-overlay.on .modal{transform:scale(1);opacity:1}
+  .modal::before{display:none}
+}
+@media(min-width:1024px){
+  body{max-width:1200px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v11</span></h1>
+  <div class="sub">🧠 Abrevia • Remove números • Artistas turbinados • <b style="color:var(--green)">💾 Salvamento blindado</b></div>
+  <div class="stats">
+    <span>📄 <b id="stTotal">0</b></span>
+    <span>✅ <b class="ok" id="stOk">0</b></span>
+    <span>⚠️ <b class="warn" id="stCor">0</b></span>
+    <span class="save-status" id="saveStatus">💾 Pronto</span>
+  </div>
+</div>
+
+<div class="zona" id="zona">
+  <span class="ic">📂</span>
+  <div class="t1">Toque para escolher arquivos</div>
+  <div class="t2">.mp3 .opus .m4a .flac .ogg .wav</div>
+  <input type="file" id="inp" multiple accept="audio/*">
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>🗑️ Apagar sempre</label>
+    <button class="b5" data-toggle="lixoBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="lixoBox">
+    <div class="inp-row">
+      <input type="text" class="inp" id="lixoManual" placeholder="Palavra/frase pra remover...">
+    </div>
+    <div class="inp-row">
+      <button class="b6" id="btnAddLixo" style="flex:1">➕ Adicionar</button>
+      <button class="b2" id="btnAddLixoAplicar" style="flex:1">➕ Aplicar agora</button>
+    </div>
+    <div class="hint">💡 Salvo no cérebro e removido automaticamente dos próximos arquivos.</div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>🎨 Artistas e bandas</label>
+    <span class="badge" id="artContador">0</span>
+    <button class="b5" data-toggle="artBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="artBox">
+    <div class="inp-row">
+      <input type="text" class="inp" id="artBusca" placeholder="🔍 Buscar artista...">
+      <button class="b5" id="btnLimparBusca" style="min-width:48px">✕</button>
+    </div>
+    <div class="chips" id="artLista"></div>
+    <div class="inp-row" style="margin-top:10px">
+      <input type="text" class="inp" id="artNovo" placeholder="Nome do artista/banda...">
+      <button class="b6" id="btnAddArt">➕</button>
+    </div>
+    <div class="inp-row">
+      <button class="b2" id="btnAddArtAtual" style="flex:1">➕ Adicionar das músicas</button>
+    </div>
+    <div class="hint" style="margin-top:10px;margin-bottom:6px">📥 Colar lista em massa (vírgula ou linha):</div>
+    <textarea class="inp" id="artMassa" placeholder="Alceu Valença, Gusttavo Lima&#10;Zeca Pagodinho&#10;Wando; Alcione"></textarea>
+    <div class="inp-row" style="margin-top:8px">
+      <button class="b2" id="btnAddMassa" style="flex:1">➕ Adicionar todos</button>
+      <button class="b5" id="btnLimparMassa">🗑️</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
+      <div class="inp-row" style="margin-bottom:8px">
+        <label style="font-size:12px;color:var(--txt2);font-weight:600;flex:1">🔗 Aliases (mesmo artista, nomes diferentes)</label>
+      </div>
+      <div class="chips" id="aliasLista"></div>
+      <div class="inp-row" style="margin-top:8px">
+        <input type="text" class="inp" id="aliasDe" placeholder="Nome alternativo">
+        <input type="text" class="inp" id="aliasPara" placeholder="Nome oficial">
+        <button class="b6" id="btnAddAlias">➕</button>
+      </div>
+    </div>
+    <div class="inp-row" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
+      <button class="b5" id="btnResetArt" style="flex:1">↺ Padrão</button>
+      <button class="b2" id="btnExportArt" style="flex:1">📤 Exportar</button>
+      <button class="b1" id="btnImportArt" style="flex:1">📥 Importar</button>
+      <button class="b4" id="btnZerarArt" style="flex:1">🗑️ Zerar</button>
+    </div>
+    <input type="file" id="inpImportArt" accept=".json,.txt" style="display:none">
+    <div class="hint" style="margin-top:8px">💡 Se parte do nome bater com um artista conhecido, ele vira ARTISTA. <b>Salvamento automático ativo.</b></div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>✂️ Abreviações (título &gt; 60 chars)</label>
+    <button class="b5" data-toggle="abrevBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="abrevBox">
+    <div class="chips" id="abrevLista"></div>
+    <div class="inp-row" style="margin-top:8px">
+      <input type="text" class="inp" id="abrevDe" placeholder="Palavra completa">
+      <input type="text" class="inp" id="abrevPara" placeholder="Abreviação">
+      <button class="b6" id="btnAddAbrev">➕</button>
+    </div>
+    <div class="inp-row">
+      <button class="b5" id="btnResetAbrev" style="flex:1">↺ Restaurar padrão</button>
+    </div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="row-2">
+    <div>
+      <label>ID inicial</label>
+      <input type="number" id="idInicial" value="1" min="1" class="inp-small">
+    </div>
+    <div>
+      <label>Gênero</label>
+      <input type="text" id="generoGeral" value="Music" class="inp-small">
+    </div>
+  </div>
+  <button class="b1" id="btnGenero" style="width:100%">Aplicar gênero em todas</button>
+</div>
+
+<div class="acoes-sec">
+  <button class="b3" id="btnLimpar">🧹 Limpar nomes</button>
+  <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
+  <button class="b5" id="btnReset">↺ Resetar</button>
+  <button class="b4" id="btnClear">🗑️ Limpar tudo</button>
+  <button class="b5" id="btnDemo" style="grid-column:1/-1">🎯 Testar exemplo</button>
+  <button class="b6" id="btnBrain" style="grid-column:1/-1">🧠 Ver Aprendizados</button>
+</div>
+
+<div class="lista" id="listaWrap">
+  <div class="vazio-card" id="vazioCard">
+    <span class="big">🎶</span>
+    <div class="t">Nenhuma música carregada ainda.<br>Toque na área acima para escolher.</div>
+  </div>
+  <div id="corpo"></div>
+</div>
+
+<div class="barra-fixa">
+  <button class="b2" id="btnZip" disabled>⬇️ <span>Baixar</span> ZIP</button>
+  <button class="b5" id="btnJson" disabled>⬇️ <span>Baixar</span> JSON</button>
+  <button class="b1" id="btnToggleJson">📋 JSON</button>
+</div>
+
+<div class="progresso" id="prog"><div class="fill" id="progFill"></div></div>
+
+<div class="painel" id="jsonPainel">
+  <div class="painel-head">
+    <div class="tt">📋 JSON <span class="badge" id="jsonBadge">0</span></div>
+    <div class="acoes">
+      <button class="b2" id="btnCopyJson2">📋</button>
+      <button class="b5" id="btnDownloadJson2">⬇️</button>
+      <button class="b5" id="btnMinificar">🔀</button>
+    </div>
+  </div>
+  <div class="painel-corpo">
+    <textarea id="jsonTexto" readonly placeholder="Arraste músicas para gerar o JSON..."></textarea>
+  </div>
+  <div class="painel-info">
+    <span id="jsonInfo">Aguardando músicas...</span>
+    <span id="jsonTamanho">0 chars</span>
+  </div>
+</div>
+
+<div class="painel" id="brainPainel">
+  <div class="painel-head">
+    <div class="tt">🧠 Cérebro <span class="badge" id="brainBadge">0</span></div>
+    <div class="acoes">
+      <button class="b2" id="btnExportBrain">📤</button>
+      <button class="b1" id="btnImportBrain">📥</button>
+      <button class="b4" id="btnResetBrain">🗑️</button>
+    </div>
+  </div>
+  <div class="brain-tabs">
+    <div class="brain-tab on" data-tab="lixo">🗑️ Lixo (<span id="cntLixo">0</span>)</div>
+    <div class="brain-tab" data-tab="artistas">🎨 Artistas (<span id="cntArt">0</span>)</div>
+    <div class="brain-tab" data-tab="titulos">🎵 Títulos (<span id="cntTit">0</span>)</div>
+  </div>
+  <div id="brainConteudo"></div>
+</div>
+
+<input type="file" id="inpBrain" accept=".json" style="display:none">
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Título</h3>
+    <p id="modalMsg">Mensagem</p>
+    <input type="text" id="modalInput" style="display:none">
+    <div class="btns">
+      <button class="btn-cancel" id="modalCancel">Cancelar</button>
+      <button class="btn-ok" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 'use strict';
 
-/* ============================================================
-   1. CONSTANTES
-   ============================================================ */
 var LIMITE_NOME = 60;
 
 var ABREV_PADRAO = {
@@ -161,9 +577,6 @@ var ABREV_KEY = 'editor_musicas_abrev_v9';
 var ART_KEY   = 'editor_musicas_artistas_v9';
 var ALIAS_KEY = 'editor_musicas_aliases_v9';
 
-/* ============================================================
-   2. ESTADO GLOBAL
-   ============================================================ */
 var musicas = [];
 var idc = 0;
 var jsonMinificado = false;
@@ -182,9 +595,6 @@ var _cacheRegexArt = null;
 var _cacheHashArt = '';
 var _dirtyArtistas = false;
 
-/* ============================================================
-   3. UTILITÁRIOS BÁSICOS (funções hoisted — sem TDZ)
-   ============================================================ */
 function $(id){ return document.getElementById(id); }
 
 function comExt(n){
@@ -221,9 +631,6 @@ function debounce(fn, ms){
   };
 }
 
-/* ============================================================
-   4. TOAST + MODAL (hoisted — usados por tudo)
-   ============================================================ */
 function toast(msg, tipo){
   var wrap = $('toastWrap');
   if(!wrap) return;
@@ -269,9 +676,6 @@ function modalConfirm(msg, title){
   });
 }
 
-/* ============================================================
-   5. STATUS DE SALVAMENTO
-   ============================================================ */
 function setSaveStatus(status){
   var el = $('saveStatus');
   if(!el) return;
@@ -289,9 +693,6 @@ function setSaveStatus(status){
   }
 }
 
-/* ============================================================
-   6. PERSISTÊNCIA
-   ============================================================ */
 function salvarArtistas(){
   if(!_dirtyArtistas && localStorage.getItem(ART_KEY)) return true;
   setSaveStatus('saving');
@@ -347,9 +748,6 @@ function salvarAbrev(){
   }catch(e){ console.warn('Erro ao salvar abreviações:', e); }
 }
 
-/* ============================================================
-   7. CARREGAMENTO INICIAL
-   ============================================================ */
 function carregarBrain(){
   try{
     var raw = localStorage.getItem(BRAIN_KEY);
@@ -427,9 +825,6 @@ function atualizarBrainStats(){
   if($('cntTit'))  $('cntTit').textContent  = Object.keys(brain.titulos).length;
 }
 
-/* ============================================================
-   8. CACHE DE REGEX (lixo + artistas)
-   ============================================================ */
 function getRegexLixo(){
   var todas = LIXO_BASE.concat(Object.keys(brain.lixo));
   var hash = todas.slice().sort().join('|');
@@ -476,9 +871,6 @@ function getRegexArtistas(){
   return regexes;
 }
 
-/* ============================================================
-   9. LIMPEZA
-   ============================================================ */
 function removerNumeros(s){
   if(!s) return '';
   return String(s).replace(/\b\d+\b/g,' ').replace(/\d+/g,' ').replace(/\s+/g,' ').trim();
@@ -528,9 +920,6 @@ function tagPareceCanal(txt){
   return /\b(sem filtro|oficial|canal|records|studio|estúdio|estudio|tv|web|play|top|best|hits|coletânea|coletanea|various|compilation|playlist|prod)\b/i.test(txt);
 }
 
-/* ============================================================
-   10. ABREVIAÇÃO
-   ============================================================ */
 function abreviarPalavra(p){
   if(!p) return p;
   var chave = norm(p);
@@ -573,9 +962,6 @@ function capitalizar(s){
   }).join(' ');
 }
 
-/* ============================================================
-   11. ARTISTAS (normalização + busca)
-   ============================================================ */
 function normalizarComAlias(nome){
   if(!nome) return nome;
   var k = norm(nome);
@@ -614,9 +1000,6 @@ function encontrarArtistaEm(txt){
   return null;
 }
 
-/* ============================================================
-   12. PARSER DE NOME
-   ============================================================ */
 function removerArtistaDoTitulo(title, artist){
   if(!title || !artist) return title;
   var re = new RegExp('^' + escapeRegex(artist) + '\\s*[-–—:/|]\\s*','i');
@@ -633,7 +1016,6 @@ function parseTracoFrente(nomeBase){
 function parseNome(nome){
   var base = String(nome).replace(/\.[^.]+$/,'');
 
-  // 1) Regra do traço na frente: -Artista-Titulo
   var forca = parseTracoFrente(base);
   if(forca){
     var a = limpar(forca.artista);
@@ -652,7 +1034,6 @@ function parseNome(nome){
     return { a: capitalizar(a), t: capitalizar(t) };
   }
 
-  // 2) Parser normal
   var s = base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
   s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
   s = s.replace(/\s+/g,' ').trim();
@@ -661,7 +1042,6 @@ function parseNome(nome){
   s = s.replace(/\b\d+\s*kbps\b/gi,' ');
   s = s.replace(/\s+/g,' ').trim();
 
-  // Separa feat/part/com
   var featMatch = s.match(FEAT_RE);
   var featTrecho = '';
   if(featMatch){
@@ -712,7 +1092,6 @@ function parseNome(nome){
   }
   if(!tituloDetectado) tituloDetectado = limpar(s);
 
-  // Evita artist === title (fallback circular)
   if(artistaDetectado && tituloDetectado && norm(artistaDetectado) === norm(tituloDetectado)){
     artistaDetectado = '';
   }
@@ -721,9 +1100,6 @@ function parseNome(nome){
   return { a: capitalizar(artistaDetectado), t: capitalizar(tituloDetectado) };
 }
 
-/* ============================================================
-   13. LEITURA DE TAGS (MP3 ID3v2 + OPUS/OGG Vorbis binário)
-   ============================================================ */
 function lerTags(file, cb){
   if(!file){ cb(null); return; }
   var ext = comExt(file.name).toLowerCase();
@@ -735,7 +1111,6 @@ function lerTags(file, cb){
       var v = new DataView(buf);
       var tags = { artist:'', title:'', genre:'' };
 
-      // MP3 ID3v2
       if(ext === '.mp3' && v.byteLength >= 10 &&
          v.getUint8(0)===0x49 && v.getUint8(1)===0x44 && v.getUint8(2)===0x33){
         var tagSize = ((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
@@ -767,11 +1142,9 @@ function lerTags(file, cb){
         }
       }
 
-      // OPUS/OGG Vorbis comment (binário)
       if((ext === '.opus' || ext === '.ogg') && v.byteLength > 16){
         var bytes2 = new Uint8Array(buf);
         var idx = -1;
-        // "OpusTags"
         var magic = [0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
         for(var i = 0; i + 8 <= bytes2.length; i++){
           if(bytes2[i]===magic[0] && bytes2[i+1]===magic[1] && bytes2[i+2]===magic[2] && bytes2[i+3]===magic[3] &&
@@ -779,7 +1152,6 @@ function lerTags(file, cb){
             idx = i + 8; break;
           }
         }
-        // "\x03vorbis"
         if(idx === -1){
           var mv = [0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
           for(var i2 = 0; i2 + 7 <= bytes2.length; i2++){
@@ -821,9 +1193,6 @@ function lerTags(file, cb){
   reader.readAsArrayBuffer(file.slice(0, 2 * 1024 * 1024));
 }
 
-/* ============================================================
-   14. ESCRITA DE TAGS (preserva capa/álbum)
-   ============================================================ */
 function escreverTags(buffer, tags){
   if(typeof ID3Writer === 'undefined') return buffer;
   try{
@@ -838,13 +1207,10 @@ function escreverTags(buffer, tags){
         });
       }
     }catch(e){}
-
     try{ w.removeTag(); }catch(e){}
-
     if(tags.title)  w.setFrame('TIT2', tags.title);
     if(tags.artist) w.setFrame('TPE1', tags.artist);
     if(tags.genre)  w.setFrame('TCON', tags.genre);
-
     Object.keys(preservar).forEach(function(fid){
       try{
         var f = preservar[fid];
@@ -855,7 +1221,6 @@ function escreverTags(buffer, tags){
         }
       }catch(e){}
     });
-
     return w.addTag();
   }catch(err){
     console.error('Erro ID3:', err);
@@ -863,9 +1228,6 @@ function escreverTags(buffer, tags){
   }
 }
 
-/* ============================================================
-   15. SANITIZE + GERAR NOME (Artista_Titulo.ext)
-   ============================================================ */
 function sanitize(s){
   if(!s) return '';
   var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -910,9 +1272,6 @@ function gerarNome(m, ext){
   return nomeCompleto + ext;
 }
 
-/* ============================================================
-   16. APRENDIZADO
-   ============================================================ */
 function aprenderLixo(textoOriginal, textoLimpo){
   if(!textoOriginal) return;
   var orig = String(textoOriginal).trim();
@@ -962,9 +1321,6 @@ function aprenderTitulo(nome){
   }
 }
 
-/* ============================================================
-   17. ADD ARQUIVOS
-   ============================================================ */
 function addArquivos(fileList){
   var arr = [];
   for(var i = 0; i < fileList.length; i++){
@@ -1044,9 +1400,6 @@ function addArquivos(fileList){
   });
 }
 
-/* ============================================================
-   18. RENDER
-   ============================================================ */
 function render(){
   var corpo = $('corpo');
   var vazio = $('vazioCard');
@@ -1134,9 +1487,6 @@ function stats(){
   atualizarBrainStats();
 }
 
-/* ============================================================
-   19. JSON
-   ============================================================ */
 function _atualizarJsonReal(){
   var txt = $('jsonTexto');
   var badge = $('jsonBadge');
@@ -1192,9 +1542,6 @@ function _atualizarJsonReal(){
 function atualizarJson(){ _atualizarJsonReal(); }
 var atualizarJsonDebounced = debounce(_atualizarJsonReal, 300);
 
-/* ============================================================
-   20. AÇÕES DA LISTA
-   ============================================================ */
 function limparTodos(){
   if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
   var n = 0;
@@ -1310,9 +1657,6 @@ function adicionarLixoManual(aplicarAgora){
   if($('brainPainel') && $('brainPainel').classList.contains('on')) renderBrain();
 }
 
-/* ============================================================
-   21. RENDER ARTISTAS
-   ============================================================ */
 function renderArtistas(){
   var lista = $('artLista');
   if(!lista) return;
@@ -1495,9 +1839,6 @@ function processarImportArt(file){
   reader.readAsText(file);
 }
 
-/* ============================================================
-   22. ALIASES
-   ============================================================ */
 function renderAliases(){
   var lista = $('aliasLista');
   if(!lista) return;
@@ -1524,9 +1865,6 @@ function adicionarAlias(){
   if(musicas.length > 0) reanalisar();
 }
 
-/* ============================================================
-   23. ABREVIAÇÕES
-   ============================================================ */
 function renderAbrev(){
   var lista = $('abrevLista');
   if(!lista) return;
@@ -1568,9 +1906,6 @@ function resetarAbrev(){
   });
 }
 
-/* ============================================================
-   24. ZIP
-   ============================================================ */
 function baixarZip(){
   if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
   if(typeof JSZip === 'undefined'){ toast('JSZip não carregou.', 'e'); return; }
@@ -1658,9 +1993,6 @@ function toggleMinificar(){
   toast(jsonMinificado ? '📦 JSON minificado' : '📄 JSON expandido', 'i');
 }
 
-/* ============================================================
-   25. CÉREBRO (painel)
-   ============================================================ */
 function renderBrain(){
   var cont = $('brainConteudo');
   if(!cont) return;
@@ -1706,9 +2038,6 @@ function resetarBrain(){
   });
 }
 
-/* ============================================================
-   26. DEMO
-   ============================================================ */
 function demo(){
   var exemplos = [
     'Meu Amor Voltou Querem Nos Separar 5 da Manha - Ze Cantor.mp3',
@@ -1743,220 +2072,224 @@ function demo(){
   toast('🎯 Exemplo carregado!', 's');
 }
 
-/* ============================================================
-   27. INIT
-   ============================================================ */
 function init(){
-  carregarBrain();
-  carregarAliases();
-  atualizarBrainStats();
-  renderAbrev();
-  renderArtistas();
-  renderAliases();
-
-  var zona = $('zona');
-  var inp = $('inp');
-  zona.addEventListener('click', function(e){ if(e.target !== inp) inp.click(); });
-  zona.addEventListener('dragover', function(e){ e.preventDefault(); zona.classList.add('drag'); });
-  zona.addEventListener('dragleave', function(e){ e.preventDefault(); zona.classList.remove('drag'); });
-  zona.addEventListener('drop', function(e){
-    e.preventDefault(); zona.classList.remove('drag');
-    if(e.dataTransfer && e.dataTransfer.files.length) addArquivos(e.dataTransfer.files);
-  });
-  inp.addEventListener('change', function(e){
-    if(e.target.files && e.target.files.length) addArquivos(e.target.files);
-    inp.value = '';
-  });
-  document.addEventListener('dragover', function(e){ e.preventDefault(); });
-  document.addEventListener('drop', function(e){ e.preventDefault(); });
-
-  document.querySelectorAll('[data-toggle]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var box = $(btn.dataset.toggle);
-      if(!box) return;
-      box.classList.toggle('on');
-      btn.textContent = box.classList.contains('on') ? '🙈' : '👁️';
-    });
-  });
-
-  $('btnAddLixo').addEventListener('click', function(){ adicionarLixoManual(false); });
-  $('btnAddLixoAplicar').addEventListener('click', function(){ adicionarLixoManual(true); });
-  $('lixoManual').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarLixoManual(false); });
-
-  $('btnAddAbrev').addEventListener('click', adicionarAbrev);
-  $('btnResetAbrev').addEventListener('click', resetarAbrev);
-  $('abrevPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAbrev(); });
-
-  $('btnAddArt').addEventListener('click', adicionarArtistaConhecido);
-  $('btnAddArtAtual').addEventListener('click', adicionarArtistasDasMusicas);
-  $('btnResetArt').addEventListener('click', resetarArtistas);
-  $('btnZerarArt').addEventListener('click', zerarArtistas);
-  $('btnExportArt').addEventListener('click', exportarArtistas);
-  $('btnImportArt').addEventListener('click', importarArtistas);
-  $('btnAddMassa').addEventListener('click', adicionarMassa);
-  $('btnLimparMassa').addEventListener('click', function(){ $('artMassa').value = ''; });
-  $('artNovo').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarArtistaConhecido(); });
-  $('artBusca').addEventListener('input', function(e){
-    artBuscaAtual = e.target.value;
+  try{
+    carregarBrain();
+    carregarAliases();
+    atualizarBrainStats();
+    renderAbrev();
     renderArtistas();
-  });
-  $('btnLimparBusca').addEventListener('click', function(){
-    $('artBusca').value = '';
-    artBuscaAtual = '';
-    renderArtistas();
-  });
-  $('btnAddAlias').addEventListener('click', adicionarAlias);
-  $('aliasPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAlias(); });
-  $('inpImportArt').addEventListener('change', function(e){
-    var f = e.target.files[0];
-    if(f) processarImportArt(f);
-    e.target.value = '';
-  });
+    renderAliases();
 
-  document.addEventListener('click', function(e){
-    var btn = e.target.closest('.chip button');
-    if(!btn) return;
-    if(btn.dataset.tab !== undefined){
-      var k = btn.dataset.k;
-      delete brain[btn.dataset.tab][k];
-      if(btn.dataset.tab === 'lixo') _cacheHashLixo = '';
-      salvarBrain();
-      renderBrain();
-      toast('Removido', 'i');
-    } else if(btn.closest('#artLista')){
-      var k2 = btn.dataset.k;
-      var nome = artistasConhecidos[k2];
-      delete artistasConhecidos[k2];
-      _cacheHashArt = '';
-      _dirtyArtistas = true;
-      if(salvarArtistas()){ renderArtistas(); toast('🗑️ Removido: ' + nome, 'i'); }
-    } else if(btn.closest('#aliasLista')){
-      delete aliases[btn.dataset.k];
-      salvarAliases();
-      renderAliases();
-      toast('Alias removido', 'i');
-    } else if(btn.closest('#abrevLista')){
-      delete abrev[btn.dataset.k];
-      salvarAbrev();
-      toast('Removido: ' + btn.dataset.k, 'i');
-      if(musicas.length > 0){
-        musicas.forEach(function(m){ m.newName = gerarNome(m, comExt(m.originalName)); });
-        render();
-      }
-    }
-  });
-
-  $('corpo').addEventListener('input', onInputEdit);
-  $('corpo').addEventListener('blur', onInputBlur, true);
-
-  $('btnLimpar').addEventListener('click', limparTodos);
-  $('btnReanalisar').addEventListener('click', reanalisar);
-  $('btnReset').addEventListener('click', resetarCampos);
-  $('btnClear').addEventListener('click', limparTudo);
-  $('btnDemo').addEventListener('click', demo);
-  $('btnZip').addEventListener('click', baixarZip);
-  $('btnJson').addEventListener('click', baixarJson);
-  $('btnGenero').addEventListener('click', aplicarGenero);
-  $('btnCopyJson2').addEventListener('click', copiarJson);
-  $('btnDownloadJson2').addEventListener('click', baixarJson);
-  $('btnMinificar').addEventListener('click', toggleMinificar);
-
-  $('btnToggleJson').addEventListener('click', function(){
-    var p = $('jsonPainel');
-    p.classList.toggle('on');
-    $('btnToggleJson').textContent = p.classList.contains('on') ? '📋 Fechar' : '📋 JSON';
-    if(p.classList.contains('on')) p.scrollIntoView({ behavior:'smooth' });
-  });
-
-  $('btnBrain').addEventListener('click', function(){
-    var p = $('brainPainel');
-    p.classList.toggle('on');
-    if(p.classList.contains('on')){ renderBrain(); p.scrollIntoView({ behavior:'smooth' }); }
-  });
-
-  document.querySelectorAll('.brain-tab').forEach(function(tab){
-    tab.addEventListener('click', function(){
-      document.querySelectorAll('.brain-tab').forEach(function(t){ t.classList.remove('on'); });
-      tab.classList.add('on');
-      brainTabAtual = tab.dataset.tab;
-      renderBrain();
+    var zona = $('zona');
+    var inp = $('inp');
+    zona.addEventListener('click', function(e){ if(e.target !== inp) inp.click(); });
+    zona.addEventListener('dragover', function(e){ e.preventDefault(); zona.classList.add('drag'); });
+    zona.addEventListener('dragleave', function(e){ e.preventDefault(); zona.classList.remove('drag'); });
+    zona.addEventListener('drop', function(e){
+      e.preventDefault(); zona.classList.remove('drag');
+      if(e.dataTransfer && e.dataTransfer.files.length) addArquivos(e.dataTransfer.files);
     });
-  });
+    inp.addEventListener('change', function(e){
+      if(e.target.files && e.target.files.length) addArquivos(e.target.files);
+      inp.value = '';
+    });
+    document.addEventListener('dragover', function(e){ e.preventDefault(); });
+    document.addEventListener('drop', function(e){ e.preventDefault(); });
 
-  $('btnExportBrain').addEventListener('click', exportarBrain);
-  $('btnImportBrain').addEventListener('click', importarBrain);
-  $('btnResetBrain').addEventListener('click', resetarBrain);
+    document.querySelectorAll('[data-toggle]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var box = $(btn.dataset.toggle);
+        if(!box) return;
+        box.classList.toggle('on');
+        btn.textContent = box.classList.contains('on') ? '🙈' : '👁️';
+      });
+    });
 
-  $('inpBrain').addEventListener('change', function(e){
-    var f = e.target.files[0];
-    if(!f) return;
-    var r = new FileReader();
-    r.onload = function(ev){
-      try{
-        var obj = JSON.parse(ev.target.result);
-        if(obj.brain){
-          brain.lixo = obj.brain.lixo || {};
-          brain.artistas = obj.brain.artistas || {};
-          brain.titulos = obj.brain.titulos || {};
-        }
-        if(obj.abrev) abrev = obj.abrev;
-        if(obj.aliases) aliases = obj.aliases;
-        if(obj.artistas && Array.isArray(obj.artistas)){
-          artistasConhecidos = {};
-          obj.artistas.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
-        }
-        _cacheHashLixo = '';
+    $('btnAddLixo').addEventListener('click', function(){ adicionarLixoManual(false); });
+    $('btnAddLixoAplicar').addEventListener('click', function(){ adicionarLixoManual(true); });
+    $('lixoManual').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarLixoManual(false); });
+
+    $('btnAddAbrev').addEventListener('click', adicionarAbrev);
+    $('btnResetAbrev').addEventListener('click', resetarAbrev);
+    $('abrevPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAbrev(); });
+
+    $('btnAddArt').addEventListener('click', adicionarArtistaConhecido);
+    $('btnAddArtAtual').addEventListener('click', adicionarArtistasDasMusicas);
+    $('btnResetArt').addEventListener('click', resetarArtistas);
+    $('btnZerarArt').addEventListener('click', zerarArtistas);
+    $('btnExportArt').addEventListener('click', exportarArtistas);
+    $('btnImportArt').addEventListener('click', importarArtistas);
+    $('btnAddMassa').addEventListener('click', adicionarMassa);
+    $('btnLimparMassa').addEventListener('click', function(){ $('artMassa').value = ''; });
+    $('artNovo').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarArtistaConhecido(); });
+    $('artBusca').addEventListener('input', function(e){
+      artBuscaAtual = e.target.value;
+      renderArtistas();
+    });
+    $('btnLimparBusca').addEventListener('click', function(){
+      $('artBusca').value = '';
+      artBuscaAtual = '';
+      renderArtistas();
+    });
+    $('btnAddAlias').addEventListener('click', adicionarAlias);
+    $('aliasPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAlias(); });
+    $('inpImportArt').addEventListener('change', function(e){
+      var f = e.target.files[0];
+      if(f) processarImportArt(f);
+      e.target.value = '';
+    });
+
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest('.chip button');
+      if(!btn) return;
+      if(btn.dataset.tab !== undefined){
+        var k = btn.dataset.k;
+        delete brain[btn.dataset.tab][k];
+        if(btn.dataset.tab === 'lixo') _cacheHashLixo = '';
+        salvarBrain();
+        renderBrain();
+        toast('Removido', 'i');
+      } else if(btn.closest('#artLista')){
+        var k2 = btn.dataset.k;
+        var nome = artistasConhecidos[k2];
+        delete artistasConhecidos[k2];
         _cacheHashArt = '';
         _dirtyArtistas = true;
-        salvarBrain();
-        salvarAbrev();
+        if(salvarArtistas()){ renderArtistas(); toast('🗑️ Removido: ' + nome, 'i'); }
+      } else if(btn.closest('#aliasLista')){
+        delete aliases[btn.dataset.k];
         salvarAliases();
-        salvarArtistas();
-        renderBrain();
         renderAliases();
-        renderArtistas();
-        toast('🧠 Cérebro importado!', 'save');
-      }catch(err){ toast('Arquivo inválido.', 'e'); }
-    };
-    r.readAsText(f);
-    e.target.value = '';
-  });
+        toast('Alias removido', 'i');
+      } else if(btn.closest('#abrevLista')){
+        delete abrev[btn.dataset.k];
+        salvarAbrev();
+        toast('Removido: ' + btn.dataset.k, 'i');
+        if(musicas.length > 0){
+          musicas.forEach(function(m){ m.newName = gerarNome(m, comExt(m.originalName)); });
+          render();
+        }
+      }
+    });
 
-  $('idInicial').addEventListener('input', atualizarJsonDebounced);
-  $('generoGeral').addEventListener('input', atualizarJsonDebounced);
+    $('corpo').addEventListener('input', onInputEdit);
+    $('corpo').addEventListener('blur', onInputBlur, true);
 
-  window.addEventListener('beforeunload', function(){
-    try{
-      if(Object.keys(artistasConhecidos).length > 0){ _dirtyArtistas = true; salvarArtistas(); }
-      if(Object.keys(aliases).length > 0) salvarAliases();
-      _salvarBrainReal();
-    }catch(e){}
-  });
+    $('btnLimpar').addEventListener('click', limparTodos);
+    $('btnReanalisar').addEventListener('click', reanalisar);
+    $('btnReset').addEventListener('click', resetarCampos);
+    $('btnClear').addEventListener('click', limparTudo);
+    $('btnDemo').addEventListener('click', demo);
+    $('btnZip').addEventListener('click', baixarZip);
+    $('btnJson').addEventListener('click', baixarJson);
+    $('btnGenero').addEventListener('click', aplicarGenero);
+    $('btnCopyJson2').addEventListener('click', copiarJson);
+    $('btnDownloadJson2').addEventListener('click', baixarJson);
+    $('btnMinificar').addEventListener('click', toggleMinificar);
 
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'hidden'){
+    $('btnToggleJson').addEventListener('click', function(){
+      var p = $('jsonPainel');
+      p.classList.toggle('on');
+      $('btnToggleJson').textContent = p.classList.contains('on') ? '📋 Fechar' : '📋 JSON';
+      if(p.classList.contains('on')) p.scrollIntoView({ behavior:'smooth' });
+    });
+
+    $('btnBrain').addEventListener('click', function(){
+      var p = $('brainPainel');
+      p.classList.toggle('on');
+      if(p.classList.contains('on')){ renderBrain(); p.scrollIntoView({ behavior:'smooth' }); }
+    });
+
+    document.querySelectorAll('.brain-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        document.querySelectorAll('.brain-tab').forEach(function(t){ t.classList.remove('on'); });
+        tab.classList.add('on');
+        brainTabAtual = tab.dataset.tab;
+        renderBrain();
+      });
+    });
+
+    $('btnExportBrain').addEventListener('click', exportarBrain);
+    $('btnImportBrain').addEventListener('click', importarBrain);
+    $('btnResetBrain').addEventListener('click', resetarBrain);
+
+    $('inpBrain').addEventListener('change', function(e){
+      var f = e.target.files[0];
+      if(!f) return;
+      var r = new FileReader();
+      r.onload = function(ev){
+        try{
+          var obj = JSON.parse(ev.target.result);
+          if(obj.brain){
+            brain.lixo = obj.brain.lixo || {};
+            brain.artistas = obj.brain.artistas || {};
+            brain.titulos = obj.brain.titulos || {};
+          }
+          if(obj.abrev) abrev = obj.abrev;
+          if(obj.aliases) aliases = obj.aliases;
+          if(obj.artistas && Array.isArray(obj.artistas)){
+            artistasConhecidos = {};
+            obj.artistas.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
+          }
+          _cacheHashLixo = '';
+          _cacheHashArt = '';
+          _dirtyArtistas = true;
+          salvarBrain();
+          salvarAbrev();
+          salvarAliases();
+          salvarArtistas();
+          renderBrain();
+          renderAliases();
+          renderArtistas();
+          toast('🧠 Cérebro importado!', 'save');
+        }catch(err){ toast('Arquivo inválido.', 'e'); }
+      };
+      r.readAsText(f);
+      e.target.value = '';
+    });
+
+    $('idInicial').addEventListener('input', atualizarJsonDebounced);
+    $('generoGeral').addEventListener('input', atualizarJsonDebounced);
+
+    window.addEventListener('beforeunload', function(){
       try{
-        _dirtyArtistas = true;
-        salvarArtistas(); salvarAliases(); _salvarBrainReal();
+        if(Object.keys(artistasConhecidos).length > 0){ _dirtyArtistas = true; salvarArtistas(); }
+        if(Object.keys(aliases).length > 0) salvarAliases();
+        _salvarBrainReal();
       }catch(e){}
-    }
-  });
+    });
 
-  setInterval(function(){
-    try{ if(_dirtyArtistas && Object.keys(artistasConhecidos).length > 0) salvarArtistas(); }catch(e){}
-  }, 60000);
+    document.addEventListener('visibilitychange', function(){
+      if(document.visibilityState === 'hidden'){
+        try{
+          _dirtyArtistas = true;
+          salvarArtistas(); salvarAliases(); _salvarBrainReal();
+        }catch(e){}
+      }
+    });
 
-  setTimeout(function(){
-    var ok1 = typeof JSZip !== 'undefined';
-    var ok2 = typeof ID3Writer !== 'undefined';
-    if(!ok1) toast('⚠️ JSZip não carregou', 'w');
-    if(!ok2) toast('⚠️ ID3Writer não carregou', 'w');
-  }, 500);
+    setInterval(function(){
+      try{ if(_dirtyArtistas && Object.keys(artistasConhecidos).length > 0) salvarArtistas(); }catch(e){}
+    }, 60000);
 
-  console.log('🎵 Editor v11 iniciado | ' + Object.keys(artistasConhecidos).length + ' artistas');
-  toast('💾 Salvamento blindado ativo!', 'save');
+    setTimeout(function(){
+      var ok1 = typeof JSZip !== 'undefined';
+      var ok2 = typeof ID3Writer !== 'undefined';
+      if(!ok1) toast('⚠️ JSZip não carregou', 'w');
+      if(!ok2) toast('⚠️ ID3Writer não carregou', 'w');
+    }, 500);
+
+    console.log('🎵 Editor v11 iniciado | ' + Object.keys(artistasConhecidos).length + ' artistas');
+    toast('💾 Salvamento blindado ativo!', 'save');
+  }catch(e){
+    console.error('ERRO NO INIT:', e);
+    alert('Erro ao iniciar: ' + e.message + '\n\n' + (e.stack || ''));
+  }
 }
 
 init();
 })();
 </script>
+</body>
+</html>
