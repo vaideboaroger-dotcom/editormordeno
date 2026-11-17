@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0b12">
-<title>🎵 Editor de Músicas v13</title>
+<title>🎵 Editor de Músicas v14</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -24,8 +23,7 @@
 html,body{height:100%;background:var(--bg);color:var(--txt);
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
   -webkit-font-smoothing:antialiased;overscroll-behavior:none}
-body{padding:calc(8px + var(--safe-top)) 12px calc(90px + var(--safe-bottom));
-  overflow-x:hidden}
+body{padding:calc(8px + var(--safe-top)) 12px calc(90px + var(--safe-bottom));overflow-x:hidden}
 input,textarea,button,select{font-family:inherit;font-size:16px}
 .header{position:sticky;top:calc(-1 * var(--safe-top));z-index:100;
   background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 90%,transparent 100%);
@@ -33,8 +31,7 @@ input,textarea,button,select{font-family:inherit;font-size:16px}
 .header h1{font-size:20px;color:var(--purple);margin-bottom:2px;display:flex;align-items:center;gap:8px}
 .header .sub{font-size:12px;color:var(--txt3);margin-bottom:10px}
 .stats{background:var(--bg2);padding:10px 12px;border-radius:var(--radius);
-  font-size:13px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid var(--border);
-  align-items:center}
+  font-size:13px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid var(--border);align-items:center}
 .stats b{color:#fff}
 .stats .ok{color:var(--green)}
 .stats .warn{color:var(--orange)}
@@ -160,22 +157,49 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   background:linear-gradient(90deg,rgba(52,184,122,.15),var(--bg4))}
 @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);
-  z-index:99999;display:none;align-items:flex-end;justify-content:center;
-  padding:20px}
+  z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:20px}
 .modal-overlay.on{display:flex}
 .modal{background:var(--bg2);border-radius:20px 20px 0 0;
   padding:20px 20px calc(20px + var(--safe-bottom));
-  width:100%;max-width:500px;border:1px solid var(--border2);
-  transform:translateY(100%);transition:transform .3s}
+  width:100%;max-width:540px;border:1px solid var(--border2);
+  transform:translateY(100%);transition:transform .3s;max-height:90vh;overflow-y:auto}
 .modal-overlay.on .modal{transform:translateY(0)}
 .modal::before{content:'';display:block;width:40px;height:4px;
   background:var(--border2);border-radius:4px;margin:0 auto 16px}
-.modal h3{color:var(--txt);font-size:16px;margin-bottom:12px;text-align:center}
+.modal h3{color:var(--txt);font-size:17px;margin-bottom:14px;text-align:center}
 .modal p{color:var(--txt2);font-size:14px;text-align:center;margin-bottom:16px;white-space:pre-wrap}
-.modal .btns{display:flex;gap:8px}
+.modal .btns{display:flex;gap:8px;margin-top:16px}
 .modal .btns button{flex:1;min-height:48px;font-size:15px}
 .modal .btn-ok{background:var(--purple2);color:#fff}
 .modal .btn-cancel{background:var(--bg4);color:var(--txt2)}
+.modal label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.modal .campo{margin-bottom:12px}
+.modal select{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:12px 14px;color:var(--txt);font-size:15px;outline:none}
+.modal select:focus{border-color:var(--purple2)}
+.preview{background:var(--bg);border:1px dashed var(--border2);border-radius:10px;
+  padding:10px 12px;font-family:'Courier New',monospace;font-size:12px;
+  color:#a8d8a8;line-height:1.6;margin-bottom:12px;word-break:break-all;min-height:60px}
+.preview .antes{color:#e05a5a}
+.preview .depois{color:#34b87a;margin-top:4px}
+.preview .seta{color:#6a6a8e;margin:4px 0}
+.regras-lista{margin-top:16px;padding-top:16px;border-top:1px dashed var(--border2)}
+.regras-lista .tt{font-size:11px;color:var(--txt3);text-transform:uppercase;
+  font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.regra-item{display:flex;align-items:center;gap:8px;padding:8px 10px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:8px;
+  margin-bottom:6px;font-size:13px}
+.regra-item .tipo{font-size:10px;padding:2px 6px;border-radius:6px;
+  background:var(--border2);color:var(--txt2);font-weight:700;flex-shrink:0}
+.regra-item .tipo.suf{background:rgba(96,165,250,.2);color:var(--blue)}
+.regra-item .tipo.pre{background:rgba(245,158,11,.2);color:var(--orange)}
+.regra-item .tipo.sub{background:rgba(192,132,252,.2);color:var(--purple)}
+.regra-item .tipo.rem{background:rgba(224,90,90,.2);color:var(--red)}
+.regra-item .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.regra-item .txt b{color:var(--cyan)}
+.regra-item button{background:transparent;color:var(--red);padding:4px;
+  min-height:auto;font-size:16px;line-height:1}
 .progresso{height:8px;background:var(--border2);border-radius:8px;
   overflow:hidden;margin:12px 0;display:none}
 .progresso.on{display:block}
@@ -188,8 +212,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .row-2 label{display:block;font-size:11px;color:var(--txt3);
   margin-bottom:4px;text-transform:uppercase;font-weight:600}
 .inp-small{background:var(--bg3);border:1px solid var(--border2);
-  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;
-  outline:none;width:100%}
+  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none;width:100%}
 .inp-small:focus{border-color:var(--purple2)}
 .vazio-card{background:var(--bg3);border-radius:var(--radius);padding:48px 20px;
   text-align:center;color:var(--txt3);border:1px dashed var(--border2)}
@@ -198,8 +221,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 @media(min-width:768px){
   body{padding:20px;max-width:900px;margin:0 auto;padding-bottom:20px}
   .header{position:relative;top:0}
-  .barra-fixa{position:relative;background:transparent;
-    border:none;padding:0;margin-bottom:12px}
+  .barra-fixa{position:relative;background:transparent;border:none;padding:0;margin-bottom:12px}
   .barra-fixa button span{display:inline}
   .card-mus{padding:14px}
   .card-mus .campos{display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:10px}
@@ -217,8 +239,8 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 <body>
 
 <div class="header">
-  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v13</span></h1>
-  <div class="sub">🧠 Motor inteligente • Remove VEVO/OFICIAL • Detecção de feat • <b style="color:var(--green)">💾 Blindado</b></div>
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v14</span></h1>
+  <div class="sub">🎓 Ensine ao código • Remova VEVO/Official • <b style="color:var(--green)">💾 Blindado</b></div>
   <div class="stats">
     <span>📄 <b id="stTotal">0</b></span>
     <span>✅ <b class="ok" id="stOk">0</b></span>
@@ -245,7 +267,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <button class="b6" id="btnAddLixo" style="flex:1">➕ Adicionar</button>
       <button class="b2" id="btnAddLixoAplicar" style="flex:1">➕ Aplicar agora</button>
     </div>
-    <div class="hint">💡 Palavras curtas (≤10) sem espaço também viram sufixos colados (VEVO, Official, Topic...)</div>
+    <div class="hint">💡 Para sufixos colados (VEVO, Official), use <b>🎓 Ensinar</b>.</div>
   </div>
 </div>
 
@@ -268,18 +290,18 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
     <div class="inp-row">
       <button class="b2" id="btnAddArtAtual" style="flex:1">➕ Adicionar das músicas</button>
     </div>
-    <div class="hint" style="margin-top:10px;margin-bottom:6px">📥 Colar lista em massa (vírgula ou linha):</div>
-    <textarea class="inp" id="artMassa" placeholder="Alceu Valença, Gusttavo Lima&#10;Zeca Pagodinho&#10;Wando; Alcione"></textarea>
+    <div class="hint" style="margin-top:10px;margin-bottom:6px">📥 Colar lista em massa:</div>
+    <textarea class="inp" id="artMassa" placeholder="Alceu Valença, Gusttavo Lima&#10;Zeca Pagodinho"></textarea>
     <div class="inp-row" style="margin-top:8px">
       <button class="b2" id="btnAddMassa" style="flex:1">➕ Adicionar todos</button>
       <button class="b5" id="btnLimparMassa">🗑️</button>
     </div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
-      <div style="font-size:12px;color:var(--txt2);font-weight:600;margin-bottom:8px">🔗 Aliases (correções aprendidas)</div>
+      <div style="font-size:12px;color:var(--txt2);font-weight:600;margin-bottom:8px">🔗 Aliases</div>
       <div class="chips" id="aliasLista"></div>
       <div class="inp-row" style="margin-top:8px">
-        <input type="text" class="inp" id="aliasDe" placeholder="Nome errado/alternativo">
-        <input type="text" class="inp" id="aliasPara" placeholder="Nome correto/oficial">
+        <input type="text" class="inp" id="aliasDe" placeholder="Nome alternativo">
+        <input type="text" class="inp" id="aliasPara" placeholder="Nome oficial">
         <button class="b6" id="btnAddAlias">➕</button>
       </div>
     </div>
@@ -290,7 +312,6 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <button class="b4" id="btnZerarArt" style="flex:1">🗑️ Zerar</button>
     </div>
     <input type="file" id="inpImportArt" accept=".json,.txt" style="display:none">
-    <div class="hint" style="margin-top:8px">💡 Se parte do nome bater com um artista conhecido, ele vira ARTISTA. <b>Salvamento automático ativo.</b></div>
   </div>
 </div>
 
@@ -319,6 +340,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 </div>
 
 <div class="acoes-sec">
+  <button class="b6 full" id="btnEnsinar">🎓 Ensinar ao código</button>
   <button class="b3" id="btnLimpar">🧹 Limpar nomes</button>
   <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
   <button class="b5" id="btnReset">↺ Resetar</button>
@@ -352,7 +374,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <button class="b5" id="btnMinificar">🔀</button>
     </div>
   </div>
-  <div class="painel-corpo"><textarea id="jsonTexto" readonly placeholder="Arraste músicas para gerar o JSON..."></textarea></div>
+  <div class="painel-corpo"><textarea id="jsonTexto" readonly placeholder="Arraste músicas..."></textarea></div>
   <div class="painel-info">
     <span id="jsonInfo">Aguardando músicas...</span>
     <span id="jsonTamanho">0 chars</span>
@@ -372,7 +394,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
     <div class="brain-tab on" data-tab="lixo">🗑️ Lixo (<span id="cntLixo">0</span>)</div>
     <div class="brain-tab" data-tab="artistas">🎨 Artistas (<span id="cntArt">0</span>)</div>
     <div class="brain-tab" data-tab="titulos">🎵 Títulos (<span id="cntTit">0</span>)</div>
-    <div class="brain-tab" data-tab="sufixos">📎 Sufixos (<span id="cntSuf">0</span>)</div>
+    <div class="brain-tab" data-tab="regras">🎓 Regras (<span id="cntReg">0</span>)</div>
   </div>
   <div id="brainConteudo"></div>
 </div>
@@ -380,6 +402,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 <input type="file" id="inpBrain" accept=".json" style="display:none">
 <div class="toast-wrap" id="toastWrap"></div>
 
+<!-- MODAL GENÉRICO (confirmações) -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">Título</h3>
@@ -387,6 +410,51 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
     <div class="btns">
       <button class="btn-cancel" id="modalCancel">Cancelar</button>
       <button class="btn-ok" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENSINAR -->
+<div class="modal-overlay" id="ensinarOverlay">
+  <div class="modal">
+    <h3>🎓 Ensinar ao código</h3>
+    <p style="margin-bottom:14px;font-size:12px">Digite o texto que aparece e o que deveria aparecer. O código aprende e aplica nas próximas.</p>
+
+    <div class="campo">
+      <label>De (texto errado)</label>
+      <input type="text" class="inp" id="ensDe" placeholder="Ex: ForeignerVEVO">
+    </div>
+
+    <div class="campo">
+      <label>Para (texto correto — vazio se for remover)</label>
+      <input type="text" class="inp" id="ensPara" placeholder="Ex: Foreigner">
+    </div>
+
+    <div class="campo">
+      <label>Tipo de regra</label>
+      <select id="ensTipo">
+        <option value="sufixo">🔤 Sufixo colado — remove do final (ForeignerVEVO → Foreigner)</option>
+        <option value="prefixo">🔠 Prefixo colado — remove do início (VEVOForeigner → Foreigner)</option>
+        <option value="substituir">✂️ Substituir em qualquer lugar</option>
+        <option value="remover">🗑️ Remover sempre (palavra inteira)</option>
+      </select>
+    </div>
+
+    <div class="campo">
+      <label>Preview</label>
+      <div class="preview" id="ensPreview">
+        <span style="color:#6a6a8e">Digite acima para ver o preview...</span>
+      </div>
+    </div>
+
+    <div class="btns">
+      <button class="btn-cancel" id="ensCancel">Cancelar</button>
+      <button class="btn-ok" id="ensOk">💾 Ensinar e aplicar</button>
+    </div>
+
+    <div class="regras-lista" id="ensRegrasLista">
+      <div class="tt">📚 Regras aprendidas</div>
+      <div id="ensRegrasConteudo"></div>
     </div>
   </div>
 </div>
@@ -440,7 +508,6 @@ var ABREV_PADRAO = {
   'embaixador':'embaix.'
 };
 
-/* Lixo que aparece como palavra separada */
 var LIXO_BASE = [
   'audio oficial','áudio oficial','official audio','audio','áudio',
   'official music video','official video','music video',
@@ -502,13 +569,6 @@ var LIXO_BASE = [
   're-recorded version','video oficial','vídeo oficial'
 ];
 
-/* Sufixos colados (sem espaço) — VEVO, Official, Topic, etc. */
-var SUFIXOS_PADRAO = [
-  'vevo','official','oficial','topic','records','music','channel',
-  'brasil','brazil','hd','hq','lyric','audio','video','tv','mtv','fm',
-  'remix','acoustic','live','on','the','and'
-];
-
 var FEAT_RE = /\s+(feat\.?|ft\.?|part\.?|participação|participacao)\s+/i;
 
 var ARTISTAS_BASE = [
@@ -565,7 +625,10 @@ var State = {
   idc: 0,
   jsonMinificado: false,
   jsonAtual: '',
-  brain: { lixo:{}, artistas:{}, titulos:{}, sufixos:{}, correcoes:{} },
+  brain: {
+    lixo:{}, artistas:{}, titulos:{},
+    regras:[]  /* {de, para, tipo} */
+  },
   aliases: {},
   abrev: {},
   artistasConhecidos: {},
@@ -576,32 +639,28 @@ var State = {
 };
 
 var KEYS = {
-  brain:'editor_musicas_brain_v13',
-  abrev:'editor_musicas_abrev_v13',
-  art:'editor_musicas_artistas_v13',
-  alias:'editor_musicas_aliases_v13'
+  brain:'editor_musicas_brain_v14',
+  abrev:'editor_musicas_abrev_v14',
+  art:'editor_musicas_artistas_v14',
+  alias:'editor_musicas_aliases_v14'
 };
 
 /* ============================================================
    HELPERS
    ============================================================ */
 function $(id){ return document.getElementById(id); }
-
 function norm(s){
   return String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
-
 function esc(s){
   return String(s==null?'':s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-
 function escAttr(s){ return String(s==null?'':s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function escapeRegex(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
 function comExt(n){ var i=n.lastIndexOf('.'); return i>0?n.slice(i):''; }
-
 function debounce(fn,ms){
   var t;
   return function(){
@@ -678,7 +737,6 @@ function safeSetItem(key,value,aviso){
     return false;
   }
 }
-
 function safeGetItem(key){
   try{
     var v=localStorage.getItem(key);
@@ -686,22 +744,16 @@ function safeGetItem(key){
     return localStorage.getItem(key+'_backup');
   }catch(e){ return null; }
 }
-
 function salvarBrainReal(){
   safeSetItem(KEYS.brain, JSON.stringify(State.brain), 'Cérebro não salvo');
   atualizarBrainStats();
 }
 var salvarBrain = debounce(salvarBrainReal,500);
-
 function salvarAbrev(){
   safeSetItem(KEYS.abrev, JSON.stringify(State.abrev));
   renderAbrev();
 }
-
-function salvarAliases(){
-  safeSetItem(KEYS.alias, JSON.stringify(State.aliases));
-}
-
+function salvarAliases(){ safeSetItem(KEYS.alias, JSON.stringify(State.aliases)); }
 function salvarArtistas(){
   setSaveStatus('saving');
   var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; });
@@ -710,15 +762,14 @@ function salvarArtistas(){
   setSaveStatus(ok?'saved':'');
   return ok;
 }
-
 function carregarTudo(){
   var raw=safeGetItem(KEYS.brain);
-  if(raw){ try{ var o=JSON.parse(raw);
+  if(raw){ try{
+    var o=JSON.parse(raw);
     State.brain.lixo=o.lixo||{};
     State.brain.artistas=o.artistas||{};
     State.brain.titulos=o.titulos||{};
-    State.brain.sufixos=o.sufixos||{};
-    State.brain.correcoes=o.correcoes||{};
+    State.brain.regras=o.regras||[];
   }catch(e){} }
 
   var rawArt=safeGetItem(KEYS.art);
@@ -743,20 +794,54 @@ function carregarTudo(){
 }
 
 /* ============================================================
+   REGRAS APRENDIDAS (o coração do "Ensinar")
+   ============================================================ */
+function aplicarRegras(texto){
+  if(!texto) return texto;
+  var regras = State.brain.regras || [];
+  for(var i=0;i<regras.length;i++){
+    var r = regras[i];
+    if(!r || !r.de) continue;
+
+    if(r.tipo === 'sufixo'){
+      // remove do final (case-insensitive)
+      var reSuf = new RegExp(escapeRegex(r.de) + '$', 'i');
+      if(reSuf.test(texto)){
+        var novo = texto.replace(reSuf, '').replace(/[\s\-_.]+$/,'').trim();
+        if(novo.length >= 2) texto = novo;
+      }
+    } else if(r.tipo === 'prefixo'){
+      var rePre = new RegExp('^' + escapeRegex(r.de), 'i');
+      if(rePre.test(texto)){
+        var novo2 = texto.replace(rePre, '').replace(/^[\s\-_.]+/,'').trim();
+        if(novo2.length >= 2) texto = novo2;
+      }
+    } else if(r.tipo === 'substituir'){
+      var reSub = new RegExp(escapeRegex(r.de), 'gi');
+      texto = texto.replace(reSub, r.para || '');
+    } else if(r.tipo === 'remover'){
+      // remove palavra inteira (com borda)
+      var reRem = new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])' + escapeRegex(r.de) + '([\\s\\-_\\/|,;:.!?()\\[\\]]|$)', 'gi');
+      texto = texto.replace(reRem, ' ');
+    }
+  }
+  // limpa espaços duplicados que sobrarem
+  return texto.replace(/\s+/g,' ').trim();
+}
+
+/* ============================================================
    CACHE DE REGEX
    ============================================================ */
 function getRegexLixo(){
   var todas=LIXO_BASE.concat(Object.keys(State.brain.lixo));
   var hash=todas.slice().sort().join('|');
   if(State.cache.regexLixo && State.cache.hashLixo===hash) return State.cache.regexLixo;
-
   var vistos={};
   var unicas=todas.filter(function(p){
     var k=norm(p);
     if(!k||vistos[k]) return false;
     vistos[k]=true; return true;
   }).sort(function(a,b){ return b.length-a.length; });
-
   var LOTE=50, regexes=[];
   for(var i=0;i<unicas.length;i+=LOTE){
     var lote=unicas.slice(i,i+LOTE);
@@ -772,7 +857,6 @@ function getRegexArtistas(){
   var chaves=Object.keys(State.artistasConhecidos).filter(function(k){ return k.length>=3; });
   var hash=chaves.slice().sort().join('|');
   if(State.cache.regexArt && State.cache.hashArt===hash) return State.cache.regexArt;
-
   chaves.sort(function(a,b){ return b.length-a.length; });
   var LOTE=50, regexes=[];
   for(var i=0;i<chaves.length;i+=LOTE){
@@ -820,286 +904,9 @@ function limpar(txt){
   return s.trim();
 }
 
-/* ============================================================
-   SUFIXOS COLADOS (VEVO, Official, Topic, etc.)
-   ============================================================ */
-function getSufixos(){
-  var suf = SUFIXOS_PADRAO.slice();
-  Object.keys(State.brain.sufixos).forEach(function(k){
-    if(suf.indexOf(k)===-1) suf.push(k);
-  });
-  suf.sort(function(a,b){ return b.length-a.length; });
-  return suf;
-}
-
-function removerSufixoCanal(s){
-  if(!s) return s;
-  var sufixos = getSufixos();
-  var mudou = true;
-  var iter = 0;
-  while(mudou && iter < 5){
-    mudou = false;
-    iter++;
-    var lower = s.toLowerCase();
-    for(var i=0;i<sufixos.length;i++){
-      var suf = sufixos[i];
-      if(lower.endsWith(suf)){
-        var resto = s.slice(0, s.length - suf.length).replace(/[\s\-_.]+$/,'');
-        if(resto.length >= 3 && /[a-z0-9]$/i.test(resto)){
-          s = resto;
-          mudou = true;
-          break;
-        }
-      }
-    }
-  }
-  return s;
-}
-
-/* ============================================================
-   DEDUPLICAÇÃO DE ARTISTA NO TÍTULO
-   ============================================================ */
-function dedupArtistaNoTitulo(title, artist){
-  if(!title || !artist) return title;
-  var aPalavras = norm(artist).split(/\s+/);
-  var palavras = title.split(/\s+/);
-  var resultado = [];
-  var i = 0, removeu = false;
-
-  while(i < palavras.length){
-    var casou = true;
-    if(i + aPalavras.length > palavras.length) casou = false;
-    else {
-      for(var j=0;j<aPalavras.length;j++){
-        if(norm(palavras[i+j]) !== aPalavras[j]){ casou=false; break; }
-      }
-    }
-    if(casou){
-      i += aPalavras.length;
-      if(i < palavras.length && /^[-–—:|]$/.test(palavras[i])) i++;
-      removeu = true;
-    } else {
-      resultado.push(palavras[i]); i++;
-    }
-  }
-  var out = resultado.join(' ').replace(/\s+/g,' ').trim();
-  return (removeu && out.length >= 3) ? out : title;
-}
-
-/* ============================================================
-   ARTISTAS
-   ============================================================ */
-function normalizarComAlias(nome){
-  if(!nome) return nome;
-  var k = norm(nome);
-  if(State.aliases[k]){
-    var oficial = State.aliases[k];
-    if(!State.artistasConhecidos[norm(oficial)]) aprenderArtista(oficial);
-    return oficial;
-  }
-  if(State.artistasConhecidos[k]) return State.artistasConhecidos[k];
-  /* corrige via brain.correcoes (aprendidas ao editar) */
-  if(State.brain.correcoes[k]) return State.brain.correcoes[k];
-  return nome;
-}
-
-function encontrarArtistaEm(txt){
-  if(!txt) return null;
-  var n = norm(txt);
-  var regexes = getRegexArtistas();
-  for(var i=0;i<regexes.length;i++){
-    var m = n.match(regexes[i]);
-    if(m && State.artistasConhecidos[m[2]]) return State.artistasConhecidos[m[2]];
-  }
-  var chavesAlias = Object.keys(State.aliases);
-  if(chavesAlias.length){
-    var padrao = chavesAlias.map(escapeRegex).join('|');
-    var re = new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i');
-    var mm = n.match(re);
-    if(mm && State.aliases[mm[2]]) return State.aliases[mm[2]];
-  }
-  return null;
-}
-
-function removerArtistaDoInicio(title, artist){
-  if(!title || !artist) return title;
-  var re = new RegExp('^'+escapeRegex(artist)+'\\s*[-–—:/|]\\s*','i');
-  var out = title.replace(re,'').trim();
-  return out.length < 3 ? title : out;
-}
-
-/* ============================================================
-   PARSING INTELIGENTE
-   ============================================================ */
-function parseTracoFrente(nomeBase){
-  var m = String(nomeBase).match(/^\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/);
-  if(!m) return null;
-  return { artista:m[1].trim(), titulo:m[2].trim() };
-}
-
-/* Quebra o nome em partes por separador forte (-, –, —, |) */
-function quebrarPartes(s){
-  return s.split(/\s*[|\-–—]\s*/).map(function(p){ return p.trim(); }).filter(Boolean);
-}
-
-/* Verifica quantas palavras tem uma string */
-function contarPalavras(s){
-  return s.trim().split(/\s+/).filter(Boolean).length;
-}
-
-/* Decide quem é artista e quem é título */
-function decidirArtistaTitulo(partes, conhecido){
-  if(partes.length === 0) return { a:'', t:'' };
-  if(partes.length === 1) return { a:conhecido||'', t:partes[0] };
-
-  var p1 = partes[0], p2 = partes.slice(1).join(' ');
-  var w1 = contarPalavras(p1), w2 = contarPalavras(p2);
-  var art1 = encontrarArtistaEm(p1);
-  var art2 = encontrarArtistaEm(p2);
-
-  /* 1. Se uma das partes é artista conhecido, ela é o artista */
-  if(art1 && !art2) return { a:art1, t:limpar(p2) };
-  if(art2 && !art1) return { a:art2, t:limpar(p1) };
-  if(art1 && art2 && norm(art1)!==norm(art2)){
-    /* dois artistas: p1 feat. p2 */
-    return { a:art1, t:limpar(p2), feat:art2 };
-  }
-
-  /* 2. Se conhecido bate com p1, é p1 */
-  if(conhecido && norm(p1)===norm(conhecido)) return { a:p1, t:limpar(p2) };
-
-  /* 3. Se p2 é curto (≤2 palavras) e p1 é longo (≥3), p2 é artista */
-  if(w2 <= 2 && w1 >= 3) return { a:limpar(p2), t:limpar(p1) };
-
-  /* 4. Se p1 é curto (≤2) e p2 é longo (≥3), p1 é artista */
-  if(w1 <= 2 && w2 >= 3) return { a:limpar(p1), t:limpar(p2) };
-
-  /* 5. Caso ambíguo: p1 é artista (regra padrão "Artista - Título") */
-  return { a:limpar(p1), t:limpar(p2) };
-}
-
-/* Extrai feat do título e remove duplicações */
-function refinarTituloArtista(artist, title){
-  var feat = '';
-
-  /* Se o título contém outro artista conhecido, vira feat */
-  var outro = encontrarArtistaEm(title);
-  if(outro && norm(outro) !== norm(artist)){
-    title = dedupArtistaNoTitulo(title, outro);
-    feat = outro;
-  }
-
-  /* Remove o próprio artista repetido no título */
-  title = dedupArtistaNoTitulo(title, artist);
-  title = removerArtistaDoInicio(title, artist);
-
-  /* Junta feat */
-  var artistFinal = artist;
-  if(feat && norm(feat) !== norm(artist) && artist.toLowerCase().indexOf(norm(feat))===-1){
-    artistFinal = artist ? artist + ' feat. ' + feat : feat;
-  }
-
-  return { artist: artistFinal, title: title, feat: feat };
-}
-
-function parseNome(nomeOriginal){
-  var base = String(nomeOriginal).replace(/\.[^.]+$/,'');
-
-  /* 1. Remove sufixos colados (VEVO, Official, etc.) */
-  base = removerSufixoCanal(base);
-
-  /* 2. Remove underscores e normaliza */
-  var s = base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
-
-  /* 3. Remove parênteses/colchetes com lixo */
-  s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
-
-  /* 4. Limpa palavras de lixo */
-  s = limparPalavras(s);
-  s = removerNumeros(s);
-  s = s.replace(/\s+/g,' ').trim();
-
-  /* 5. Caso especial: "-Artista-Titulo" (traço na frente) */
-  var forca = parseTracoFrente(s);
-  if(forca){
-    var a = limpar(forca.artista);
-    var t = limpar(forca.titulo);
-    if(a && t){
-      a = normalizarComAlias(a);
-      var aN = norm(a);
-      if(State.brain.artistas[aN]) a = State.brain.artistas[aN];
-      var tN = norm(t);
-      if(State.brain.titulos[tN]) t = State.brain.titulos[tN];
-      var ref = refinarTituloArtista(a, t);
-      return { a:capitalizar(ref.artist), t:capitalizar(ref.title) };
-    }
-  }
-
-  /* 6. Extrai feat (feat., ft., part.) */
-  var featMatch = s.match(FEAT_RE);
-  var featTrecho = '';
-  if(featMatch){
-    featTrecho = limpar(s.slice(featMatch.index).replace(FEAT_RE,' '));
-    s = s.slice(0, featMatch.index).trim();
-  }
-
-  /* 7. Quebra em partes por separador forte */
-  var partes = quebrarPartes(s).map(limpar).filter(function(p){ return p && !ehLixo(p); });
-
-  if(partes.length === 0){
-    return { a:'', t:capitalizar(limpar(s)) };
-  }
-
-  /* 8. Encontra artista conhecido em qualquer parte */
-  var conhecido = encontrarArtistaEm(s);
-
-  /* 9. Decide artista/título */
-  var dec = decidirArtistaTitulo(partes, conhecido);
-  var artist = dec.a || '';
-  var title = dec.t || '';
-  var featExtra = dec.feat || '';
-
-  /* 10. Adiciona feat detectado */
-  if(featTrecho){
-    if(featExtra){
-      /* dois feats: mantém os dois */
-      featExtra = featExtra + ' e ' + featTrecho;
-    } else {
-      featExtra = featTrecho;
-    }
-  }
-
-  /* 11. Normaliza artista via cérebro */
-  if(artist){
-    artist = normalizarComAlias(artist);
-    var aN2 = norm(artist);
-    if(State.brain.artistas[aN2]) artist = State.brain.artistas[aN2];
-  }
-  if(title){
-    var tN2 = norm(title);
-    if(State.brain.titulos[tN2]) title = State.brain.titulos[tN2];
-  }
-
-  /* 12. Refina (feat + dedup) */
-  var ref = refinarTituloArtista(artist, title);
-  artist = ref.artist;
-  title = ref.title;
-
-  /* 13. Adiciona feat extra (do passo 10) */
-  if(featExtra && norm(featExtra) !== norm(artist) && artist.toLowerCase().indexOf(norm(featExtra))===-1){
-    artist = artist ? artist + ' feat. ' + featExtra : featExtra;
-  }
-
-  /* 14. Se artista e título iguais, limpa artista */
-  if(artist && title && norm(artist) === norm(title)) artist = '';
-
-  if(!title) title = limpar(s);
-  return { a:capitalizar(artist), t:capitalizar(title) };
-}
-
 function ehLixo(t){
   if(!t) return true;
-  var x = norm(t);
+  var x=norm(t);
   if(!x) return true;
   if(/^\d+[\s._-]*kbps/.test(x)) return true;
   if(/^[\d\s.\-_]+$/.test(x)) return true;
@@ -1124,7 +931,7 @@ function capitalizar(s){
 
 function abreviarPalavra(p){
   if(!p) return p;
-  var chave = norm(p);
+  var chave=norm(p);
   if(State.abrev[chave]) return State.abrev[chave];
   if(p.length<=7) return p;
   return p.slice(0,5)+'.';
@@ -1133,104 +940,291 @@ function abreviarPalavra(p){
 function abreviarTexto(txt,limite){
   if(!txt) return '';
   if(txt.length<=limite) return txt;
-  var palavras = txt.split(/\s+/);
-  var abreviado = palavras.map(function(p){
-    var m = p.match(/^([\/\-–—(]?)([A-Za-zÀ-Ýà-ÿ]+)([\/\-–—),.]?)$/);
+  var palavras=txt.split(/\s+/);
+  var abreviado=palavras.map(function(p){
+    var m=p.match(/^([\/\-–—(]?)([A-Za-zÀ-Ýà-ÿ]+)([\/\-–—),.]?)$/);
     if(!m) return p;
     return m[1]+abreviarPalavra(m[2])+m[3];
   }).join(' ');
   if(abreviado.length<=limite) return abreviado;
-  var palavras2 = abreviado.split(/\s+/);
+  var palavras2=abreviado.split(/\s+/);
   while(palavras2.length>2 && palavras2.join(' ').length>limite) palavras2.pop();
-  abreviado = palavras2.join(' ');
+  abreviado=palavras2.join(' ');
   if(abreviado.length>limite){
-    var corte = abreviado.slice(0,limite);
-    var ultimoEspaco = corte.lastIndexOf(' ');
-    abreviado = ultimoEspaco>limite*0.5?corte.slice(0,ultimoEspaco):corte;
+    var corte=abreviado.slice(0,limite);
+    var ultimoEspaco=corte.lastIndexOf(' ');
+    abreviado=ultimoEspaco>limite*0.5?corte.slice(0,ultimoEspaco):corte;
   }
   return abreviado.trim();
 }
 
 /* ============================================================
-   TAGS DE ÁUDIO
+   ARTISTAS
+   ============================================================ */
+function normalizarComAlias(nome){
+  if(!nome) return nome;
+  var k=norm(nome);
+  if(State.aliases[k]){
+    var oficial=State.aliases[k];
+    if(!State.artistasConhecidos[norm(oficial)]) aprenderArtista(oficial);
+    return oficial;
+  }
+  if(State.artistasConhecidos[k]) return State.artistasConhecidos[k];
+  return nome;
+}
+
+function encontrarArtistaEm(txt){
+  if(!txt) return null;
+  var n=norm(txt);
+  var regexes=getRegexArtistas();
+  for(var i=0;i<regexes.length;i++){
+    var m=n.match(regexes[i]);
+    if(m && State.artistasConhecidos[m[2]]) return State.artistasConhecidos[m[2]];
+  }
+  var chavesAlias=Object.keys(State.aliases);
+  if(chavesAlias.length){
+    var padrao=chavesAlias.map(escapeRegex).join('|');
+    var re=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i');
+    var mm=n.match(re);
+    if(mm && State.aliases[mm[2]]) return State.aliases[mm[2]];
+  }
+  return null;
+}
+
+function removerArtistaDoInicio(title,artist){
+  if(!title||!artist) return title;
+  var re=new RegExp('^'+escapeRegex(artist)+'\\s*[-–—:/|]\\s*','i');
+  var out=title.replace(re,'').trim();
+  return out.length<3?title:out;
+}
+
+function dedupArtistaNoTitulo(title,artist){
+  if(!title||!artist) return title;
+  var aP=norm(artist).split(/\s+/);
+  var palavras=title.split(/\s+/);
+  var resultado=[];
+  var i=0,removeu=false;
+  while(i<palavras.length){
+    var casou=true;
+    if(i+aP.length>palavras.length) casou=false;
+    else {
+      for(var j=0;j<aP.length;j++){
+        if(norm(palavras[i+j])!==aP[j]){ casou=false; break; }
+      }
+    }
+    if(casou){
+      i+=aP.length;
+      if(i<palavras.length && /^[-–—:|]$/.test(palavras[i])) i++;
+      removeu=true;
+    } else {
+      resultado.push(palavras[i]); i++;
+    }
+  }
+  var out=resultado.join(' ').replace(/\s+/g,' ').trim();
+  return (removeu && out.length>=3)?out:title;
+}
+
+/* ============================================================
+   PARSING
+   ============================================================ */
+function parseTracoFrente(nomeBase){
+  var m=String(nomeBase).match(/^\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/);
+  if(!m) return null;
+  return { artista:m[1].trim(), titulo:m[2].trim() };
+}
+
+function quebrarPartes(s){
+  return s.split(/\s*[|\-–—]\s*/).map(function(p){ return p.trim(); }).filter(Boolean);
+}
+
+function contarPalavras(s){
+  return s.trim().split(/\s+/).filter(Boolean).length;
+}
+
+function decidirArtistaTitulo(partes,conhecido){
+  if(partes.length===0) return { a:'', t:'' };
+  if(partes.length===1) return { a:conhecido||'', t:partes[0] };
+
+  var p1=partes[0], p2=partes.slice(1).join(' ');
+  var w1=contarPalavras(p1), w2=contarPalavras(p2);
+  var art1=encontrarArtistaEm(p1);
+  var art2=encontrarArtistaEm(p2);
+
+  if(art1 && !art2) return { a:art1, t:limpar(p2) };
+  if(art2 && !art1) return { a:art2, t:limpar(p1) };
+  if(art1 && art2 && norm(art1)!==norm(art2)) return { a:art1, t:limpar(p2), feat:art2 };
+  if(conhecido && norm(p1)===norm(conhecido)) return { a:p1, t:limpar(p2) };
+  if(w2<=2 && w1>=3) return { a:limpar(p2), t:limpar(p1) };
+  if(w1<=2 && w2>=3) return { a:limpar(p1), t:limpar(p2) };
+  return { a:limpar(p1), t:limpar(p2) };
+}
+
+function refinarTituloArtista(artist,title){
+  var feat='';
+  var outro=encontrarArtistaEm(title);
+  if(outro && norm(outro)!==norm(artist)){
+    title=dedupArtistaNoTitulo(title,outro);
+    feat=outro;
+  }
+  title=dedupArtistaNoTitulo(title,artist);
+  title=removerArtistaDoInicio(title,artist);
+  var artistFinal=artist;
+  if(feat && norm(feat)!==norm(artist) && artist.toLowerCase().indexOf(norm(feat))===-1){
+    artistFinal = artist ? artist+' feat. '+feat : feat;
+  }
+  return { artist:artistFinal, title:title, feat:feat };
+}
+
+function parseNome(nomeOriginal){
+  var base=String(nomeOriginal).replace(/\.[^.]+$/,'');
+
+  /* APLICA REGRAS APRENDIDAS (o coração da feature) */
+  base = aplicarRegras(base);
+
+  /* Limpeza padrão */
+  var s=base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s=limparPalavras(s);
+  s=removerNumeros(s);
+  s=s.replace(/\s+/g,' ').trim();
+
+  var forca=parseTracoFrente(s);
+  if(forca){
+    var a=limpar(forca.artista), t=limpar(forca.titulo);
+    if(a&&t){
+      a=normalizarComAlias(a);
+      var aN=norm(a);
+      if(State.brain.artistas[aN]) a=State.brain.artistas[aN];
+      var tN=norm(t);
+      if(State.brain.titulos[tN]) t=State.brain.titulos[tN];
+      var ref=refinarTituloArtista(a,t);
+      return { a:capitalizar(ref.artist), t:capitalizar(ref.title) };
+    }
+  }
+
+  var featMatch=s.match(FEAT_RE);
+  var featTrecho='';
+  if(featMatch){
+    featTrecho=limpar(s.slice(featMatch.index).replace(FEAT_RE,' '));
+    s=s.slice(0,featMatch.index).trim();
+  }
+
+  var partes=quebrarPartes(s).map(limpar).filter(function(p){ return p && !ehLixo(p); });
+
+  if(partes.length===0){
+    return { a:'', t:capitalizar(limpar(s)) };
+  }
+
+  var conhecido=encontrarArtistaEm(s);
+  var dec=decidirArtistaTitulo(partes,conhecido);
+  var artist=dec.a||'';
+  var title=dec.t||'';
+  var featExtra=dec.feat||'';
+
+  if(featTrecho){
+    if(featExtra) featExtra=featExtra+' e '+featTrecho;
+    else featExtra=featTrecho;
+  }
+
+  if(artist){
+    artist=normalizarComAlias(artist);
+    var aN2=norm(artist);
+    if(State.brain.artistas[aN2]) artist=State.brain.artistas[aN2];
+  }
+  if(title){
+    var tN2=norm(title);
+    if(State.brain.titulos[tN2]) title=State.brain.titulos[tN2];
+  }
+
+  var ref2=refinarTituloArtista(artist,title);
+  artist=ref2.artist;
+  title=ref2.title;
+
+  if(featExtra && norm(featExtra)!==norm(artist) && artist.toLowerCase().indexOf(norm(featExtra))===-1){
+    artist = artist ? artist+' feat. '+featExtra : featExtra;
+  }
+
+  if(artist && title && norm(artist)===norm(title)) artist='';
+  if(!title) title=limpar(s);
+  return { a:capitalizar(artist), t:capitalizar(title) };
+}
+
+/* ============================================================
+   TAGS
    ============================================================ */
 function lerTags(file,cb){
   if(!file){ cb(null); return; }
-  var ext = comExt(file.name).toLowerCase();
+  var ext=comExt(file.name).toLowerCase();
   if(['.mp3','.opus','.ogg','.flac'].indexOf(ext)===-1){ cb(null); return; }
-  var reader = new FileReader();
-  reader.onload = function(e){
+  var reader=new FileReader();
+  reader.onload=function(e){
     try{
-      var buf = e.target.result;
-      var v = new DataView(buf);
-      var bytes = new Uint8Array(buf);
-      var tags = { artist:'', title:'', genre:'' };
-      var dec = new TextDecoder('utf-8');
+      var buf=e.target.result;
+      var v=new DataView(buf);
+      var bytes=new Uint8Array(buf);
+      var tags={ artist:'', title:'', genre:'' };
+      var dec=new TextDecoder('utf-8');
 
       if(ext==='.mp3' && v.byteLength>=10 &&
          v.getUint8(0)===0x49 && v.getUint8(1)===0x44 && v.getUint8(2)===0x33){
-        var tagSize = ((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
-        var total = Math.min(10+tagSize, v.byteLength);
-        var off = 10;
-        while(off < total-10){
+        var tagSize=((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
+        var total=Math.min(10+tagSize,v.byteLength);
+        var off=10;
+        while(off<total-10){
           try{
-            var fid = String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
-            var fsz = (v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
+            var fid=String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
+            var fsz=(v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
             if(fsz<1 || off+10+fsz>total) break;
             if(fid==='TIT2'||fid==='TPE1'||fid==='TCON'){
-              var enc = v.getUint8(off+10);
-              var len = fsz-1;
+              var enc=v.getUint8(off+10);
+              var len=fsz-1;
               if(len>0 && off+11+len<=bytes.length){
-                var sub = bytes.subarray(off+11, off+11+len);
-                var txt = '';
-                if(enc===0||enc===3) txt = dec.decode(sub);
+                var sub=bytes.subarray(off+11,off+11+len);
+                var txt='';
+                if(enc===0||enc===3) txt=dec.decode(sub);
                 else {
                   var cc=[];
                   for(var k=0;k+1<sub.length;k+=2) cc.push(String.fromCharCode(sub[k]|(sub[k+1]<<8)));
-                  txt = cc.join('');
+                  txt=cc.join('');
                 }
-                txt = txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
+                txt=txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
                 if(fid==='TIT2') tags.title=txt;
                 if(fid==='TPE1') tags.artist=txt;
                 if(fid==='TCON') tags.genre=txt;
               }
             }
-            off += 10+fsz;
+            off+=10+fsz;
           }catch(err){ break; }
         }
       }
 
       if((ext==='.opus'||ext==='.ogg') && v.byteLength>16){
-        var idx = -1;
-        var magicOgg = [0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
+        var idx=-1;
+        var magicOgg=[0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
         for(var i=0;i+8<=bytes.length;i++){
           if(bytes[i]===magicOgg[0]&&bytes[i+1]===magicOgg[1]&&bytes[i+2]===magicOgg[2]&&bytes[i+3]===magicOgg[3]&&
-             bytes[i+4]===magicOgg[4]&&bytes[i+5]===magicOgg[5]&&bytes[i+6]===magicOgg[6]&&bytes[i+7]===magicOgg[7]){
-            idx=i+8; break;
-          }
+             bytes[i+4]===magicOgg[4]&&bytes[i+5]===magicOgg[5]&&bytes[i+6]===magicOgg[6]&&bytes[i+7]===magicOgg[7]){ idx=i+8; break; }
         }
         if(idx===-1){
-          var magicV = [0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
+          var magicV=[0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
           for(var i2=0;i2+7<=bytes.length;i2++){
             if(bytes[i2]===magicV[0]&&bytes[i2+1]===magicV[1]&&bytes[i2+2]===magicV[2]&&bytes[i2+3]===magicV[3]&&
-               bytes[i2+4]===magicV[4]&&bytes[i2+5]===magicV[5]&&bytes[i2+6]===magicV[6]){
-              idx=i2+7; break;
-            }
+               bytes[i2+4]===magicV[4]&&bytes[i2+5]===magicV[5]&&bytes[i2+6]===magicV[6]){ idx=i2+7; break; }
           }
         }
         if(idx>=0 && idx+4<=bytes.length){
-          var vendorLen = v.getUint32(idx,true); idx+=4;
+          var vendorLen=v.getUint32(idx,true); idx+=4;
           if(idx+vendorLen+4<=bytes.length){
-            idx += vendorLen;
-            var count = v.getUint32(idx,true); idx+=4;
+            idx+=vendorLen;
+            var count=v.getUint32(idx,true); idx+=4;
             for(var c=0;c<count && idx+4<=bytes.length;c++){
-              var clen = v.getUint32(idx,true); idx+=4;
+              var clen=v.getUint32(idx,true); idx+=4;
               if(idx+clen>bytes.length) break;
-              var s2 = dec.decode(bytes.subarray(idx,idx+clen)); idx+=clen;
-              var eq = s2.indexOf('=');
+              var s2=dec.decode(bytes.subarray(idx,idx+clen)); idx+=clen;
+              var eq=s2.indexOf('=');
               if(eq<=0) continue;
-              var key = s2.slice(0,eq).toUpperCase();
-              var val = s2.slice(eq+1).trim();
+              var key=s2.slice(0,eq).toUpperCase();
+              var val=s2.slice(eq+1).trim();
               if(!val) continue;
               if(key==='TITLE') tags.title=val;
               if(key==='ARTIST') tags.artist=val;
@@ -1242,27 +1236,27 @@ function lerTags(file,cb){
 
       if(ext==='.flac' && bytes.length>4){
         if(bytes[0]===0x66&&bytes[1]===0x4C&&bytes[2]===0x61&&bytes[3]===0x43){
-          var off2 = 4;
+          var off2=4;
           while(off2+4<=bytes.length){
-            var header = bytes[off2];
-            var isLast = (header&0x80)!==0;
-            var type = header&0x7F;
-            var flen = (bytes[off2+1]<<16)|(bytes[off2+2]<<8)|bytes[off2+3];
-            off2 += 4;
+            var header=bytes[off2];
+            var isLast=(header&0x80)!==0;
+            var type=header&0x7F;
+            var flen=(bytes[off2+1]<<16)|(bytes[off2+2]<<8)|bytes[off2+3];
+            off2+=4;
             if(type===4){
               if(off2+4<=bytes.length){
-                var vlen = v.getUint32(off2,true); off2+=4+vlen;
+                var vlen=v.getUint32(off2,true); off2+=4+vlen;
                 if(off2+4<=bytes.length){
-                  var fcount = v.getUint32(off2,true); off2+=4;
+                  var fcount=v.getUint32(off2,true); off2+=4;
                   for(var fc=0;fc<fcount;fc++){
                     if(off2+4>bytes.length) break;
-                    var fclen = v.getUint32(off2,true); off2+=4;
+                    var fclen=v.getUint32(off2,true); off2+=4;
                     if(off2+fclen>bytes.length) break;
-                    var fs2 = dec.decode(bytes.subarray(off2,off2+fclen)); off2+=fclen;
-                    var feq = fs2.indexOf('=');
+                    var fs2=dec.decode(bytes.subarray(off2,off2+fclen)); off2+=fclen;
+                    var feq=fs2.indexOf('=');
                     if(feq<0) continue;
-                    var fk = fs2.slice(0,feq).toUpperCase();
-                    var fv = fs2.slice(feq+1).trim();
+                    var fk=fs2.slice(0,feq).toUpperCase();
+                    var fv=fs2.slice(feq+1).trim();
                     if(!fv) continue;
                     if(fk==='TITLE') tags.title=fv;
                     if(fk==='ARTIST') tags.artist=fv;
@@ -1272,7 +1266,7 @@ function lerTags(file,cb){
               }
               break;
             }
-            off2 += flen;
+            off2+=flen;
             if(isLast) break;
           }
         }
@@ -1281,14 +1275,14 @@ function lerTags(file,cb){
       cb(tags);
     }catch(err){ console.warn('Erro tags:',err); cb(null); }
   };
-  reader.onerror = function(){ cb(null); };
+  reader.onerror=function(){ cb(null); };
   reader.readAsArrayBuffer(file.slice(0,2*1024*1024));
 }
 
 function escreverTags(buffer,tags){
   if(typeof ID3Writer==='undefined') return buffer;
   try{
-    var w = new ID3Writer(buffer);
+    var w=new ID3Writer(buffer);
     if(tags.title)  w.setFrame('TIT2',tags.title);
     if(tags.artist) w.setFrame('TPE1',tags.artist);
     if(tags.genre)  w.setFrame('TCON',tags.genre);
@@ -1301,42 +1295,37 @@ function escreverTags(buffer,tags){
    ============================================================ */
 function sanitize(s){
   if(!s) return '';
-  var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x = x.replace(/[^A-Za-z0-9\s\-_]/g,'');
-  x = x.replace(/\s+/g,'_').replace(/_+/g,'_');
-  x = x.replace(/-+/g,'-');
-  x = x.replace(/^[_\-.]+|[_\-.]+$/g,'');
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  x=x.replace(/[^A-Za-z0-9\s\-_]/g,'');
+  x=x.replace(/\s+/g,'_').replace(/_+/g,'_');
+  x=x.replace(/-+/g,'-');
+  x=x.replace(/^[_\-.]+|[_\-.]+$/g,'');
   return x;
 }
 
 function gerarNome(m,ext){
-  var art = sanitize(m.artist)||'desconhecido';
-  var tit = sanitize(m.title)||'sem_titulo';
-  var limite = LIMITE_NOME - ext.length;
+  var art=sanitize(m.artist)||'desconhecido';
+  var tit=sanitize(m.title)||'sem_titulo';
+  var limite=LIMITE_NOME-ext.length;
   if(limite<15) limite=15;
-
-  /* Se artista==título, usa só um */
   if(norm(art)===norm(tit)){
-    var so = tit;
-    if(so.length>limite) so = sanitize(abreviarTexto(m.title,limite));
+    var so=tit;
+    if(so.length>limite) so=sanitize(abreviarTexto(m.title,limite));
     return so+ext;
   }
-
-  var nome = art+'_'+tit;
+  var nome=art+'_'+tit;
   if(nome.length<=limite) return nome+ext;
-
-  var espT = limite - art.length - 1;
-  if(espT<10) espT = Math.floor(limite*0.45);
-  var tA = sanitize(abreviarTexto(m.title,espT)) || tit.slice(0,espT);
-
-  nome = art+'_'+tA;
+  var espT=limite-art.length-1;
+  if(espT<10) espT=Math.floor(limite*0.45);
+  var tA=sanitize(abreviarTexto(m.title,espT))||tit.slice(0,espT);
+  nome=art+'_'+tA;
   if(nome.length>limite){
-    var espA = limite - tA.length - 1;
+    var espA=limite-tA.length-1;
     if(espA<5) espA=5;
-    var aA = sanitize(abreviarTexto(m.artist,espA)) || art.slice(0,espA);
-    nome = aA+'_'+tA;
+    var aA=sanitize(abreviarTexto(m.artist,espA))||art.slice(0,espA);
+    nome=aA+'_'+tA;
   }
-  if(nome.length>limite) nome = nome.slice(0,limite).replace(/[_\-.]+$/,'');
+  if(nome.length>limite) nome=nome.slice(0,limite).replace(/[_\-.]+$/,'');
   return nome+ext;
 }
 
@@ -1345,56 +1334,40 @@ function gerarNome(m,ext){
    ============================================================ */
 function aprenderLixo(original,limpo){
   if(!original) return;
-  var limpoNorm = norm(limpo||'');
-  var palavras = String(original).trim().split(/\s+/).filter(Boolean);
-  var aprendidos = [];
+  var limpoNorm=norm(limpo||'');
+  var palavras=String(original).trim().split(/\s+/).filter(Boolean);
+  var aprendidos=[];
   palavras.forEach(function(p){
-    var pn = norm(p).replace(/[^\w\s]/g,'').trim();
+    var pn=norm(p).replace(/[^\w\s]/g,'').trim();
     if(!pn || pn.length<4) return;
     if(limpoNorm.indexOf(pn)===-1 && !State.brain.lixo[pn] && pn.length<=30){
       State.brain.lixo[pn]=true;
       aprendidos.push(p);
     }
   });
-  if(aprendidos.length){
-    State.cache.hashLixo='';
-    salvarBrain();
-  }
+  if(aprendidos.length){ State.cache.hashLixo=''; salvarBrain(); }
 }
 
 function aprenderArtista(nome){
   if(!nome) return;
-  var n = String(nome).trim();
+  var n=String(nome).trim();
   if(n.length<2) return;
-  var chave = norm(n);
+  var chave=norm(n);
   if(State.brain.artistas[chave]!==n){ State.brain.artistas[chave]=n; salvarBrain(); }
   if(!State.artistasConhecidos[chave]){
-    State.artistasConhecidos[chave] = n;
+    State.artistasConhecidos[chave]=n;
     State.cache.hashArt='';
-    State.cache.dirtyArt = true;
+    State.cache.dirtyArt=true;
     if(salvarArtistas()) toast('🎨 Artista salvo: '+n,'save');
   }
 }
 
 function aprenderTitulo(nome){
   if(!nome) return;
-  var n = String(nome).trim();
+  var n=String(nome).trim();
   if(n.length<2) return;
-  var chave = norm(n);
-  if(State.brain.titulos[chave]!==n){
-    State.brain.titulos[chave]=n;
-    salvarBrain();
-  }
-}
-
-/* Aprende correção: "gustavo lima" → "Gusttavo Lima" */
-function aprenderCorrecao(errado, correto){
-  if(!errado || !correto) return;
-  var k = norm(errado);
-  if(k && norm(correto)!==k){
-    State.brain.correcoes[k] = correto;
-    salvarBrain();
-  }
+  var chave=norm(n);
+  if(State.brain.titulos[chave]!==n){ State.brain.titulos[chave]=n; salvarBrain(); }
 }
 
 /* ============================================================
@@ -1408,67 +1381,57 @@ function addArquivos(fileList){
   if(arr.length===0){ toast('Nenhum arquivo suportado.','e'); return; }
 
   var vistos={};
-  var naoDup = arr.filter(function(f){
-    var k = f.name+'|'+f.size;
+  var naoDup=arr.filter(function(f){
+    var k=f.name+'|'+f.size;
     if(vistos[k]) return false;
     vistos[k]=true; return true;
   });
   if(naoDup.length<arr.length) toast('⚠️ '+(arr.length-naoDup.length)+' duplicado(s) ignorado(s)','w');
 
   toast('Lendo '+naoDup.length+' arquivo(s)...','i');
-  var pendentes = naoDup.length;
+  var pendentes=naoDup.length;
   if(pendentes===0) return;
 
   function concluir(){
     pendentes--;
-    if(pendentes===0){
-      render();
-      toast('✅ '+naoDup.length+' arquivo(s) carregado(s)','s');
-    }
+    if(pendentes===0){ render(); toast('✅ '+naoDup.length+' arquivo(s) carregado(s)','s'); }
   }
 
   naoDup.forEach(function(file){
-    var respondeu = false;
+    var respondeu=false;
     function finalizar(){ if(!respondeu){ respondeu=true; concluir(); } }
-    var timeout = setTimeout(finalizar,30000);
+    var timeout=setTimeout(finalizar,30000);
     try{
-      var p = parseNome(file.name);
+      var p=parseNome(file.name);
       lerTags(file,function(tags){
         clearTimeout(timeout);
         try{
-          var tagArtist = (tags&&tags.artist)?limpar(tags.artist):'';
-          var tagTitle  = (tags&&tags.title)?limpar(tags.title):'';
-          var tagGenero = (tags&&tags.genre)?tags.genre:'';
-
-          var artist, title;
-          var pNorm = norm(p.a);
-          if(State.brain.artistas[pNorm]) artist = State.brain.artistas[pNorm];
-          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
-          else artist = p.a;
-          artist = normalizarComAlias(artist);
-
-          var tNorm = norm(p.t);
-          if(State.brain.titulos[tNorm]) title = State.brain.titulos[tNorm];
-          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
-          else title = p.t;
-
-          var ref = refinarTituloArtista(artist, title);
-          artist = ref.artist;
-          title = ref.title;
-
-          var m = {
+          var tagArtist=(tags&&tags.artist)?limpar(aplicarRegras(tags.artist)):'';
+          var tagTitle=(tags&&tags.title)?limpar(aplicarRegras(tags.title)):'';
+          var tagGenero=(tags&&tags.genre)?tags.genre:'';
+          var artist,title;
+          var pNorm=norm(p.a);
+          if(State.brain.artistas[pNorm]) artist=State.brain.artistas[pNorm];
+          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist=tagArtist;
+          else artist=p.a;
+          artist=normalizarComAlias(artist);
+          var tNorm=norm(p.t);
+          if(State.brain.titulos[tNorm]) title=State.brain.titulos[tNorm];
+          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title=tagTitle;
+          else title=p.t;
+          var ref=refinarTituloArtista(artist,title);
+          artist=ref.artist;
+          title=ref.title;
+          var m={
             id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-            file:file,
-            originalName:file.name,
-            artist:artist||'',
-            title:title||'',
-            genero:tagGenero||'',
+            file:file, originalName:file.name,
+            artist:artist||'', title:title||'', genero:tagGenero||'',
             corrompido:ehLixo(artist)||ehLixo(title)||norm(artist)===norm(title)
           };
-          m.newName = gerarNome(m, comExt(file.name));
+          m.newName=gerarNome(m,comExt(file.name));
           State.musicas.push(m);
           State.map.set(m.id,m);
-        }catch(e){ console.error('Erro processando:',e); }
+        }catch(e){ console.error('Erro:',e); }
         finalizar();
       });
     }catch(e){ clearTimeout(timeout); finalizar(); }
@@ -1479,22 +1442,21 @@ function addArquivos(fileList){
    RENDER
    ============================================================ */
 function stats(){
-  $('stTotal').textContent = State.musicas.length;
+  $('stTotal').textContent=State.musicas.length;
   var ok=0,cor=0;
   for(var i=0;i<State.musicas.length;i++){
     if(State.musicas[i].corrompido) cor++; else ok++;
   }
-  $('stOk').textContent = ok;
-  $('stCor').textContent = cor;
-  $('btnZip').disabled = !State.musicas.some(function(m){ return m.file; });
-  $('btnJson').disabled = State.musicas.length===0;
+  $('stOk').textContent=ok;
+  $('stCor').textContent=cor;
+  $('btnZip').disabled=!State.musicas.some(function(m){ return m.file; });
+  $('btnJson').disabled=State.musicas.length===0;
   atualizarBrainStats();
 }
 
 function render(){
-  var corpo = $('corpo');
-  var vazio = $('vazioCard');
-
+  var corpo=$('corpo');
+  var vazio=$('vazioCard');
   if(State.musicas.length===0){
     vazio.style.display='block';
     corpo.innerHTML='';
@@ -1503,50 +1465,46 @@ function render(){
     return;
   }
   vazio.style.display='none';
-
   var html='';
   for(var i=0;i<State.musicas.length;i++){
-    var m = State.musicas[i];
-    var cls = m.corrompido?'cor':'';
-    var st = m.corrompido?'⚠️':'✅';
-    html += '<div class="card-mus '+cls+'" data-mid="'+m.id+'">'+
+    var m=State.musicas[i];
+    var cls=m.corrompido?'cor':'';
+    var st=m.corrompido?'⚠️':'✅';
+    html+='<div class="card-mus '+cls+'" data-mid="'+m.id+'">'+
       '<div class="topo">'+
         '<span class="num">'+(i+1)+'</span>'+
         '<span class="orig" title="'+escAttr(m.originalName)+'">'+esc(m.originalName)+'</span>'+
         '<span class="st">'+st+'</span>'+
       '</div>'+
       '<div class="campos">'+
-        '<div class="campo"><label>Artista</label>'+
-          '<input data-id="'+m.id+'" data-campo="artist" value="'+escAttr(m.artist)+'" placeholder="Artista"></div>'+
-        '<div class="campo"><label>Título</label>'+
-          '<input data-id="'+m.id+'" data-campo="title" value="'+escAttr(m.title)+'" placeholder="Título"></div>'+
-        '<div class="campo"><label>Gênero</label>'+
-          '<input data-id="'+m.id+'" data-campo="genero" value="'+escAttr(m.genero)+'" placeholder="Gênero"></div>'+
+        '<div class="campo"><label>Artista</label><input data-id="'+m.id+'" data-campo="artist" value="'+escAttr(m.artist)+'" placeholder="Artista"></div>'+
+        '<div class="campo"><label>Título</label><input data-id="'+m.id+'" data-campo="title" value="'+escAttr(m.title)+'" placeholder="Título"></div>'+
+        '<div class="campo"><label>Gênero</label><input data-id="'+m.id+'" data-campo="genero" value="'+escAttr(m.genero)+'" placeholder="Gênero"></div>'+
       '</div>'+
       '<div class="novo-nome" title="'+escAttr(m.newName)+'"><b>→</b> '+esc(m.newName)+'</div>'+
     '</div>';
   }
-  corpo.innerHTML = html;
+  corpo.innerHTML=html;
   stats();
   atualizarJson();
 }
 
 function onInputEdit(e){
-  var inp = e.target;
+  var inp=e.target;
   if(!inp.dataset || !inp.dataset.id) return;
-  var m = State.map.get(inp.dataset.id);
+  var m=State.map.get(inp.dataset.id);
   if(!m) return;
-  m[inp.dataset.campo] = inp.value;
+  m[inp.dataset.campo]=inp.value;
   if(inp.dataset.campo==='artist'||inp.dataset.campo==='title'){
-    m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-    m.newName = gerarNome(m,comExt(m.originalName));
-    var card = inp.closest('.card-mus');
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+    var card=inp.closest('.card-mus');
     if(card){
       card.classList.toggle('cor',m.corrompido);
-      var stEl = card.querySelector('.st');
-      if(stEl) stEl.textContent = m.corrompido?'⚠️':'✅';
-      var nn = card.querySelector('.novo-nome');
-      if(nn){ nn.innerHTML = '<b>→</b> '+esc(m.newName); nn.title = m.newName; }
+      var stEl=card.querySelector('.st');
+      if(stEl) stEl.textContent=m.corrompido?'⚠️':'✅';
+      var nn=card.querySelector('.novo-nome');
+      if(nn){ nn.innerHTML='<b>→</b> '+esc(m.newName); nn.title=m.newName; }
     }
   }
   stats();
@@ -1554,19 +1512,14 @@ function onInputEdit(e){
 }
 
 function onInputBlur(e){
-  var inp = e.target;
+  var inp=e.target;
   if(!inp.dataset || !inp.dataset.id) return;
-  var m = State.map.get(inp.dataset.id);
+  var m=State.map.get(inp.dataset.id);
   if(!m) return;
-  var campo = inp.dataset.campo;
-  var valor = inp.value.trim();
+  var campo=inp.dataset.campo;
+  var valor=inp.value.trim();
   if(!valor) return;
-  if(campo==='artist'){
-    aprenderArtista(valor);
-    /* aprende correção se o artista original era diferente */
-    var original = parseNome(m.originalName).a;
-    if(original && norm(original)!==norm(valor)) aprenderCorrecao(original, valor);
-  }
+  if(campo==='artist') aprenderArtista(valor);
   else if(campo==='title') aprenderTitulo(valor);
 }
 
@@ -1574,10 +1527,9 @@ function onInputBlur(e){
    JSON
    ============================================================ */
 function _atualizarJsonReal(){
-  var txt = $('jsonTexto'), badge = $('jsonBadge'), info = $('jsonInfo'), tam = $('jsonTamanho');
+  var txt=$('jsonTexto'),badge=$('jsonBadge'),info=$('jsonInfo'),tam=$('jsonTamanho');
   if(!txt) return;
   if(document.activeElement===txt) return;
-
   if(State.musicas.length===0){
     txt.value='';
     txt.placeholder='Adicione músicas para gerar o JSON...';
@@ -1588,35 +1540,22 @@ function _atualizarJsonReal(){
     State.jsonAtual='';
     return;
   }
-
-  var idIni = parseInt($('idInicial').value,10)||1;
-  var gen = $('generoGeral').value.trim()||'Music';
-
-  var arr = State.musicas.map(function(m,i){
-    return {
-      id:idIni+i,
-      artist:m.artist||'Desconhecido',
-      title:m.title||'Sem título',
-      genero:m.genero||gen,
-      src:m.newName
-    };
+  var idIni=parseInt($('idInicial').value,10)||1;
+  var gen=$('generoGeral').value.trim()||'Music';
+  var arr=State.musicas.map(function(m,i){
+    return { id:idIni+i, artist:m.artist||'Desconhecido', title:m.title||'Sem título', genero:m.genero||gen, src:m.newName };
   });
-
-  State.jsonAtual = State.jsonMinificado
-    ? JSON.stringify(arr)
-    : '[\n'+arr.map(function(o){ return JSON.stringify(o); }).join(',\n')+'\n]';
-
-  txt.value = State.jsonAtual;
-  badge.textContent = arr.length;
-
+  State.jsonAtual=State.jsonMinificado?JSON.stringify(arr):'[\n'+arr.map(function(o){ return JSON.stringify(o); }).join(',\n')+'\n]';
+  txt.value=State.jsonAtual;
+  badge.textContent=arr.length;
   var corr=0;
   for(var i=0;i<State.musicas.length;i++) if(State.musicas[i].corrompido) corr++;
   if(corr>0){ info.textContent='⚠️ '+corr+' incompleta(s)'; info.style.color='#f59e0b'; }
   else { info.textContent='✅ Pronto'; info.style.color='#34b87a'; }
-  tam.textContent = State.jsonAtual.length.toLocaleString('pt-BR')+' chars';
+  tam.textContent=State.jsonAtual.length.toLocaleString('pt-BR')+' chars';
 }
 function atualizarJson(){ _atualizarJsonReal(); }
-var atualizarJsonDebounced = debounce(_atualizarJsonReal,300);
+var atualizarJsonDebounced=debounce(_atualizarJsonReal,300);
 
 /* ============================================================
    AÇÕES
@@ -1625,12 +1564,12 @@ function limparTodos(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   var n=0;
   State.musicas.forEach(function(m){
-    var a = limpar(m.artist), t = limpar(m.title);
+    var a=limpar(m.artist), t=limpar(m.title);
     if(a!==m.artist||t!==m.title) n++;
     if(a) m.artist=a;
     if(t) m.title=t;
-    m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-    m.newName = gerarNome(m,comExt(m.originalName));
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
   });
   render();
   toast('🧹 '+n+' nome(s) limpo(s)','s');
@@ -1641,12 +1580,10 @@ function resetarCampos(){
   return modalConfirm('Resetar todos os campos?').then(function(ok){
     if(!ok) return;
     State.musicas.forEach(function(m){
-      var p = parseNome(m.originalName);
-      m.artist = p.a;
-      m.title = p.t;
-      m.genero = '';
-      m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-      m.newName = gerarNome(m,comExt(m.originalName));
+      var p=parseNome(m.originalName);
+      m.artist=p.a; m.title=p.t; m.genero='';
+      m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+      m.newName=gerarNome(m,comExt(m.originalName));
     });
     render();
     toast('↺ Campos resetados','i');
@@ -1668,43 +1605,40 @@ function limparTudo(){
 function reanalisar(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   toast('Re-analisando...','i');
-  var pendentes = State.musicas.length;
+  var pendentes=State.musicas.length;
   State.musicas.forEach(function(m){
-    var respondeu = false;
+    var respondeu=false;
     function finalizar(){
       if(respondeu) return;
-      respondeu=true;
-      pendentes--;
+      respondeu=true; pendentes--;
       if(pendentes===0){ render(); toast('🔄 Re-análise concluída','s'); }
     }
-    var timeout = setTimeout(finalizar,30000);
+    var timeout=setTimeout(finalizar,30000);
     try{
-      var p = parseNome(m.originalName);
+      var p=parseNome(m.originalName);
       lerTags(m.file,function(tags){
         clearTimeout(timeout);
         try{
-          var tagArtist = (tags&&tags.artist)?limpar(tags.artist):'';
-          var tagTitle  = (tags&&tags.title)?limpar(tags.title):'';
-          var artist, title;
-          var pNorm = norm(p.a);
-          if(State.brain.artistas[pNorm]) artist = State.brain.artistas[pNorm];
-          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
-          else artist = p.a;
-          artist = normalizarComAlias(artist);
-          var tNorm = norm(p.t);
-          if(State.brain.titulos[tNorm]) title = State.brain.titulos[tNorm];
-          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
-          else title = p.t;
-
-          var ref = refinarTituloArtista(artist, title);
-          artist = ref.artist;
-          title = ref.title;
-
-          m.artist = artist||'';
-          m.title = title||'';
-          m.genero = (tags&&tags.genre)?tags.genre:m.genero;
-          m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-          m.newName = gerarNome(m,comExt(m.originalName));
+          var tagArtist=(tags&&tags.artist)?limpar(aplicarRegras(tags.artist)):'';
+          var tagTitle=(tags&&tags.title)?limpar(aplicarRegras(tags.title)):'';
+          var artist,title;
+          var pNorm=norm(p.a);
+          if(State.brain.artistas[pNorm]) artist=State.brain.artistas[pNorm];
+          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist=tagArtist;
+          else artist=p.a;
+          artist=normalizarComAlias(artist);
+          var tNorm=norm(p.t);
+          if(State.brain.titulos[tNorm]) title=State.brain.titulos[tNorm];
+          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title=tagTitle;
+          else title=p.t;
+          var ref=refinarTituloArtista(artist,title);
+          artist=ref.artist;
+          title=ref.title;
+          m.artist=artist||'';
+          m.title=title||'';
+          m.genero=(tags&&tags.genre)?tags.genre:m.genero;
+          m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+          m.newName=gerarNome(m,comExt(m.originalName));
         }catch(e){}
         finalizar();
       });
@@ -1713,7 +1647,7 @@ function reanalisar(){
 }
 
 function aplicarGenero(){
-  var g = $('generoGeral').value.trim();
+  var g=$('generoGeral').value.trim();
   if(!g){ toast('Digite um gênero.','w'); return; }
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   State.musicas.forEach(function(m){ m.genero=g; });
@@ -1725,21 +1659,14 @@ function aplicarGenero(){
    LIXO
    ============================================================ */
 function adicionarLixoManual(aplicarAgora){
-  var inp = $('lixoManual');
-  var val = inp.value.trim();
+  var inp=$('lixoManual');
+  var val=inp.value.trim();
   if(!val){ toast('Digite algo para remover.','w'); return; }
-  var itens = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos = 0;
+  var itens=val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0;
   itens.forEach(function(item){
-    var chave = norm(item);
-    if(chave && !State.brain.lixo[chave]){
-      State.brain.lixo[chave] = true;
-      novos++;
-      /* Se for palavra única curta, também aprende como sufixo colado */
-      if(!/\s/.test(chave) && chave.length<=12){
-        State.brain.sufixos[chave] = true;
-      }
-    }
+    var chave=norm(item);
+    if(chave && !State.brain.lixo[chave]){ State.brain.lixo[chave]=true; novos++; }
   });
   if(novos===0){ toast('Já estava na lista.','w'); return; }
   State.cache.hashLixo='';
@@ -1751,49 +1678,44 @@ function adicionarLixoManual(aplicarAgora){
 }
 
 /* ============================================================
-   ARTISTAS
+   ARTISTAS / ALIASES / ABREV
    ============================================================ */
 function renderArtistas(){
-  var lista = $('artLista'); if(!lista) return;
-  var chaves = Object.keys(State.artistasConhecidos).sort();
-  var filtro = norm(State.artBusca);
+  var lista=$('artLista'); if(!lista) return;
+  var chaves=Object.keys(State.artistasConhecidos).sort();
+  var filtro=norm(State.artBusca);
   if(filtro){
-    chaves = chaves.filter(function(k){
+    chaves=chaves.filter(function(k){
       return k.indexOf(filtro)!==-1 || norm(State.artistasConhecidos[k]).indexOf(filtro)!==-1;
     });
   }
   if(chaves.length===0){
-    lista.innerHTML = '<div class="chip-vazio">'+(filtro?'🔍 Nenhum artista encontrado.':'Nenhum artista. Adicione acima.')+'</div>';
+    lista.innerHTML='<div class="chip-vazio">'+(filtro?'🔍 Nenhum artista encontrado.':'Nenhum artista. Adicione acima.')+'</div>';
   } else {
-    lista.innerHTML = chaves.map(function(k){
+    lista.innerHTML=chaves.map(function(k){
       return '<div class="chip"><span>'+esc(State.artistasConhecidos[k])+'</span><button data-k="'+escAttr(k)+'">✕</button></div>';
     }).join('');
   }
-  $('artContador').textContent = Object.keys(State.artistasConhecidos).length;
+  $('artContador').textContent=Object.keys(State.artistasConhecidos).length;
 }
 
 function adicionarArtistaConhecido(){
-  var inp = $('artNovo');
-  var val = inp.value.trim();
+  var inp=$('artNovo');
+  var val=inp.value.trim();
   if(!val){ toast('Digite um nome.','w'); return; }
-  var itens = val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos=0, duplicados=0;
-  var adicionados=[];
+  var itens=val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0,duplicados=0,adicionados=[];
   itens.forEach(function(item){
-    var k = norm(item);
+    var k=norm(item);
     if(!k || k.length<2) return;
     if(State.artistasConhecidos[k]){ duplicados++; return; }
-    State.artistasConhecidos[k] = item;
-    novos++; adicionados.push(item);
+    State.artistasConhecidos[k]=item; novos++; adicionados.push(item);
   });
   if(novos===0){ toast(duplicados>0?'Já estava na lista.':'Nada válido.','w'); return; }
   State.cache.hashArt='';
-  State.cache.dirtyArt = true;
+  State.cache.dirtyArt=true;
   if(!salvarArtistas()) return;
-  adicionados.forEach(function(a){
-    var kk = norm(a);
-    if(!State.brain.artistas[kk]) State.brain.artistas[kk] = a;
-  });
+  adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
   salvarBrain();
   inp.value='';
   renderArtistas();
@@ -1801,26 +1723,22 @@ function adicionarArtistaConhecido(){
 }
 
 function adicionarMassa(){
-  var ta = $('artMassa');
-  var texto = ta.value;
+  var ta=$('artMassa');
+  var texto=ta.value;
   if(!texto.trim()){ toast('Cole algo no campo.','w'); return; }
-  var itens = texto.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos=0, duplicados=0;
-  var adicionados=[];
+  var itens=texto.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0,duplicados=0,adicionados=[];
   itens.forEach(function(item){
-    var k = norm(item);
+    var k=norm(item);
     if(!k || k.length<2) return;
     if(State.artistasConhecidos[k]){ duplicados++; return; }
-    State.artistasConhecidos[k] = item; novos++; adicionados.push(item);
+    State.artistasConhecidos[k]=item; novos++; adicionados.push(item);
   });
   if(novos===0){ toast('Nada novo.','w'); return; }
   State.cache.hashArt='';
   State.cache.dirtyArt=true;
   if(!salvarArtistas()) return;
-  adicionados.forEach(function(a){
-    var kk = norm(a);
-    if(!State.brain.artistas[kk]) State.brain.artistas[kk] = a;
-  });
+  adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
   salvarBrain();
   ta.value='';
   renderArtistas();
@@ -1829,35 +1747,29 @@ function adicionarMassa(){
 
 function adicionarArtistasDasMusicas(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
-  var novos=0;
-  var adicionados=[];
+  var novos=0,adicionados=[];
   State.musicas.forEach(function(m){
     if(!m.artist) return;
-    var k = norm(m.artist);
-    if(k && !State.artistasConhecidos[k]){
-      State.artistasConhecidos[k]=m.artist; novos++; adicionados.push(m.artist);
-    }
+    var k=norm(m.artist);
+    if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=m.artist; novos++; adicionados.push(m.artist); }
   });
   if(novos===0){ toast('Todos já estavam na lista.','w'); return; }
   State.cache.hashArt='';
   State.cache.dirtyArt=true;
   if(!salvarArtistas()) return;
-  adicionados.forEach(function(a){
-    var kk = norm(a);
-    if(!State.brain.artistas[kk]) State.brain.artistas[kk] = a;
-  });
+  adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
   salvarBrain();
   renderArtistas();
   toast('🎨 '+novos+' artista(s) salvo(s)!','save');
 }
 
 function resetarArtistas(){
-  return modalConfirm('Restaurar lista padrão? Os que você adicionou serão mantidos.').then(function(ok){
+  return modalConfirm('Restaurar lista padrão? Os adicionados serão mantidos.').then(function(ok){
     if(!ok) return;
     var base={};
     ARTISTAS_BASE.forEach(function(a){ base[norm(a)]=a; });
     Object.keys(State.artistasConhecidos).forEach(function(k){ base[k]=State.artistasConhecidos[k]; });
-    State.artistasConhecidos = base;
+    State.artistasConhecidos=base;
     State.cache.hashArt='';
     State.cache.dirtyArt=true;
     if(salvarArtistas()){ renderArtistas(); toast('↺ Padrão restaurado','save'); }
@@ -1875,11 +1787,11 @@ function zerarArtistas(){
 }
 
 function exportarArtistas(){
-  var arr = Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }).sort();
-  var data = JSON.stringify({ artistas:arr, aliases:State.aliases },null,2);
-  var blob = new Blob([data],{type:'application/json'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
+  var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }).sort();
+  var data=JSON.stringify({ artistas:arr, aliases:State.aliases },null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
   a.href=url; a.download='artistas_conhecidos.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); },1000);
@@ -1889,26 +1801,24 @@ function exportarArtistas(){
 function importarArtistas(){ $('inpImportArt').click(); }
 
 function processarImportArt(file){
-  var reader = new FileReader();
-  reader.onload = function(e){
+  var reader=new FileReader();
+  reader.onload=function(e){
     try{
-      var txt = e.target.result;
-      var novos = 0;
+      var txt=e.target.result;
+      var novos=0;
       if(/^\s*[\{\[]/.test(txt)){
-        var obj = JSON.parse(txt);
-        var arr = Array.isArray(obj)?obj:(obj.artistas||[]);
+        var obj=JSON.parse(txt);
+        var arr=Array.isArray(obj)?obj:(obj.artistas||[]);
         arr.forEach(function(a){ var k=norm(a); if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=a; novos++; } });
         if(obj.aliases) Object.keys(obj.aliases).forEach(function(k){ State.aliases[k]=obj.aliases[k]; });
       } else {
-        var itens = txt.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+        var itens=txt.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
         itens.forEach(function(a){ var k=norm(a); if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=a; novos++; } });
       }
       State.cache.hashArt='';
       State.cache.dirtyArt=true;
       if(salvarArtistas()){
-        salvarAliases();
-        renderArtistas();
-        renderAliases();
+        salvarAliases(); renderArtistas(); renderAliases();
         toast('📥 '+novos+' artista(s) importado(s)!','save');
       }
     }catch(err){ toast('Arquivo inválido.','e'); }
@@ -1916,23 +1826,20 @@ function processarImportArt(file){
   reader.readAsText(file);
 }
 
-/* ============================================================
-   ALIASES E ABREV
-   ============================================================ */
 function renderAliases(){
-  var lista = $('aliasLista'); if(!lista) return;
-  var chaves = Object.keys(State.aliases).sort();
+  var lista=$('aliasLista'); if(!lista) return;
+  var chaves=Object.keys(State.aliases).sort();
   if(chaves.length===0){ lista.innerHTML='<div class="chip-vazio">Nenhum alias.</div>'; return; }
-  lista.innerHTML = chaves.map(function(k){
+  lista.innerHTML=chaves.map(function(k){
     return '<div class="chip"><span>'+esc(k)+' = <b>'+esc(State.aliases[k])+'</b></span><button data-k="'+escAttr(k)+'">✕</button></div>';
   }).join('');
 }
 
 function adicionarAlias(){
-  var de = $('aliasDe').value.trim();
-  var para = $('aliasPara').value.trim();
+  var de=$('aliasDe').value.trim();
+  var para=$('aliasPara').value.trim();
   if(!de||!para){ toast('Preencha os dois campos.','w'); return; }
-  State.aliases[norm(de)] = para;
+  State.aliases[norm(de)]=para;
   $('aliasDe').value='';
   $('aliasPara').value='';
   salvarAliases();
@@ -1942,25 +1849,24 @@ function adicionarAlias(){
 }
 
 function renderAbrev(){
-  var lista = $('abrevLista'); if(!lista) return;
-  var chaves = Object.keys(State.abrev).sort();
+  var lista=$('abrevLista'); if(!lista) return;
+  var chaves=Object.keys(State.abrev).sort();
   if(chaves.length===0){ lista.innerHTML='<div class="chip-vazio">Nenhuma abreviação.</div>'; return; }
-  lista.innerHTML = chaves.map(function(k){
+  lista.innerHTML=chaves.map(function(k){
     return '<div class="chip"><span>'+esc(k)+' → <b>'+esc(State.abrev[k])+'</b></span><button data-k="'+escAttr(k)+'">✕</button></div>';
   }).join('');
 }
 
 function adicionarAbrev(){
-  var de = $('abrevDe').value.trim();
-  var para = $('abrevPara').value.trim();
+  var de=$('abrevDe').value.trim();
+  var para=$('abrevPara').value.trim();
   if(!de||!para){ toast('Preencha os dois campos.','w'); return; }
-  State.abrev[norm(de)] = para;
-  $('abrevDe').value='';
-  $('abrevPara').value='';
+  State.abrev[norm(de)]=para;
+  $('abrevDe').value=''; $('abrevPara').value='';
   salvarAbrev();
   toast('✂️ '+de+' → '+para,'s');
   if(State.musicas.length>0){
-    State.musicas.forEach(function(m){ m.newName = gerarNome(m,comExt(m.originalName)); });
+    State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
     render();
   }
 }
@@ -1968,11 +1874,11 @@ function adicionarAbrev(){
 function resetarAbrev(){
   return modalConfirm('Restaurar todas as abreviações padrão?').then(function(ok){
     if(!ok) return;
-    State.abrev = Object.assign({},ABREV_PADRAO);
+    State.abrev=Object.assign({},ABREV_PADRAO);
     salvarAbrev();
     toast('↺ Abreviações restauradas','s');
     if(State.musicas.length>0){
-      State.musicas.forEach(function(m){ m.newName = gerarNome(m,comExt(m.originalName)); });
+      State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
       render();
     }
   });
@@ -1982,23 +1888,22 @@ function resetarAbrev(){
    DOWNLOADS
    ============================================================ */
 function baixarZip(){
-  var comFile = State.musicas.filter(function(m){ return m.file; });
+  var comFile=State.musicas.filter(function(m){ return m.file; });
   if(comFile.length===0){ toast('Nenhum arquivo real para baixar.','w'); return; }
   if(typeof JSZip==='undefined'){ toast('JSZip não carregou.','e'); return; }
   toast('Preparando ZIP...','i');
   $('prog').classList.add('on');
-  var zip = new JSZip();
-  var total = comFile.length;
-  var i = 0;
-  var usados = {};
-
+  var zip=new JSZip();
+  var total=comFile.length;
+  var i=0;
+  var usados={};
   function proximo(){
     if(i>=total){
       zip.generateAsync({type:'blob'},function(meta){
-        $('progFill').style.width = Math.min(99,meta.percent).toFixed(0)+'%';
+        $('progFill').style.width=Math.min(99,meta.percent).toFixed(0)+'%';
       }).then(function(blob){
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
         a.href=url; a.download='musicas_corrigidas.zip';
         document.body.appendChild(a); a.click(); a.remove();
         setTimeout(function(){ URL.revokeObjectURL(url); },1000);
@@ -2008,23 +1913,21 @@ function baixarZip(){
       });
       return;
     }
-    var m = comFile[i];
-    $('progFill').style.width = ((i+1)/total*90).toFixed(0)+'%';
-
-    var chave = m.newName;
-    usados[chave] = (usados[chave]||0)+1;
-    var nomeFinal = usados[chave]===1 ? chave : chave.replace(/(\.[^.]+)$/,'_'+usados[chave]+'$1');
-
-    var reader = new FileReader();
-    reader.onload = function(e){
-      var buf = e.target.result;
+    var m=comFile[i];
+    $('progFill').style.width=((i+1)/total*90).toFixed(0)+'%';
+    var chave=m.newName;
+    usados[chave]=(usados[chave]||0)+1;
+    var nomeFinal=usados[chave]===1?chave:chave.replace(/(\.[^.]+)$/,'_'+usados[chave]+'$1');
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var buf=e.target.result;
       if(comExt(m.originalName).toLowerCase()==='.mp3'){
-        try{ buf = escreverTags(buf,{artist:m.artist,title:m.title,genre:m.genero}); }catch(err){}
+        try{ buf=escreverTags(buf,{artist:m.artist,title:m.title,genre:m.genero}); }catch(err){}
       }
       zip.file(nomeFinal,buf);
       i++; proximo();
     };
-    reader.onerror = function(){ i++; proximo(); };
+    reader.onerror=function(){ i++; proximo(); };
     reader.readAsArrayBuffer(m.file);
   }
   proximo();
@@ -2032,9 +1935,9 @@ function baixarZip(){
 
 function baixarJson(){
   if(!State.jsonAtual){ toast('Nenhuma música.','w'); return; }
-  var blob = new Blob([State.jsonAtual],{type:'application/json'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
+  var blob=new Blob([State.jsonAtual],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
   a.href=url; a.download='play.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); },1000);
@@ -2055,8 +1958,8 @@ function copiarJson(){
 }
 
 function toggleMinificar(){
-  State.jsonMinificado = !State.jsonMinificado;
-  $('btnMinificar').textContent = State.jsonMinificado?'📄':'🔀';
+  State.jsonMinificado=!State.jsonMinificado;
+  $('btnMinificar').textContent=State.jsonMinificado?'📄':'🔀';
   atualizarJson();
   toast(State.jsonMinificado?'📦 JSON minificado':'📄 JSON expandido','i');
 }
@@ -2065,41 +1968,47 @@ function toggleMinificar(){
    BRAIN
    ============================================================ */
 function atualizarBrainStats(){
-  var total = Object.keys(State.brain.lixo).length
-           + Object.keys(State.brain.artistas).length
-           + Object.keys(State.brain.titulos).length
-           + Object.keys(State.brain.sufixos).length;
-  if($('brainBadge')) $('brainBadge').textContent = total+' itens';
-  if($('cntLixo')) $('cntLixo').textContent = Object.keys(State.brain.lixo).length;
-  if($('cntArt'))  $('cntArt').textContent  = Object.keys(State.brain.artistas).length;
-  if($('cntTit'))  $('cntTit').textContent  = Object.keys(State.brain.titulos).length;
-  if($('cntSuf'))  $('cntSuf').textContent  = Object.keys(State.brain.sufixos).length;
+  var total=Object.keys(State.brain.lixo).length
+          + Object.keys(State.brain.artistas).length
+          + Object.keys(State.brain.titulos).length
+          + (State.brain.regras||[]).length;
+  if($('brainBadge')) $('brainBadge').textContent=total+' itens';
+  if($('cntLixo')) $('cntLixo').textContent=Object.keys(State.brain.lixo).length;
+  if($('cntArt'))  $('cntArt').textContent=Object.keys(State.brain.artistas).length;
+  if($('cntTit'))  $('cntTit').textContent=Object.keys(State.brain.titulos).length;
+  if($('cntReg'))  $('cntReg').textContent=(State.brain.regras||[]).length;
 }
 
 function renderBrain(){
-  var cont = $('brainConteudo'); if(!cont) return;
-  var lista = State.brain[State.brainTab]||{};
-  var chaves = Object.keys(lista).sort();
-  if(chaves.length===0){
-    cont.innerHTML = '<div class="chip-vazio">Nada aprendido ainda nessa categoria.</div>';
+  var cont=$('brainConteudo'); if(!cont) return;
+  if(State.brainTab==='regras'){
+    var regras=State.brain.regras||[];
+    if(regras.length===0){ cont.innerHTML='<div class="chip-vazio">Nenhuma regra aprendida. Use 🎓 Ensinar.</div>'; return; }
+    cont.innerHTML='<div class="brain-lista">'+regras.map(function(r,idx){
+      var tipoLabel={sufixo:'🔤 suf',prefixo:'🔠 pre',substituir:'✂️ sub',remover:'🗑️ rem'}[r.tipo]||r.tipo;
+      var txt = esc(r.de) + (r.para?' → <b>'+esc(r.para)+'</b>':' → <i style="color:#e05a5a">(vazio)</i>');
+      return '<div class="chip"><span style="flex:1">'+tipoLabel+' · '+txt+'</span><button data-regidx="'+idx+'">✕</button></div>';
+    }).join('')+'</div>';
     return;
   }
-  cont.innerHTML = '<div class="brain-lista">'+chaves.map(function(k){
-    var label = lista[k]===true?k:(lista[k]||k);
+  var lista=State.brain[State.brainTab]||{};
+  var chaves=Object.keys(lista).sort();
+  if(chaves.length===0){ cont.innerHTML='<div class="chip-vazio">Nada aprendido nessa categoria.</div>'; return; }
+  cont.innerHTML='<div class="brain-lista">'+chaves.map(function(k){
+    var label=lista[k]===true?k:(lista[k]||k);
     return '<div class="chip"><span>'+esc(label)+'</span><button data-k="'+escAttr(k)+'" data-tab="'+State.brainTab+'">✕</button></div>';
   }).join('')+'</div>';
 }
 
 function exportarBrain(){
-  var data = JSON.stringify({
-    brain:State.brain,
-    abrev:State.abrev,
+  var data=JSON.stringify({
+    brain:State.brain, abrev:State.abrev,
     artistas:Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }),
     aliases:State.aliases
   },null,2);
-  var blob = new Blob([data],{type:'application/json'});
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
   a.href=url; a.download='cerebro_editor.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(url); },1000);
@@ -2111,7 +2020,7 @@ function importarBrain(){ $('inpBrain').click(); }
 function resetarBrain(){
   return modalConfirm('Apagar TODO o aprendizado?').then(function(ok){
     if(!ok) return;
-    State.brain = { lixo:{}, artistas:{}, titulos:{}, sufixos:{}, correcoes:{} };
+    State.brain={ lixo:{}, artistas:{}, titulos:{}, regras:[] };
     State.cache.hashLixo='';
     salvarBrain();
     renderBrain();
@@ -2120,10 +2029,132 @@ function resetarBrain(){
 }
 
 /* ============================================================
+   MODAL "ENSINAR"
+   ============================================================ */
+function abrirEnsinar(){
+  $('ensDe').value='';
+  $('ensPara').value='';
+  $('ensTipo').value='sufixo';
+  atualizarPreviewEnsinar();
+  renderRegrasEnsinar();
+  $('ensinarOverlay').classList.add('on');
+  setTimeout(function(){ $('ensDe').focus(); },200);
+}
+
+function fecharEnsinar(){ $('ensinarOverlay').classList.remove('on'); }
+
+function atualizarPreviewEnsinar(){
+  var de=$('ensDe').value.trim();
+  var para=$('ensPara').value.trim();
+  var tipo=$('ensTipo').value;
+  var prev=$('ensPreview');
+  if(!de){ prev.innerHTML='<span style="color:#6a6a8e">Digite acima para ver o preview...</span>'; return; }
+
+  /* Pega um exemplo real (primeira música) ou usa exemplo padrão */
+  var exemplo = State.musicas.length>0 ? State.musicas[0].originalName.replace(/\.[^.]+$/,'') : 'ForeignerVEVO - Sweet Love';
+  var antes = exemplo;
+  var depois = simularRegra(exemplo, {de:de, para:para, tipo:tipo});
+
+  prev.innerHTML =
+    '<div class="antes">🔴 '+esc(antes)+'</div>'+
+    '<div class="seta">↓</div>'+
+    '<div class="depois">🟢 '+esc(depois)+'</div>';
+}
+
+function simularRegra(texto, regra){
+  if(!texto || !regra.de) return texto;
+  var de=regra.de, para=regra.para, tipo=regra.tipo;
+  if(tipo==='sufixo'){
+    var re=new RegExp(escapeRegex(de)+'$','i');
+    if(re.test(texto)) return texto.replace(re,'').replace(/[\s\-_.]+$/,'').trim();
+  } else if(tipo==='prefixo'){
+    var re2=new RegExp('^'+escapeRegex(de),'i');
+    if(re2.test(texto)) return texto.replace(re2,'').replace(/^[\s\-_.]+/,'').trim();
+  } else if(tipo==='substituir'){
+    return texto.replace(new RegExp(escapeRegex(de),'gi'), para||'');
+  } else if(tipo==='remover'){
+    var re3=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])'+escapeRegex(de)+'([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
+    return texto.replace(re3,' ');
+  }
+  return texto;
+}
+
+function renderRegrasEnsinar(){
+  var cont=$('ensRegrasConteudo');
+  var regras=State.brain.regras||[];
+  if(regras.length===0){
+    cont.innerHTML='<div style="color:#6a6a8e;font-size:12px;text-align:center;padding:8px">Nenhuma regra ensinada ainda.</div>';
+    return;
+  }
+  cont.innerHTML=regras.map(function(r,idx){
+    var tipoLabel={sufixo:'suf',prefixo:'pre',substituir:'sub',remover:'rem'}[r.tipo]||r.tipo;
+    var txt='<b>'+esc(r.de)+'</b>'+(r.para?' → <b>'+esc(r.para)+'</b>':' → (vazio)');
+    return '<div class="regra-item">'+
+      '<span class="tipo '+tipoLabel+'">'+tipoLabel+'</span>'+
+      '<span class="txt">'+txt+'</span>'+
+      '<button data-regidx="'+idx+'">✕</button>'+
+    '</div>';
+  }).join('');
+}
+
+function ensinarAgora(){
+  var de=$('ensDe').value.trim();
+  var para=$('ensPara').value.trim();
+  var tipo=$('ensTipo').value;
+  if(!de){ toast('Digite o texto errado no campo "De".','w'); return; }
+
+  /* Verifica se já existe regra igual */
+  var regras=State.brain.regras||[];
+  for(var i=0;i<regras.length;i++){
+    if(norm(regras[i].de)===norm(de) && regras[i].tipo===tipo){
+      regras[i].para=para;
+      salvarBrain();
+      toast('Regra atualizada!','s');
+      renderRegrasEnsinar();
+      atualizarPreviewEnsinar();
+      aplicarRegrasNasMusicas();
+      return;
+    }
+  }
+
+  regras.push({de:de, para:para, tipo:tipo});
+  State.brain.regras=regras;
+  salvarBrain();
+  toast('🎓 Regra aprendida!','save');
+  renderRegrasEnsinar();
+  atualizarPreviewEnsinar();
+  aplicarRegrasNasMusicas();
+}
+
+function aplicarRegrasNasMusicas(){
+  if(State.musicas.length===0) return;
+  /* Re-analisa cada música aplicando as regras */
+  State.musicas.forEach(function(m){
+    var p=parseNome(m.originalName);
+    m.artist=p.a;
+    m.title=p.t;
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+  });
+  render();
+  toast('✅ Regras aplicadas nas músicas!','s');
+}
+
+function removerRegra(idx){
+  var regras=State.brain.regras||[];
+  if(idx<0 || idx>=regras.length) return;
+  var r=regras.splice(idx,1)[0];
+  salvarBrain();
+  renderRegrasEnsinar();
+  renderBrain();
+  toast('🗑️ Regra removida: '+r.de,'i');
+}
+
+/* ============================================================
    DEMO
    ============================================================ */
 function demo(){
-  var exemplos = [
+  var exemplos=[
     'ForeignerVEVO - Sweet Love.mp3',
     'Jota Quest - Jota Quest - Tim Maia - Réu Confesso.mp3',
     'Leonid & Friends - Sweet Love.mp3',
@@ -2139,18 +2170,15 @@ function demo(){
     'LUDMILLA e Alcione - Faz uma Loucura por mim _ Você me vira a cabeça.mp3',
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3'
   ];
-  State.musicas = exemplos.map(function(nome){
-    var p = parseNome(nome);
-    var m = {
+  State.musicas=exemplos.map(function(nome){
+    var p=parseNome(nome);
+    var m={
       id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-      file:null,
-      originalName:nome,
-      artist:p.a,
-      title:p.t,
-      genero:'Music',
+      file:null, originalName:nome,
+      artist:p.a, title:p.t, genero:'Music',
       corrompido:ehLixo(p.a)||ehLixo(p.t)||norm(p.a)===norm(p.t)
     };
-    m.newName = gerarNome(m,comExt(nome));
+    m.newName=gerarNome(m,comExt(nome));
     return m;
   });
   State.map.clear();
@@ -2170,7 +2198,7 @@ function init(){
     renderArtistas();
     renderAliases();
 
-    var zona = $('zona'), inp = $('inp');
+    var zona=$('zona'),inp=$('inp');
     zona.addEventListener('click',function(e){ if(e.target!==inp) inp.click(); });
     zona.addEventListener('dragover',function(e){ e.preventDefault(); zona.classList.add('drag'); });
     zona.addEventListener('dragleave',function(e){ e.preventDefault(); zona.classList.remove('drag'); });
@@ -2187,10 +2215,10 @@ function init(){
 
     document.querySelectorAll('[data-toggle]').forEach(function(btn){
       btn.addEventListener('click',function(){
-        var box = $(btn.dataset.toggle);
+        var box=$(btn.dataset.toggle);
         if(!box) return;
         box.classList.toggle('on');
-        btn.textContent = box.classList.contains('on')?'🙈':'👁️';
+        btn.textContent=box.classList.contains('on')?'🙈':'👁️';
       });
     });
 
@@ -2216,13 +2244,30 @@ function init(){
     $('btnAddAlias').addEventListener('click',adicionarAlias);
     $('aliasPara').addEventListener('keydown',function(e){ if(e.key==='Enter') adicionarAlias(); });
     $('inpImportArt').addEventListener('change',function(e){
-      var f = e.target.files[0];
+      var f=e.target.files[0];
       if(f) processarImportArt(f);
       e.target.value='';
     });
 
+    /* ENSINAR */
+    $('btnEnsinar').addEventListener('click',abrirEnsinar);
+    $('ensCancel').addEventListener('click',fecharEnsinar);
+    $('ensOk').addEventListener('click',function(){ ensinarAgora(); });
+    $('ensDe').addEventListener('input',atualizarPreviewEnsinar);
+    $('ensPara').addEventListener('input',atualizarPreviewEnsinar);
+    $('ensTipo').addEventListener('change',atualizarPreviewEnsinar);
+    $('ensinarOverlay').addEventListener('click',function(e){
+      if(e.target===$('ensinarOverlay')) fecharEnsinar();
+    });
+
+    /* Remover regra (delegado) */
     document.addEventListener('click',function(e){
-      var btn = e.target.closest('.chip button');
+      var btnReg=e.target.closest('button[data-regidx]');
+      if(btnReg){
+        removerRegra(parseInt(btnReg.dataset.regidx,10));
+        return;
+      }
+      var btn=e.target.closest('.chip button');
       if(!btn) return;
       if(btn.dataset.tab!==undefined){
         delete State.brain[btn.dataset.tab][btn.dataset.k];
@@ -2231,22 +2276,20 @@ function init(){
         renderBrain();
         toast('Removido','i');
       } else if(btn.closest('#artLista')){
-        var nome = State.artistasConhecidos[btn.dataset.k];
+        var nome=State.artistasConhecidos[btn.dataset.k];
         delete State.artistasConhecidos[btn.dataset.k];
         State.cache.hashArt='';
         State.cache.dirtyArt=true;
         if(salvarArtistas()){ renderArtistas(); toast('🗑️ Removido: '+nome,'i'); }
       } else if(btn.closest('#aliasLista')){
         delete State.aliases[btn.dataset.k];
-        salvarAliases();
-        renderAliases();
-        toast('Alias removido','i');
+        salvarAliases(); renderAliases(); toast('Alias removido','i');
       } else if(btn.closest('#abrevLista')){
         delete State.abrev[btn.dataset.k];
         salvarAbrev();
         toast('Removido: '+btn.dataset.k,'i');
         if(State.musicas.length>0){
-          State.musicas.forEach(function(m){ m.newName = gerarNome(m,comExt(m.originalName)); });
+          State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
           render();
         }
       }
@@ -2268,14 +2311,14 @@ function init(){
     $('btnMinificar').addEventListener('click',toggleMinificar);
 
     $('btnToggleJson').addEventListener('click',function(){
-      var p = $('jsonPainel');
+      var p=$('jsonPainel');
       p.classList.toggle('on');
-      $('btnToggleJson').textContent = p.classList.contains('on')?'📋 Fechar':'📋 JSON';
+      $('btnToggleJson').textContent=p.classList.contains('on')?'📋 Fechar':'📋 JSON';
       if(p.classList.contains('on')) p.scrollIntoView({behavior:'smooth'});
     });
 
     $('btnBrain').addEventListener('click',function(){
-      var p = $('brainPainel');
+      var p=$('brainPainel');
       p.classList.toggle('on');
       if(p.classList.contains('on')){ renderBrain(); p.scrollIntoView({behavior:'smooth'}); }
     });
@@ -2284,7 +2327,7 @@ function init(){
       tab.addEventListener('click',function(){
         document.querySelectorAll('.brain-tab').forEach(function(t){ t.classList.remove('on'); });
         tab.classList.add('on');
-        State.brainTab = tab.dataset.tab;
+        State.brainTab=tab.dataset.tab;
         renderBrain();
       });
     });
@@ -2294,23 +2337,22 @@ function init(){
     $('btnResetBrain').addEventListener('click',resetarBrain);
 
     $('inpBrain').addEventListener('change',function(e){
-      var f = e.target.files[0];
+      var f=e.target.files[0];
       if(!f) return;
-      var r = new FileReader();
-      r.onload = function(ev){
+      var r=new FileReader();
+      r.onload=function(ev){
         try{
-          var obj = JSON.parse(ev.target.result);
+          var obj=JSON.parse(ev.target.result);
           if(obj.brain){
-            State.brain.lixo = obj.brain.lixo||{};
-            State.brain.artistas = obj.brain.artistas||{};
-            State.brain.titulos = obj.brain.titulos||{};
-            State.brain.sufixos = obj.brain.sufixos||{};
-            State.brain.correcoes = obj.brain.correcoes||{};
+            State.brain.lixo=obj.brain.lixo||{};
+            State.brain.artistas=obj.brain.artistas||{};
+            State.brain.titulos=obj.brain.titulos||{};
+            State.brain.regras=obj.brain.regras||[];
           }
-          if(obj.abrev) State.abrev = obj.abrev;
-          if(obj.aliases) State.aliases = obj.aliases;
+          if(obj.abrev) State.abrev=obj.abrev;
+          if(obj.aliases) State.aliases=obj.aliases;
           if(obj.artistas && Array.isArray(obj.artistas)){
-            State.artistasConhecidos = {};
+            State.artistasConhecidos={};
             obj.artistas.forEach(function(a){ State.artistasConhecidos[norm(a)]=a; });
           }
           State.cache.hashLixo='';
@@ -2354,8 +2396,8 @@ function init(){
       if(typeof ID3Writer==='undefined') toast('⚠️ ID3Writer não carregou','w');
     },500);
 
-    console.log('🎵 Editor v13 | '+Object.keys(State.artistasConhecidos).length+' artistas');
-    toast('💾 Motor inteligente ativo!','save');
+    console.log('🎵 Editor v14 | '+Object.keys(State.artistasConhecidos).length+' artistas');
+    toast('🎓 Motor + Ensino ativo!','save');
   }catch(e){
     console.error('ERRO NO INIT:',e);
     alert('Erro ao iniciar: '+e.message+'\n\n'+(e.stack||''));
