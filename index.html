@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0b12">
-<title>🎵 Editor de Músicas v11</title>
+<title>🎵 Editor de Músicas v12</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -18,7 +18,7 @@
   --txt:#e8e8f0;--txt2:#a8a8c8;--txt3:#6a6a8e;
   --purple:#c084fc;--purple2:#7c6cf0;
   --green:#34b87a;--red:#e05a5a;--orange:#f59e0b;--blue:#60a5fa;--cyan:#22d3ee;
-  --touch:44px;
+  --touch:44px;--radius:12px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--txt);
@@ -32,17 +32,17 @@ input,textarea,button,select{font-family:inherit;font-size:16px}
   margin:0 -12px 12px;padding:8px 12px 12px}
 .header h1{font-size:20px;color:var(--purple);margin-bottom:2px;display:flex;align-items:center;gap:8px}
 .header .sub{font-size:12px;color:var(--txt3);margin-bottom:10px}
-.stats{background:var(--bg2);padding:10px 12px;border-radius:12px;
+.stats{background:var(--bg2);padding:10px 12px;border-radius:var(--radius);
   font-size:13px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid var(--border);
   align-items:center}
 .stats b{color:#fff}
 .stats .ok{color:var(--green)}
 .stats .warn{color:var(--orange)}
-.stats .save-status{font-size:11px;padding:4px 10px;border-radius:8px;
+.save-status{font-size:11px;padding:4px 10px;border-radius:8px;
   background:var(--bg4);color:var(--txt3);border:1px solid var(--border2);
   transition:all .3s;margin-left:auto;white-space:nowrap}
-.stats .save-status.saved{background:rgba(52,184,122,.15);color:var(--green);border-color:var(--green)}
-.stats .save-status.saving{background:rgba(245,158,11,.15);color:var(--orange);border-color:var(--orange)}
+.save-status.saved{background:rgba(52,184,122,.15);color:var(--green);border-color:var(--green)}
+.save-status.saving{background:rgba(245,158,11,.15);color:var(--orange);border-color:var(--orange)}
 .zona{border:2px dashed var(--border2);border-radius:16px;padding:32px 16px;
   text-align:center;cursor:pointer;background:var(--bg3);margin-bottom:12px;
   transition:all .2s;min-height:140px;display:flex;flex-direction:column;
@@ -64,12 +64,11 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .b4{background:var(--red);color:#fff}
 .b5{background:var(--border2);color:var(--txt2)}
 .b6{background:var(--purple);color:#1a0033}
-.b-ghost{background:transparent;color:var(--txt2);border:1px solid var(--border2)}
-.box{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
+.box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
   padding:12px;margin-bottom:12px}
 .box-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .box-head label{font-size:13px;color:var(--purple);font-weight:700;flex:1;min-width:0}
-.box-head .badge{background:var(--border2);color:var(--txt2);font-size:11px;
+.badge{background:var(--border2);color:var(--txt2);font-size:11px;
   padding:2px 8px;border-radius:8px;font-weight:700}
 .box-conteudo{display:none}
 .box-conteudo.on{display:block}
@@ -94,7 +93,7 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .chip-vazio{color:var(--txt3);font-size:12px;padding:16px;text-align:center;width:100%}
 textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .lista{margin-bottom:12px}
-.card-mus{background:var(--bg3);border-radius:12px;padding:12px;
+.card-mus{background:var(--bg3);border-radius:var(--radius);padding:12px;
   margin-bottom:10px;border:1px solid var(--border);position:relative;
   border-left:3px solid var(--green);transition:border-color .2s}
 .card-mus.cor{border-left-color:var(--orange);background:rgba(245,158,11,.04)}
@@ -121,18 +120,15 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   display:flex;gap:8px;z-index:90;border-top:1px solid var(--border)}
 .barra-fixa button{flex:1;font-size:13px;padding:12px 8px}
 .barra-fixa button span{display:none}
-.painel{background:var(--bg3);border-radius:12px;border:1px solid var(--border);
+.painel{background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);
   margin-bottom:12px;overflow:hidden;display:none}
 .painel.on{display:block}
 .painel-head{padding:12px;background:var(--bg4);border-bottom:1px solid var(--border);
   display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .painel-head .tt{font-size:13px;font-weight:700;color:var(--purple);
   display:flex;align-items:center;gap:6px;flex:1;min-width:0}
-.painel-head .badge{background:var(--border2);color:var(--txt2);font-size:10px;
-  padding:2px 8px;border-radius:8px;font-weight:600}
 .painel-head .acoes{display:flex;gap:6px;flex-wrap:wrap}
 .painel-head .acoes button{padding:8px 12px;font-size:12px;min-height:36px}
-.painel-corpo{padding:0}
 .painel-corpo textarea{width:100%;min-height:200px;max-height:400px;
   background:var(--bg);border:none;color:#a8d8a8;
   font-family:'Courier New',monospace;font-size:12px;padding:14px;
@@ -151,7 +147,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .toast-wrap{position:fixed;top:calc(12px + var(--safe-top));
   left:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;
   pointer-events:none}
-.toast{padding:12px 16px;border-radius:12px;background:var(--bg4);
+.toast{padding:12px 16px;border-radius:var(--radius);background:var(--bg4);
   border:1px solid var(--border2);color:var(--txt);font-size:14px;
   box-shadow:0 8px 32px rgba(0,0,0,.7);font-weight:500;
   animation:slideDown .3s;pointer-events:auto}
@@ -176,9 +172,6 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   background:var(--border2);border-radius:4px;margin:0 auto 16px}
 .modal h3{color:var(--txt);font-size:16px;margin-bottom:12px;text-align:center}
 .modal p{color:var(--txt2);font-size:14px;text-align:center;margin-bottom:16px;white-space:pre-wrap}
-.modal input{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
-  border-radius:10px;padding:14px;color:var(--txt);font-size:16px;
-  text-align:center;outline:none;margin-bottom:14px}
 .modal .btns{display:flex;gap:8px}
 .modal .btns button{flex:1;min-height:48px;font-size:15px}
 .modal .btn-ok{background:var(--purple2);color:#fff}
@@ -191,15 +184,14 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .acoes-sec{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .acoes-sec button{font-size:13px;padding:12px 8px}
 .acoes-sec button.full{grid-column:1/-1}
-.acoes-sec .b3{grid-column:1/-1}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.row-2 label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;font-weight:600}
 .inp-small{background:var(--bg3);border:1px solid var(--border2);
   border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;
   outline:none;width:100%}
 .inp-small:focus{border-color:var(--purple2)}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.row-2 label{display:block;font-size:11px;color:var(--txt3);
-  margin-bottom:4px;text-transform:uppercase;font-weight:600}
-.vazio-card{background:var(--bg3);border-radius:12px;padding:48px 20px;
+.vazio-card{background:var(--bg3);border-radius:var(--radius);padding:48px 20px;
   text-align:center;color:var(--txt3);border:1px dashed var(--border2)}
 .vazio-card .big{font-size:52px;display:block;margin-bottom:12px;opacity:.5}
 .vazio-card .t{font-size:14px;line-height:1.5}
@@ -213,23 +205,20 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   .card-mus .campos{display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:10px}
   .card-mus .campo{margin-bottom:0}
   .acoes-sec{grid-template-columns:repeat(4,1fr)}
-  .acoes-sec .b3{grid-column:auto}
   .toast-wrap{top:20px;left:auto;right:20px;max-width:400px}
   .modal-overlay{align-items:center}
   .modal{border-radius:16px;transform:scale(.9);opacity:0}
   .modal-overlay.on .modal{transform:scale(1);opacity:1}
   .modal::before{display:none}
 }
-@media(min-width:1024px){
-  body{max-width:1200px}
-}
+@media(min-width:1024px){body{max-width:1200px}}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v11</span></h1>
-  <div class="sub">🧠 Abrevia • Remove números • Artistas turbinados • <b style="color:var(--green)">💾 Salvamento blindado</b></div>
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v12</span></h1>
+  <div class="sub">🧠 Abrevia • Remove números • FLAC • <b style="color:var(--green)">💾 Salvamento blindado</b></div>
   <div class="stats">
     <span>📄 <b id="stTotal">0</b></span>
     <span>✅ <b class="ok" id="stOk">0</b></span>
@@ -251,9 +240,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
     <button class="b5" data-toggle="lixoBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
   </div>
   <div class="box-conteudo" id="lixoBox">
-    <div class="inp-row">
-      <input type="text" class="inp" id="lixoManual" placeholder="Palavra/frase pra remover...">
-    </div>
+    <div class="inp-row"><input type="text" class="inp" id="lixoManual" placeholder="Palavra/frase pra remover..."></div>
     <div class="inp-row">
       <button class="b6" id="btnAddLixo" style="flex:1">➕ Adicionar</button>
       <button class="b2" id="btnAddLixoAplicar" style="flex:1">➕ Aplicar agora</button>
@@ -288,9 +275,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <button class="b5" id="btnLimparMassa">🗑️</button>
     </div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
-      <div class="inp-row" style="margin-bottom:8px">
-        <label style="font-size:12px;color:var(--txt2);font-weight:600;flex:1">🔗 Aliases (mesmo artista, nomes diferentes)</label>
-      </div>
+      <div style="font-size:12px;color:var(--txt2);font-weight:600;margin-bottom:8px">🔗 Aliases (mesmo artista, nomes diferentes)</div>
       <div class="chips" id="aliasLista"></div>
       <div class="inp-row" style="margin-top:8px">
         <input type="text" class="inp" id="aliasDe" placeholder="Nome alternativo">
@@ -321,22 +306,14 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <input type="text" class="inp" id="abrevPara" placeholder="Abreviação">
       <button class="b6" id="btnAddAbrev">➕</button>
     </div>
-    <div class="inp-row">
-      <button class="b5" id="btnResetAbrev" style="flex:1">↺ Restaurar padrão</button>
-    </div>
+    <div class="inp-row"><button class="b5" id="btnResetAbrev" style="flex:1">↺ Restaurar padrão</button></div>
   </div>
 </div>
 
 <div class="box">
   <div class="row-2">
-    <div>
-      <label>ID inicial</label>
-      <input type="number" id="idInicial" value="1" min="1" class="inp-small">
-    </div>
-    <div>
-      <label>Gênero</label>
-      <input type="text" id="generoGeral" value="Music" class="inp-small">
-    </div>
+    <div><label>ID inicial</label><input type="number" id="idInicial" value="1" min="1" class="inp-small"></div>
+    <div><label>Gênero</label><input type="text" id="generoGeral" value="Music" class="inp-small"></div>
   </div>
   <button class="b1" id="btnGenero" style="width:100%">Aplicar gênero em todas</button>
 </div>
@@ -346,8 +323,8 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
   <button class="b5" id="btnReset">↺ Resetar</button>
   <button class="b4" id="btnClear">🗑️ Limpar tudo</button>
-  <button class="b5" id="btnDemo" style="grid-column:1/-1">🎯 Testar exemplo</button>
-  <button class="b6" id="btnBrain" style="grid-column:1/-1">🧠 Ver Aprendizados</button>
+  <button class="b5 full" id="btnDemo">🎯 Testar exemplo</button>
+  <button class="b6 full" id="btnBrain">🧠 Ver Aprendizados</button>
 </div>
 
 <div class="lista" id="listaWrap">
@@ -375,9 +352,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
       <button class="b5" id="btnMinificar">🔀</button>
     </div>
   </div>
-  <div class="painel-corpo">
-    <textarea id="jsonTexto" readonly placeholder="Arraste músicas para gerar o JSON..."></textarea>
-  </div>
+  <div class="painel-corpo"><textarea id="jsonTexto" readonly placeholder="Arraste músicas para gerar o JSON..."></textarea></div>
   <div class="painel-info">
     <span id="jsonInfo">Aguardando músicas...</span>
     <span id="jsonTamanho">0 chars</span>
@@ -402,14 +377,12 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 </div>
 
 <input type="file" id="inpBrain" accept=".json" style="display:none">
-
 <div class="toast-wrap" id="toastWrap"></div>
 
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
     <h3 id="modalTitle">Título</h3>
     <p id="modalMsg">Mensagem</p>
-    <input type="text" id="modalInput" style="display:none">
     <div class="btns">
       <button class="btn-cancel" id="modalCancel">Cancelar</button>
       <button class="btn-ok" id="modalOk">OK</button>
@@ -421,7 +394,11 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 (function(){
 'use strict';
 
+/* ============================================================
+   CONSTANTES
+   ============================================================ */
 var LIMITE_NOME = 60;
+var STOPWORDS = new Set(['a','o','e','de','da','do','das','dos','em','no','na','nos','nas','um','uma','que','com','por','para','se','ao','os','as','me','te','se','lhe','nos','vos','sua','seu']);
 
 var ABREV_PADRAO = {
   'você':'vc','voce':'vc','vocês':'vcs','voces':'vcs',
@@ -454,7 +431,6 @@ var ABREV_PADRAO = {
   'separar':'sep.','separação':'sep.','separacao':'sep.',
   'querem':'quer.','querer':'quer.','queria':'quer.',
   'voltou':'volt.','voltar':'volt.','voltando':'volt.',
-  'manhã':'manhã','manha':'manhã',
   'parabéns':'parab.','parabens':'parab.',
   'pressão':'press.','pressao':'press.',
   'paredão':'pared.','paredao':'pared.',
@@ -492,7 +468,6 @@ var LIXO_BASE = [
   'mp3','mp4','m4a','flac','opus','ogg','wav','aac','wma',
   'lame','cbr','vbr','stereo','mono','joint stereo',
   'hires','hi-res','hi res','24bit','16bit',
-  '48kbps','64kbps','96kbps','160kbps','224kbps','320 kbps','48 kbps',
   'dvd','cd','bluray','blu-ray','blu ray','vhs',
   'deluxe','deluxe edition','edição especial','edicao especial',
   'special edition','collector','collectors edition',
@@ -520,43 +495,43 @@ var LIXO_BASE = [
   'ao vivo em','gravado em','direto de',
   'rip','cd rip','web rip','radio rip','vinyl rip',
   'fm','am','live fm','radio fm',
-  'música','musica','músicas','musicas','canção','cancao','canções','cancoes',
+  'canção','cancao','canções','cancoes',
   'sucesso','sucessos','hit','hits',
   'chamego','single_version','single version','remastered version',
   're-recorded version','video oficial','vídeo oficial'
 ];
 
-var FEAT_RE = /\s+(feat\.?|ft\.?|part\.?|participação|participacao|com)\s+/i;
+var FEAT_RE = /\s+(feat\.?|ft\.?|part\.?|participação|participacao)\s+/i;
 
 var ARTISTAS_BASE = [
-  'Alcione','Alceu Valença','Alceu Valenca','Cartola','Clara Nunes','Djavan',
-  'Emílio Santiago','Emilio Santiago','Wando','Xande de Pilares','Zé Cantor',
+  'Alcione','Alceu Valença','Cartola','Clara Nunes','Djavan',
+  'Emílio Santiago','Wando','Xande de Pilares','Zé Cantor',
   'Zeca Pagodinho','Beth Carvalho','Martinho da Vila','Fundo de Quintal',
-  'Jorge Aragão','Jorge Aragao','Dona Ivone Lara','Paulinho da Viola',
+  'Jorge Aragão','Dona Ivone Lara','Paulinho da Viola',
   'Chico Buarque','Caetano Veloso','Gilberto Gil','Gal Costa','Maria Bethânia',
-  'Maria Bethania','Elis Regina','Tom Jobim','Vinicius de Moraes','João Gilberto',
-  'Joao Gilberto','Roberto Carlos','Erasmo Carlos','Tim Maia','Jorge Ben Jor',
-  'Novos Baianos','Raul Seixas','Legião Urbana','Legiao Urbana','Titãs','Titas',
-  'Paralamas do Sucesso','Barão Vermelho','Barao Vermelho','Cazuza','Renato Russo',
-  'Cássia Eller','Cassia Eller','Marisa Monte','Adriana Calcanhotto','Zélia Duncan',
-  'Zelia Duncan','Ana Carolina','Seu Jorge','Marcelo D2','Criolo','Racionais MCs',
-  'Ludmilla','LUDMILLA','Anitta','Ivete Sangalo','Claudia Leitte','Bell Marques',
-  'Chiclete com Banana','Asa de Águia','Asa de Aguia','Ara Ketu','É o Tchan',
-  'E o Tchan','Harmonia do Samba','Psirico','Leo Santana','Wesley Safadão',
-  'Wesley Safadao','Gusttavo Lima','Luan Santana','Jorge e Mateus',
-  'Matheus e Kauan','Henrique e Juliano','Zé Neto e Cristiano','Ze Neto e Cristiano',
-  'Marília Mendonça','Marilia Mendonca','Maiara e Maraísa','Maiara e Maraisa',
-  'Chitãozinho e Xororó','Chitaozinho e Xororo','Chrystian e Ralf',
-  'Leandro e Leonardo','João Paulo e Daniel','Joao Paulo e Daniel','Rick e Renner',
-  'Chico Rey e Paraná','Chico Rey e Parana','Gino e Geno','Tião Carreiro e Pardinho',
-  'Tiao Carreiro e Pardinho','Pena Branca e Xavantinho','Almir Sater','Renato Teixeira',
-  'Sérgio Reis','Sergio Reis','Péricles','Pericles','Thiaguinho','Ferrugem',
-  'Dilsinho','Mumuzinho','Sorriso Maroto','Exaltasamba','Revelação','Revelacao',
-  'Katinguelê','Katinguele','Negritude Junior','Soweto','Raça Negra','Raca Negra',
-  'Brasas do Forró','Brasas do Forro','Augeboys','Fernandinha','Vitinho Imperador',
+  'Elis Regina','Tom Jobim','Vinicius de Moraes','João Gilberto',
+  'Roberto Carlos','Erasmo Carlos','Tim Maia','Jorge Ben Jor',
+  'Novos Baianos','Raul Seixas','Legião Urbana','Titãs',
+  'Paralamas do Sucesso','Barão Vermelho','Cazuza','Renato Russo',
+  'Cássia Eller','Marisa Monte','Adriana Calcanhotto','Zélia Duncan',
+  'Ana Carolina','Seu Jorge','Marcelo D2','Criolo','Racionais MCs',
+  'Ludmilla','Anitta','Ivete Sangalo','Claudia Leitte','Bell Marques',
+  'Chiclete com Banana','Asa de Águia','Ara Ketu','É o Tchan',
+  'Harmonia do Samba','Psirico','Leo Santana','Wesley Safadão',
+  'Gusttavo Lima','Luan Santana','Jorge e Mateus',
+  'Matheus e Kauan','Henrique e Juliano','Zé Neto e Cristiano',
+  'Marília Mendonça','Maiara e Maraísa',
+  'Chitãozinho e Xororó','Chrystian e Ralf',
+  'Leandro e Leonardo','João Paulo e Daniel','Rick e Renner',
+  'Chico Rey e Paraná','Gino e Geno','Tião Carreiro e Pardinho',
+  'Pena Branca e Xavantinho','Almir Sater','Renato Teixeira',
+  'Sérgio Reis','Péricles','Thiaguinho','Ferrugem',
+  'Dilsinho','Mumuzinho','Sorriso Maroto','Exaltasamba','Revelação',
+  'Katinguelê','Negritude Junior','Soweto','Raça Negra',
+  'Brasas do Forró','Augeboys','Fernandinha','Vitinho Imperador',
   'Madonna','Michael Jackson','Prince','Whitney Houston','Mariah Carey',
   'Celine Dion','Cher','Tina Turner','Aretha Franklin','Diana Ross',
-  'The Weeknd','Drake','Beyoncé','Beyonce','Rihanna','Lady Gaga','Katy Perry',
+  'The Weeknd','Drake','Beyoncé','Rihanna','Lady Gaga','Katy Perry',
   'Taylor Swift','Adele','Ed Sheeran','Bruno Mars','Justin Bieber',
   'Ariana Grande','Dua Lipa','Billie Eilish','Olivia Rodrigo','Harry Styles',
   'The Beatles','John Lennon','Paul McCartney','George Harrison','Ringo Starr',
@@ -568,347 +543,274 @@ var ARTISTAS_BASE = [
   'Bob Sinclar','Kiesza','FISHER','David Guetta','Calvin Harris',
   'Tiësto','Avicii','Martin Garrix','Marshmello','Diplo',
   'Jennifer Paige','Jennifer Lopez','Shakira','Enrique Iglesias','Ricky Martin',
-  'Marc Anthony','Julio Iglesias','Luis Miguel','Juanes','Juan Luis Guerra',
-  'Lado B','Gente da Antiga','Yaô'
+  'Marc Anthony','Julio Iglesias','Luis Miguel','Juanes','Juan Luis Guerra'
 ];
 
-var BRAIN_KEY = 'editor_musicas_brain_v9';
-var ABREV_KEY = 'editor_musicas_abrev_v9';
-var ART_KEY   = 'editor_musicas_artistas_v9';
-var ALIAS_KEY = 'editor_musicas_aliases_v9';
+/* ============================================================
+   ESTADO
+   ============================================================ */
+var State = {
+  musicas: [],
+  idc: 0,
+  jsonMinificado: false,
+  jsonAtual: '',
+  brain: { lixo:{}, artistas:{}, titulos:{} },
+  aliases: {},
+  abrev: {},
+  artistasConhecidos: {},
+  artBusca: '',
+  brainTab: 'lixo',
+  map: new Map(),
+  cache: { regexLixo:null, hashLixo:'', regexArt:null, hashArt:'', dirtyArt:false }
+};
 
-var musicas = [];
-var idc = 0;
-var jsonMinificado = false;
-var jsonAtual = '';
-var brain = { lixo:{}, artistas:{}, titulos:{} };
-var aliases = {};
-var abrev = {};
-var artistasConhecidos = {};
-var artBuscaAtual = '';
-var brainTabAtual = 'lixo';
-var mapMusicas = new Map();
+var KEYS = {
+  brain:'editor_musicas_brain_v12',
+  abrev:'editor_musicas_abrev_v12',
+  art:'editor_musicas_artistas_v12',
+  alias:'editor_musicas_aliases_v12'
+};
 
-var _cacheRegexLixo = null;
-var _cacheHashLixo = '';
-var _cacheRegexArt = null;
-var _cacheHashArt = '';
-var _dirtyArtistas = false;
-
+/* ============================================================
+   HELPERS
+   ============================================================ */
 function $(id){ return document.getElementById(id); }
-
-function comExt(n){
-  var i = n.lastIndexOf('.');
-  return i > 0 ? n.slice(i) : '';
-}
-
-function esc(s){
-  return String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function escAttr(s){
-  return String(s == null ? '' : s)
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function escapeRegex(s){
-  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 function norm(s){
   return String(s||'').toLowerCase()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
-function debounce(fn, ms){
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function escAttr(s){ return String(s==null?'':s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escapeRegex(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function comExt(n){ var i=n.lastIndexOf('.'); return i>0?n.slice(i):''; }
+
+function debounce(fn,ms){
   var t;
   return function(){
-    var self = this, args = arguments;
+    var self=this,args=arguments;
     clearTimeout(t);
-    t = setTimeout(function(){ fn.apply(self, args); }, ms);
+    t=setTimeout(function(){ fn.apply(self,args); },ms);
   };
 }
 
-function toast(msg, tipo){
-  var wrap = $('toastWrap');
-  if(!wrap) return;
-  var el = document.createElement('div');
-  el.className = 'toast ' + (tipo || 'i');
-  var ic = { s:'✅', e:'❌', w:'⚠️', i:'ℹ️', b:'🧠', save:'💾' };
-  el.textContent = (ic[tipo] || 'ℹ️') + ' ' + msg;
+function toast(msg,tipo){
+  var wrap=$('toastWrap'); if(!wrap) return;
+  var el=document.createElement('div');
+  el.className='toast '+(tipo||'i');
+  var ic={s:'✅',e:'❌',w:'⚠️',i:'ℹ️',b:'🧠',save:'💾'};
+  el.textContent=(ic[tipo]||'ℹ️')+' '+msg;
   wrap.appendChild(el);
   setTimeout(function(){
-    el.style.transition = 'all .3s';
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(-20px)';
-    setTimeout(function(){ el.remove(); }, 300);
-  }, 3500);
+    el.style.transition='all .3s';
+    el.style.opacity='0';
+    el.style.transform='translateY(-20px)';
+    setTimeout(function(){ el.remove(); },300);
+  },3500);
 }
 
-function modalConfirm(msg, title){
+/* Modal — resolve promise anterior se abrir outra */
+var _modalResolve=null;
+function modalConfirm(msg,title){
   return new Promise(function(resolve){
-    var ov = $('modalOverlay');
-    var tit = $('modalTitle');
-    var m = $('modalMsg');
-    var inp = $('modalInput');
-    var ok = $('modalOk');
-    var cancel = $('modalCancel');
-    tit.textContent = title || 'Confirmação';
-    m.textContent = msg;
-    inp.style.display = 'none';
+    if(_modalResolve){ _modalResolve(false); _modalResolve=null; }
+    _modalResolve=resolve;
+    var ov=$('modalOverlay'),tit=$('modalTitle'),m=$('modalMsg');
+    var ok=$('modalOk'),cancel=$('modalCancel');
+    tit.textContent=title||'Confirmação';
+    m.textContent=msg;
     ov.classList.add('on');
     function fechar(v){
+      if(_modalResolve===resolve) _modalResolve=null;
       ov.classList.remove('on');
-      ok.onclick = null; cancel.onclick = null; ov.onclick = null;
-      document.removeEventListener('keydown', onKey);
+      ok.onclick=null; cancel.onclick=null; ov.onclick=null;
+      document.removeEventListener('keydown',onKey);
       resolve(v);
     }
     function onKey(e){
-      if(e.key === 'Escape') fechar(false);
-      if(e.key === 'Enter') fechar(true);
+      if(e.key==='Escape') fechar(false);
+      if(e.key==='Enter') fechar(true);
     }
-    document.addEventListener('keydown', onKey);
-    ok.onclick = function(){ fechar(true); };
-    cancel.onclick = function(){ fechar(false); };
-    ov.onclick = function(e){ if(e.target === ov) fechar(false); };
+    document.addEventListener('keydown',onKey);
+    ok.onclick=function(){ fechar(true); };
+    cancel.onclick=function(){ fechar(false); };
+    ov.onclick=function(e){ if(e.target===ov) fechar(false); };
   });
 }
 
 function setSaveStatus(status){
-  var el = $('saveStatus');
-  if(!el) return;
-  el.className = 'save-status ' + status;
-  if(status === 'saving'){
-    el.textContent = '⏳ Salvando...';
-  } else if(status === 'saved'){
-    el.textContent = '✅ Salvo!';
-    setTimeout(function(){
-      el.textContent = '💾 Pronto';
-      el.className = 'save-status';
-    }, 2000);
-  } else {
-    el.textContent = '💾 Pronto';
+  var el=$('saveStatus'); if(!el) return;
+  el.className='save-status '+status;
+  if(status==='saving') el.textContent='⏳ Salvando...';
+  else if(status==='saved'){
+    el.textContent='✅ Salvo!';
+    setTimeout(function(){ el.textContent='💾 Pronto'; el.className='save-status'; },2000);
+  } else el.textContent='💾 Pronto';
+}
+
+/* ============================================================
+   PERSISTÊNCIA (com fallback robusto)
+   ============================================================ */
+function safeSetItem(key,value,aviso){
+  try{
+    localStorage.setItem(key,value);
+    try{ localStorage.setItem(key+'_backup',value); localStorage.setItem(key+'_backup_at',String(Date.now())); }catch(e){}
+    return true;
+  }catch(e){
+    console.warn('Falha ao salvar '+key+':',e);
+    if(aviso) toast('❌ '+aviso+' (espaço cheio)', 'e');
+    return false;
   }
 }
 
-function salvarArtistas(){
-  if(!_dirtyArtistas && localStorage.getItem(ART_KEY)) return true;
-  setSaveStatus('saving');
+function safeGetItem(key){
   try{
-    var arr = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; });
-    var json = JSON.stringify(arr);
-    localStorage.setItem(ART_KEY, json);
-    try{
-      localStorage.setItem(ART_KEY + '_backup', json);
-      localStorage.setItem(ART_KEY + '_backup_data', String(Date.now()));
-    }catch(e){}
-    try{ localStorage.setItem(ALIAS_KEY + '_backup', JSON.stringify(aliases || {})); }catch(e){}
-    _dirtyArtistas = false;
-    setSaveStatus('saved');
-    return true;
-  }catch(e){
-    console.error('Erro ao salvar artistas:', e);
-    try{
-      var arr2 = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; });
-      localStorage.setItem(ART_KEY, JSON.stringify(arr2));
-      _dirtyArtistas = false;
-      toast('⚠️ Salvo sem backup (espaço cheio)', 'w');
-      setSaveStatus('saved');
-      return true;
-    }catch(e2){
-      toast('❌ Espaço cheio! Não foi possível salvar.', 'e');
-      setSaveStatus('');
-      return false;
-    }
-  }
+    var v=localStorage.getItem(key);
+    if(v) return v;
+    return localStorage.getItem(key+'_backup');
+  }catch(e){ return null; }
+}
+
+function salvarBrainReal(){
+  safeSetItem(KEYS.brain, JSON.stringify(State.brain), 'Cérebro não salvo');
+  atualizarBrainStats();
+}
+var salvarBrain = debounce(salvarBrainReal,500);
+
+function salvarAbrev(){
+  safeSetItem(KEYS.abrev, JSON.stringify(State.abrev));
+  renderAbrev();
 }
 
 function salvarAliases(){
-  try{
-    localStorage.setItem(ALIAS_KEY, JSON.stringify(aliases));
-    try{ localStorage.setItem(ALIAS_KEY + '_backup', JSON.stringify(aliases)); }catch(e){}
-  }catch(e){ toast('⚠️ Erro ao salvar aliases', 'w'); }
+  safeSetItem(KEYS.alias, JSON.stringify(State.aliases));
 }
 
-function _salvarBrainReal(){
-  try{
-    localStorage.setItem(BRAIN_KEY, JSON.stringify(brain));
-    try{ localStorage.setItem(BRAIN_KEY + '_backup', JSON.stringify(brain)); }catch(e){}
-    atualizarBrainStats();
-  }catch(e){ console.warn('Erro ao salvar cérebro:', e); }
-}
-var salvarBrain = debounce(_salvarBrainReal, 500);
-
-function salvarAbrev(){
-  try{
-    localStorage.setItem(ABREV_KEY, JSON.stringify(abrev));
-    renderAbrev();
-  }catch(e){ console.warn('Erro ao salvar abreviações:', e); }
+function salvarArtistas(){
+  setSaveStatus('saving');
+  var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; });
+  var ok=safeSetItem(KEYS.art, JSON.stringify(arr), 'Artistas não salvos');
+  State.cache.dirtyArt=false;
+  setSaveStatus(ok?'saved':'');
+  return ok;
 }
 
-function carregarBrain(){
-  try{
-    var raw = localStorage.getItem(BRAIN_KEY);
-    if(raw){
-      try{
-        var obj = JSON.parse(raw);
-        brain.lixo = obj.lixo || {};
-        brain.artistas = obj.artistas || {};
-        brain.titulos = obj.titulos || {};
-      }catch(e){}
-    }
+function carregarTudo(){
+  /* Brain */
+  var raw=safeGetItem(KEYS.brain);
+  if(raw){ try{ var o=JSON.parse(raw); State.brain.lixo=o.lixo||{}; State.brain.artistas=o.artistas||{}; State.brain.titulos=o.titulos||{}; }catch(e){} }
 
-    var rawArt = localStorage.getItem(ART_KEY);
-    var rawArtBackup = localStorage.getItem(ART_KEY + '_backup');
-    var arrArt = null;
-    if(rawArt){ try{ arrArt = JSON.parse(rawArt); }catch(e){} }
-    if(!arrArt || !Array.isArray(arrArt) || arrArt.length === 0){
-      if(rawArtBackup){
-        try{
-          var arrBackup = JSON.parse(rawArtBackup);
-          if(Array.isArray(arrBackup) && arrBackup.length > 0){
-            arrArt = arrBackup;
-            setTimeout(function(){ toast('♻️ Artistas recuperados do backup', 's'); }, 1000);
-          }
-        }catch(e){}
-      }
-    }
-
-    if(arrArt && Array.isArray(arrArt) && arrArt.length > 0){
-      artistasConhecidos = {};
-      arrArt.forEach(function(a){
-        if(a && typeof a === 'string') artistasConhecidos[norm(a)] = a;
-      });
-    } else {
-      artistasConhecidos = {};
-      ARTISTAS_BASE.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
-      _dirtyArtistas = true;
-      salvarArtistas();
-    }
-
-    var rawAb = localStorage.getItem(ABREV_KEY);
-    if(rawAb){
-      try{ abrev = JSON.parse(rawAb); }catch(e){ abrev = JSON.parse(JSON.stringify(ABREV_PADRAO)); }
-    } else {
-      abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
-    }
-
-    var rawAlias = localStorage.getItem(ALIAS_KEY);
-    var rawAliasBackup = localStorage.getItem(ALIAS_KEY + '_backup');
-    if(rawAlias){ try{ aliases = JSON.parse(rawAlias); }catch(e){ aliases = {}; } }
-    else if(rawAliasBackup){ try{ aliases = JSON.parse(rawAliasBackup); }catch(e){ aliases = {}; } }
-  }catch(e){
-    console.warn('Erro ao carregar cérebro:', e);
-    artistasConhecidos = {};
-    ARTISTAS_BASE.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
-    abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
-    aliases = {};
+  /* Artistas */
+  var rawArt=safeGetItem(KEYS.art);
+  var arrArt=null;
+  if(rawArt){ try{ arrArt=JSON.parse(rawArt); }catch(e){} }
+  if(Array.isArray(arrArt) && arrArt.length>0){
+    State.artistasConhecidos={};
+    arrArt.forEach(function(a){ if(typeof a==='string') State.artistasConhecidos[norm(a)]=a; });
+  } else {
+    State.artistasConhecidos={};
+    ARTISTAS_BASE.forEach(function(a){ State.artistasConhecidos[norm(a)]=a; });
+    State.cache.dirtyArt=true;
+    salvarArtistas();
   }
+
+  /* Abreviações */
+  var rawAb=safeGetItem(KEYS.abrev);
+  if(rawAb){ try{ State.abrev=JSON.parse(rawAb); }catch(e){ State.abrev=Object.assign({},ABREV_PADRAO); } }
+  else State.abrev=Object.assign({},ABREV_PADRAO);
+
+  /* Aliases */
+  var rawAl=safeGetItem(KEYS.alias);
+  if(rawAl){ try{ State.aliases=JSON.parse(rawAl); }catch(e){ State.aliases={}; } }
 }
 
-function carregarAliases(){
-  try{
-    var raw = localStorage.getItem(ALIAS_KEY);
-    if(raw) aliases = JSON.parse(raw);
-  }catch(e){ aliases = {}; }
-}
-
-function atualizarBrainStats(){
-  var total = Object.keys(brain.lixo).length
-            + Object.keys(brain.artistas).length
-            + Object.keys(brain.titulos).length;
-  if($('brainBadge')) $('brainBadge').textContent = total + ' itens';
-  if($('cntLixo')) $('cntLixo').textContent = Object.keys(brain.lixo).length;
-  if($('cntArt'))  $('cntArt').textContent  = Object.keys(brain.artistas).length;
-  if($('cntTit'))  $('cntTit').textContent  = Object.keys(brain.titulos).length;
-}
-
+/* ============================================================
+   CACHE DE REGEX
+   ============================================================ */
 function getRegexLixo(){
-  var todas = LIXO_BASE.concat(Object.keys(brain.lixo));
-  var hash = todas.slice().sort().join('|');
-  if(_cacheRegexLixo && _cacheHashLixo === hash) return _cacheRegexLixo;
+  var todas=LIXO_BASE.concat(Object.keys(State.brain.lixo));
+  var hash=todas.slice().sort().join('|');
+  if(State.cache.regexLixo && State.cache.hashLixo===hash) return State.cache.regexLixo;
 
-  var LOTE = 50;
-  var regexes = [];
-  var vistos = {};
-  var unicas = todas.filter(function(p){
-    var k = norm(p);
-    if(!k || vistos[k]) return false;
-    vistos[k] = true; return true;
-  }).sort(function(a,b){ return b.length - a.length; });
+  var vistos={};
+  var unicas=todas.filter(function(p){
+    var k=norm(p);
+    if(!k||vistos[k]) return false;
+    vistos[k]=true; return true;
+  }).sort(function(a,b){ return b.length-a.length; });
 
-  for(var i = 0; i < unicas.length; i += LOTE){
-    var lote = unicas.slice(i, i + LOTE);
-    var padrao = lote.map(function(p){ return escapeRegex(p); }).join('|');
-    regexes.push(new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])(' + padrao + ')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)', 'gi'));
+  var LOTE=50, regexes=[];
+  for(var i=0;i<unicas.length;i+=LOTE){
+    var lote=unicas.slice(i,i+LOTE);
+    var padrao=lote.map(escapeRegex).join('|');
+    regexes.push(new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi'));
   }
-
-  _cacheRegexLixo = regexes;
-  _cacheHashLixo = hash;
+  State.cache.regexLixo=regexes;
+  State.cache.hashLixo=hash;
   return regexes;
 }
 
 function getRegexArtistas(){
-  var chaves = Object.keys(artistasConhecidos).filter(function(k){ return k.length >= 3; });
-  var hash = chaves.slice().sort().join('|');
-  if(_cacheRegexArt && _cacheHashArt === hash) return _cacheRegexArt;
+  var chaves=Object.keys(State.artistasConhecidos).filter(function(k){ return k.length>=3; });
+  var hash=chaves.slice().sort().join('|');
+  if(State.cache.regexArt && State.cache.hashArt===hash) return State.cache.regexArt;
 
-  chaves.sort(function(a,b){ return b.length - a.length; });
-  var LOTE = 50;
-  var regexes = [];
-  for(var i = 0; i < chaves.length; i += LOTE){
-    var lote = chaves.slice(i, i + LOTE);
-    var padrao = lote.map(function(k){ return escapeRegex(k); }).join('|');
-    regexes.push({
-      re: new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])(' + padrao + ')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)', 'i'),
-      lote: lote
-    });
+  chaves.sort(function(a,b){ return b.length-a.length; });
+  var LOTE=50, regexes=[];
+  for(var i=0;i<chaves.length;i+=LOTE){
+    var lote=chaves.slice(i,i+LOTE);
+    var padrao=lote.map(escapeRegex).join('|');
+    regexes.push(new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i'));
   }
-  _cacheRegexArt = regexes;
-  _cacheHashArt = hash;
+  State.cache.regexArt=regexes;
+  State.cache.hashArt=hash;
   return regexes;
 }
 
+/* ============================================================
+   LIMPEZA E PARSE
+   ============================================================ */
 function removerNumeros(s){
   if(!s) return '';
   return String(s).replace(/\b\d+\b/g,' ').replace(/\d+/g,' ').replace(/\s+/g,' ').trim();
 }
 
 function removerSimbolos(s){
-  s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,' ');
-  s = s.replace(/[♪♫♬♭♮♯🎤🎶🎵🎧🎼]/g,' ');
-  s = s.replace(/[\u00A0\u200B\u200C\u200D\uFEFF\u200E\u200F\u2028\u2029]/g,' ');
+  s=s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,' ');
+  s=s.replace(/[♪♫♬♭♮♯🎤🎶🎵🎧🎼]/g,' ');
+  s=s.replace(/[\u00A0\u200B\u200C\u200D\uFEFF\u200E\u200F\u2028\u2029]/g,' ');
   return s;
 }
 
 function limparPalavras(s){
   if(!s) return '';
-  var regexes = getRegexLixo();
-  for(var i = 0; i < regexes.length; i++){
-    s = s.replace(regexes[i], ' ');
-  }
-  s = s.replace(/\b\d+\s*kbps\b/gi,' ');
+  var regexes=getRegexLixo();
+  for(var i=0;i<regexes.length;i++) s=s.replace(regexes[i],' ');
   return s;
 }
 
 function limpar(txt){
   if(!txt) return '';
-  var s = String(txt).replace(/_/g,' ');
-  s = removerSimbolos(s);
-  s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
-  s = limparPalavras(s);
-  s = removerNumeros(s);
-  s = s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
-  s = s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
-  s = s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
+  var s=String(txt).replace(/_/g,' ');
+  s=removerSimbolos(s);
+  s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s=limparPalavras(s);
+  s=removerNumeros(s);
+  s=s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
+  s=s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
+  s=s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
   return s.trim();
 }
 
 function ehLixo(t){
   if(!t) return true;
-  var x = norm(t);
+  var x=norm(t);
   if(!x) return true;
   if(/^\d+[\s._-]*kbps/.test(x)) return true;
   if(/^[\d\s.\-_]+$/.test(x)) return true;
@@ -920,36 +822,32 @@ function tagPareceCanal(txt){
   return /\b(sem filtro|oficial|canal|records|studio|estúdio|estudio|tv|web|play|top|best|hits|coletânea|coletanea|various|compilation|playlist|prod)\b/i.test(txt);
 }
 
+/* Abreviação */
 function abreviarPalavra(p){
   if(!p) return p;
-  var chave = norm(p);
-  if(abrev[chave]) return abrev[chave];
-  if(p.length <= 4) return p;
-  if(p.length <= 6){
-    var semVogais = p.charAt(0) + p.slice(1, -1).replace(/[aeiouáéíóúâêôãõà]/gi,'') + p.slice(-1);
-    if(semVogais.length >= 3 && semVogais.length < p.length) return semVogais;
-    return p;
-  }
-  return p.slice(0, 5) + '.';
+  var chave=norm(p);
+  if(State.abrev[chave]) return State.abrev[chave];
+  if(p.length<=7) return p; /* só abrevia palavras longas */
+  return p.slice(0,5)+'.';
 }
 
-function abreviarTexto(txt, limite){
+function abreviarTexto(txt,limite){
   if(!txt) return '';
-  if(txt.length <= limite) return txt;
-  var palavras = txt.split(/\s+/);
-  var abreviado = palavras.map(function(p){
-    var m = p.match(/^([\/\-–—(]?)([A-Za-zÀ-Ýà-ÿ]+)([\/\-–—),.]?)$/);
+  if(txt.length<=limite) return txt;
+  var palavras=txt.split(/\s+/);
+  var abreviado=palavras.map(function(p){
+    var m=p.match(/^([\/\-–—(]?)([A-Za-zÀ-Ýà-ÿ]+)([\/\-–—),.]?)$/);
     if(!m) return p;
-    return m[1] + abreviarPalavra(m[2]) + m[3];
+    return m[1]+abreviarPalavra(m[2])+m[3];
   }).join(' ');
-  if(abreviado.length <= limite) return abreviado;
-  var palavras2 = abreviado.split(/\s+/);
-  while(palavras2.length > 2 && palavras2.join(' ').length > limite) palavras2.pop();
-  abreviado = palavras2.join(' ');
-  if(abreviado.length > limite){
-    var corte = abreviado.slice(0, limite);
-    var ultimoEspaco = corte.lastIndexOf(' ');
-    abreviado = ultimoEspaco > limite * 0.5 ? corte.slice(0, ultimoEspaco) : corte;
+  if(abreviado.length<=limite) return abreviado;
+  var palavras2=abreviado.split(/\s+/);
+  while(palavras2.length>2 && palavras2.join(' ').length>limite) palavras2.pop();
+  abreviado=palavras2.join(' ');
+  if(abreviado.length>limite){
+    var corte=abreviado.slice(0,limite);
+    var ultimoEspaco=corte.lastIndexOf(' ');
+    abreviado=ultimoEspaco>limite*0.5?corte.slice(0,ultimoEspaco):corte;
   }
   return abreviado.trim();
 }
@@ -957,505 +855,532 @@ function abreviarTexto(txt, limite){
 function capitalizar(s){
   if(!s) return '';
   return s.split(/\s+/).map(function(p){
-    if(p.length <= 2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
-    return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+    if(p.length<=2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
+    return p.charAt(0).toUpperCase()+p.slice(1).toLowerCase();
   }).join(' ');
 }
 
+/* Artistas */
 function normalizarComAlias(nome){
   if(!nome) return nome;
-  var k = norm(nome);
-  if(aliases[k]) return aliases[k];
-  if(artistasConhecidos[k]) return artistasConhecidos[k];
+  var k=norm(nome);
+  if(State.aliases[k]){
+    var oficial=State.aliases[k];
+    if(!State.artistasConhecidos[norm(oficial)]) aprenderArtista(oficial);
+    return oficial;
+  }
+  if(State.artistasConhecidos[k]) return State.artistasConhecidos[k];
   return nome;
 }
 
 function encontrarArtistaEm(txt){
   if(!txt) return null;
-  var n = norm(txt);
-  var regexes = getRegexArtistas();
-  for(var i = 0; i < regexes.length; i++){
-    var m = n.match(regexes[i].re);
-    if(m){
-      var match = m[2];
-      var chaves = Object.keys(artistasConhecidos);
-      for(var j = 0; j < chaves.length; j++){
-        if(norm(artistasConhecidos[chaves[j]]) === match) return artistasConhecidos[chaves[j]];
-      }
-    }
+  var n=norm(txt);
+  var regexes=getRegexArtistas();
+  for(var i=0;i<regexes.length;i++){
+    var m=n.match(regexes[i]);
+    if(m && State.artistasConhecidos[m[2]]) return State.artistasConhecidos[m[2]];
   }
-  var chavesAlias = Object.keys(aliases).sort(function(a,b){ return b.length - a.length; });
-  for(var k = 0; k < chavesAlias.length; k += 50){
-    var lote = chavesAlias.slice(k, k + 50);
-    var padrao = lote.map(function(x){ return escapeRegex(x); }).join('|');
-    var re = new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])(' + padrao + ')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)', 'i');
-    var mm = n.match(re);
-    if(mm){
-      var match2 = mm[2];
-      for(var l = 0; l < chavesAlias.length; l++){
-        if(chavesAlias[l] === match2) return aliases[chavesAlias[l]];
-      }
-    }
+  var chavesAlias=Object.keys(State.aliases);
+  if(chavesAlias.length){
+    var padrao=chavesAlias.map(escapeRegex).join('|');
+    var re=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i');
+    var mm=n.match(re);
+    if(mm && State.aliases[mm[2]]) return State.aliases[mm[2]];
   }
   return null;
 }
 
-function removerArtistaDoTitulo(title, artist){
-  if(!title || !artist) return title;
-  var re = new RegExp('^' + escapeRegex(artist) + '\\s*[-–—:/|]\\s*','i');
-  var out = title.replace(re,'').trim();
-  return out.length < 3 ? title : out;
+function removerArtistaDoTitulo(title,artist){
+  if(!title||!artist) return title;
+  var re=new RegExp('^'+escapeRegex(artist)+'\\s*[-–—:/|]\\s*','i');
+  var out=title.replace(re,'').trim();
+  return out.length<3?title:out;
 }
 
 function parseTracoFrente(nomeBase){
-  var m = String(nomeBase).match(/^\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/);
+  var m=String(nomeBase).match(/^\s*[-–—]\s*(.+?)\s*[-–—]\s*(.+)$/);
   if(!m) return null;
-  return { artista: m[1].trim(), titulo: m[2].trim() };
+  return { artista:m[1].trim(), titulo:m[2].trim() };
 }
 
 function parseNome(nome){
-  var base = String(nome).replace(/\.[^.]+$/,'');
+  var base=String(nome).replace(/\.[^.]+$/,'');
 
-  var forca = parseTracoFrente(base);
+  var forca=parseTracoFrente(base);
   if(forca){
-    var a = limpar(forca.artista);
-    var t = limpar(forca.titulo);
+    var a=limpar(forca.artista);
+    var t=limpar(forca.titulo);
     if(a){
-      a = normalizarComAlias(a);
-      var aNorm = norm(a);
-      if(brain.artistas[aNorm]) a = brain.artistas[aNorm];
+      a=normalizarComAlias(a);
+      var aNorm=norm(a);
+      if(State.brain.artistas[aNorm]) a=State.brain.artistas[aNorm];
     }
     if(t){
-      var tNorm = norm(t);
-      if(brain.titulos[tNorm]) t = brain.titulos[tNorm];
+      var tNorm=norm(t);
+      if(State.brain.titulos[tNorm]) t=State.brain.titulos[tNorm];
     }
-    if(!t) t = a;
-    t = removerArtistaDoTitulo(t, a);
-    return { a: capitalizar(a), t: capitalizar(t) };
+    if(!t) t=a;
+    t=removerArtistaDoTitulo(t,a);
+    return { a:capitalizar(a), t:capitalizar(t) };
   }
 
-  var s = base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
-  s = s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
-  s = s.replace(/\s+/g,' ').trim();
-  s = limparPalavras(s);
-  s = removerNumeros(s);
-  s = s.replace(/\b\d+\s*kbps\b/gi,' ');
-  s = s.replace(/\s+/g,' ').trim();
+  var s=base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s=s.replace(/\s+/g,' ').trim();
+  s=limparPalavras(s);
+  s=removerNumeros(s);
+  s=s.replace(/\s+/g,' ').trim();
 
-  var featMatch = s.match(FEAT_RE);
-  var featTrecho = '';
+  var featMatch=s.match(FEAT_RE);
+  var featTrecho='';
   if(featMatch){
-    featTrecho = s.slice(featMatch.index).trim();
-    s = s.slice(0, featMatch.index).trim();
+    featTrecho=s.slice(featMatch.index).trim();
+    s=s.slice(0,featMatch.index).trim();
   }
 
-  var artistaConhecido = encontrarArtistaEm(s);
-  var artistaDetectado = '';
-  var tituloDetectado = '';
+  var artistaConhecido=encontrarArtistaEm(s);
+  var artistaDetectado='';
+  var tituloDetectado='';
 
-  var partes = s.split(/\s*[+\-–—]\s*/).filter(function(p){ return p.trim().length > 0; });
-  partes = partes.map(function(p){ return limpar(p); }).filter(function(p){ return p && !ehLixo(p); });
+  var partes=s.split(/\s*[+\-–—]\s*/).filter(function(p){ return p.trim().length>0; });
+  partes=partes.map(limpar).filter(function(p){ return p && !ehLixo(p); });
 
   if(artistaConhecido){
-    artistaDetectado = artistaConhecido;
-    var restoTitulo = partes.filter(function(p){
-      var pn = norm(p), an = norm(artistaConhecido);
-      return pn !== an && pn.indexOf(an) === -1 && an.indexOf(pn) === -1;
+    artistaDetectado=artistaConhecido;
+    var restoTitulo=partes.filter(function(p){
+      var pn=norm(p),an=norm(artistaConhecido);
+      return pn!==an && pn.indexOf(an)===-1 && an.indexOf(pn)===-1;
     }).join(' ');
-    tituloDetectado = restoTitulo ? limpar(restoTitulo) : limpar(s);
-  } else if(partes.length >= 2){
-    var p1 = partes[0], p2 = partes[1];
-    var w1 = p1.split(/\s+/).length, w2 = p2.split(/\s+/).length;
-
-    if(w2 <= 2 && w1 >= 3){ artistaDetectado = p2; tituloDetectado = p1; }
-    else if(w1 <= 2 && w2 >= 3){ artistaDetectado = p1; tituloDetectado = p2; }
-    else if(w1 <= 2 && w2 <= 2){ artistaDetectado = p1; tituloDetectado = partes.slice(1).join(' '); }
-    else { artistaDetectado = p1; tituloDetectado = partes.slice(1).join(' '); }
-  } else if(partes.length === 1){
-    var mm = s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
-    if(mm){ artistaDetectado = limpar(mm[1]); tituloDetectado = limpar(mm[2]); }
-    else { tituloDetectado = partes[0]; }
+    tituloDetectado=restoTitulo?limpar(restoTitulo):limpar(s);
+  } else if(partes.length>=2){
+    var p1=partes[0],p2=partes[1];
+    var w1=p1.split(/\s+/).length,w2=p2.split(/\s+/).length;
+    if(w2<=2 && w1>=3){ artistaDetectado=p2; tituloDetectado=p1; }
+    else if(w1<=2 && w2>=3){ artistaDetectado=p1; tituloDetectado=p2; }
+    else { artistaDetectado=p1; tituloDetectado=partes.slice(1).join(' '); }
+  } else if(partes.length===1){
+    var mm=s.match(/^(.+?)\s+[-–—]\s+(.+)$/);
+    if(mm){ artistaDetectado=limpar(mm[1]); tituloDetectado=limpar(mm[2]); }
+    else tituloDetectado=partes[0];
+  } else {
+    tituloDetectado=limpar(s);
   }
 
-  if(featTrecho){
-    tituloDetectado = (tituloDetectado ? tituloDetectado + ' ' : '') + limpar(featTrecho);
-  }
+  if(featTrecho) tituloDetectado=(tituloDetectado?tituloDetectado+' ':'')+limpar(featTrecho);
 
   if(artistaDetectado){
-    artistaDetectado = normalizarComAlias(artistaDetectado);
-    var aNorm2 = norm(artistaDetectado);
-    if(brain.artistas[aNorm2]) artistaDetectado = brain.artistas[aNorm2];
+    artistaDetectado=normalizarComAlias(artistaDetectado);
+    var aN2=norm(artistaDetectado);
+    if(State.brain.artistas[aN2]) artistaDetectado=State.brain.artistas[aN2];
   }
   if(tituloDetectado){
-    var tNorm2 = norm(tituloDetectado);
-    if(brain.titulos[tNorm2]) tituloDetectado = brain.titulos[tNorm2];
+    var tN2=norm(tituloDetectado);
+    if(State.brain.titulos[tN2]) tituloDetectado=State.brain.titulos[tN2];
   }
-  if(!tituloDetectado) tituloDetectado = limpar(s);
+  if(!tituloDetectado) tituloDetectado=limpar(s);
 
-  if(artistaDetectado && tituloDetectado && norm(artistaDetectado) === norm(tituloDetectado)){
-    artistaDetectado = '';
-  }
+  if(artistaDetectado && tituloDetectado && norm(artistaDetectado)===norm(tituloDetectado)) artistaDetectado='';
 
-  tituloDetectado = removerArtistaDoTitulo(tituloDetectado, artistaDetectado);
-  return { a: capitalizar(artistaDetectado), t: capitalizar(tituloDetectado) };
+  tituloDetectado=removerArtistaDoTitulo(tituloDetectado,artistaDetectado);
+  return { a:capitalizar(artistaDetectado), t:capitalizar(tituloDetectado) };
 }
 
-function lerTags(file, cb){
+/* ============================================================
+   TAGS DE ÁUDIO
+   ============================================================ */
+function lerTags(file,cb){
   if(!file){ cb(null); return; }
-  var ext = comExt(file.name).toLowerCase();
-  if(ext !== '.mp3' && ext !== '.opus' && ext !== '.ogg'){ cb(null); return; }
-  var reader = new FileReader();
-  reader.onload = function(e){
+  var ext=comExt(file.name).toLowerCase();
+  if(['.mp3','.opus','.ogg','.flac'].indexOf(ext)===-1){ cb(null); return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
     try{
-      var buf = e.target.result;
-      var v = new DataView(buf);
-      var tags = { artist:'', title:'', genre:'' };
+      var buf=e.target.result;
+      var v=new DataView(buf);
+      var bytes=new Uint8Array(buf);
+      var tags={ artist:'', title:'', genre:'' };
+      var dec=new TextDecoder('utf-8');
 
-      if(ext === '.mp3' && v.byteLength >= 10 &&
+      /* MP3 — ID3v2 */
+      if(ext==='.mp3' && v.byteLength>=10 &&
          v.getUint8(0)===0x49 && v.getUint8(1)===0x44 && v.getUint8(2)===0x33){
-        var tagSize = ((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
-        var total = Math.min(10 + tagSize, v.byteLength);
-        var dec = new TextDecoder('utf-8');
-        var off = 10;
-        while(off < total - 10){
+        var tagSize=((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
+        var total=Math.min(10+tagSize,v.byteLength);
+        var off=10;
+        while(off<total-10){
           try{
-            var fid = String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
-            var fsz = (v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
-            if(fsz <= 0 || fsz > 500000 || off+10+fsz > total) break;
-            if(fid==='TIT2' || fid==='TPE1' || fid==='TCON'){
-              var enc = v.getUint8(off+10);
-              var bytes = new Uint8Array(buf, off+11, fsz-1);
-              var txt = '';
-              if(enc===0 || enc===3){ txt = dec.decode(bytes); }
-              else {
-                var cc = [];
-                for(var k=0;k+1<bytes.length;k+=2) cc.push(String.fromCharCode(bytes[k]|(bytes[k+1]<<8)));
-                txt = cc.join('');
+            var fid=String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
+            var fsz=(v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
+            if(fsz<1 || off+10+fsz>total) break;
+            if(fid==='TIT2'||fid==='TPE1'||fid==='TCON'){
+              var enc=v.getUint8(off+10);
+              var len=fsz-1;
+              if(len>0 && off+11+len<=bytes.length){
+                var sub=bytes.subarray(off+11,off+11+len);
+                var txt='';
+                if(enc===0||enc===3) txt=dec.decode(sub);
+                else {
+                  var cc=[];
+                  for(var k=0;k+1<sub.length;k+=2) cc.push(String.fromCharCode(sub[k]|(sub[k+1]<<8)));
+                  txt=cc.join('');
+                }
+                txt=txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
+                if(fid==='TIT2') tags.title=txt;
+                if(fid==='TPE1') tags.artist=txt;
+                if(fid==='TCON') tags.genre=txt;
               }
-              txt = txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
-              if(fid==='TIT2') tags.title = txt;
-              if(fid==='TPE1') tags.artist = txt;
-              if(fid==='TCON') tags.genre = txt;
             }
-            off += 10 + fsz;
+            off+=10+fsz;
           }catch(err){ break; }
         }
       }
 
-      if((ext === '.opus' || ext === '.ogg') && v.byteLength > 16){
-        var bytes2 = new Uint8Array(buf);
-        var idx = -1;
-        var magic = [0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
-        for(var i = 0; i + 8 <= bytes2.length; i++){
-          if(bytes2[i]===magic[0] && bytes2[i+1]===magic[1] && bytes2[i+2]===magic[2] && bytes2[i+3]===magic[3] &&
-             bytes2[i+4]===magic[4] && bytes2[i+5]===magic[5] && bytes2[i+6]===magic[6] && bytes2[i+7]===magic[7]){
-            idx = i + 8; break;
+      /* OGG/OPUS — Vorbis comments */
+      if((ext==='.opus'||ext==='.ogg') && v.byteLength>16){
+        var idx=-1;
+        var magicOgg=[0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
+        for(var i=0;i+8<=bytes.length;i++){
+          if(bytes[i]===magicOgg[0]&&bytes[i+1]===magicOgg[1]&&bytes[i+2]===magicOgg[2]&&bytes[i+3]===magicOgg[3]&&
+             bytes[i+4]===magicOgg[4]&&bytes[i+5]===magicOgg[5]&&bytes[i+6]===magicOgg[6]&&bytes[i+7]===magicOgg[7]){
+            idx=i+8; break;
           }
         }
-        if(idx === -1){
-          var mv = [0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
-          for(var i2 = 0; i2 + 7 <= bytes2.length; i2++){
-            if(bytes2[i2]===mv[0] && bytes2[i2+1]===mv[1] && bytes2[i2+2]===mv[2] && bytes2[i2+3]===mv[3] &&
-               bytes2[i2+4]===mv[4] && bytes2[i2+5]===mv[5] && bytes2[i2+6]===mv[6]){
-              idx = i2 + 7; break;
+        if(idx===-1){
+          var magicVorbis=[0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
+          for(var i2=0;i2+7<=bytes.length;i2++){
+            if(bytes[i2]===magicVorbis[0]&&bytes[i2+1]===magicVorbis[1]&&bytes[i2+2]===magicVorbis[2]&&bytes[i2+3]===magicVorbis[3]&&
+               bytes[i2+4]===magicVorbis[4]&&bytes[i2+5]===magicVorbis[5]&&bytes[i2+6]===magicVorbis[6]){
+              idx=i2+7; break;
             }
           }
         }
-        if(idx >= 0 && idx + 4 <= bytes2.length){
-          var dv = new DataView(buf);
-          var vendorLen = dv.getUint32(idx, true); idx += 4;
-          if(idx + vendorLen + 4 <= bytes2.length){
-            idx += vendorLen;
-            var commentCount = dv.getUint32(idx, true); idx += 4;
-            var dec2 = new TextDecoder('utf-8');
-            for(var c = 0; c < commentCount && idx + 4 <= bytes2.length; c++){
-              var len = dv.getUint32(idx, true); idx += 4;
-              if(idx + len > bytes2.length) break;
-              var txt2 = dec2.decode(bytes2.subarray(idx, idx + len));
-              idx += len;
-              var eq = txt2.indexOf('=');
-              if(eq <= 0) continue;
-              var key = txt2.slice(0, eq).toUpperCase();
-              var val = txt2.slice(eq + 1).trim();
+        if(idx>=0 && idx+4<=bytes.length){
+          var vendorLen=v.getUint32(idx,true); idx+=4;
+          if(idx+vendorLen+4<=bytes.length){
+            idx+=vendorLen;
+            var count=v.getUint32(idx,true); idx+=4;
+            for(var c=0;c<count && idx+4<=bytes.length;c++){
+              var clen=v.getUint32(idx,true); idx+=4;
+              if(idx+clen>bytes.length) break;
+              var s2=dec.decode(bytes.subarray(idx,idx+clen)); idx+=clen;
+              var eq=s2.indexOf('=');
+              if(eq<=0) continue;
+              var key=s2.slice(0,eq).toUpperCase();
+              var val=s2.slice(eq+1).trim();
               if(!val) continue;
-              if(key === 'TITLE') tags.title = val;
-              if(key === 'ARTIST') tags.artist = val;
-              if(key === 'GENRE') tags.genre = val;
+              if(key==='TITLE') tags.title=val;
+              if(key==='ARTIST') tags.artist=val;
+              if(key==='GENRE') tags.genre=val;
             }
+          }
+        }
+      }
+
+      /* FLAC — Vorbis comments */
+      if(ext==='.flac' && bytes.length>4){
+        if(bytes[0]===0x66&&bytes[1]===0x4C&&bytes[2]===0x61&&bytes[3]===0x43){
+          var off2=4;
+          while(off2+4<=bytes.length){
+            var header=bytes[off2];
+            var isLast=(header&0x80)!==0;
+            var type=header&0x7F;
+            var flen=(bytes[off2+1]<<16)|(bytes[off2+2]<<8)|bytes[off2+3];
+            off2+=4;
+            if(type===4){
+              if(off2+4<=bytes.length){
+                var vlen=v.getUint32(off2,true); off2+=4+vlen;
+                if(off2+4<=bytes.length){
+                  var fcount=v.getUint32(off2,true); off2+=4;
+                  for(var fc=0;fc<fcount;fc++){
+                    if(off2+4>bytes.length) break;
+                    var fclen=v.getUint32(off2,true); off2+=4;
+                    if(off2+fclen>bytes.length) break;
+                    var fs2=dec.decode(bytes.subarray(off2,off2+fclen)); off2+=fclen;
+                    var feq=fs2.indexOf('=');
+                    if(feq<0) continue;
+                    var fk=fs2.slice(0,feq).toUpperCase();
+                    var fv=fs2.slice(feq+1).trim();
+                    if(!fv) continue;
+                    if(fk==='TITLE') tags.title=fv;
+                    if(fk==='ARTIST') tags.artist=fv;
+                    if(fk==='GENRE') tags.genre=fv;
+                  }
+                }
+              }
+              break;
+            }
+            off2+=flen;
+            if(isLast) break;
           }
         }
       }
 
       cb(tags);
-    }catch(err){ cb(null); }
+    }catch(err){ console.warn('Erro tags:',err); cb(null); }
   };
-  reader.onerror = function(){ cb(null); };
-  reader.readAsArrayBuffer(file.slice(0, 2 * 1024 * 1024));
+  reader.onerror=function(){ cb(null); };
+  reader.readAsArrayBuffer(file.slice(0,2*1024*1024));
 }
 
-function escreverTags(buffer, tags){
-  if(typeof ID3Writer === 'undefined') return buffer;
+function escreverTags(buffer,tags){
+  if(typeof ID3Writer==='undefined') return buffer;
   try{
-    var w = new ID3Writer(buffer);
-    var preservar = {};
-    try{
-      var old = w.parseTag ? w.parseTag() : null;
-      if(old && old.frames){
-        ['APIC','TALB','TRCK','TYER','TPOS','TCOM','TPE2'].forEach(function(fid){
-          var f = old.frames.find(function(x){ return x.id === fid; });
-          if(f) preservar[fid] = f;
-        });
-      }
-    }catch(e){}
-    try{ w.removeTag(); }catch(e){}
-    if(tags.title)  w.setFrame('TIT2', tags.title);
-    if(tags.artist) w.setFrame('TPE1', tags.artist);
-    if(tags.genre)  w.setFrame('TCON', tags.genre);
-    Object.keys(preservar).forEach(function(fid){
-      try{
-        var f = preservar[fid];
-        if(fid === 'APIC' && f.picture){
-          w.setFrame('APIC', { type: f.picture.type || 3, data: f.picture.data, description: f.picture.description || '' });
-        } else if(fid !== 'APIC' && f.value != null){
-          w.setFrame(fid, f.value);
-        }
-      }catch(e){}
-    });
+    var w=new ID3Writer(buffer);
+    if(tags.title)  w.setFrame('TIT2',tags.title);
+    if(tags.artist) w.setFrame('TPE1',tags.artist);
+    if(tags.genre)  w.setFrame('TCON',tags.genre);
     return w.addTag();
   }catch(err){
-    console.error('Erro ID3:', err);
+    console.warn('Erro ao escrever ID3:',err);
     return buffer;
   }
 }
 
+/* ============================================================
+   NOME DE ARQUIVO
+   ============================================================ */
 function sanitize(s){
   if(!s) return '';
-  var x = String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x = x.replace(/[^A-Za-z0-9\s\-_]/g,'');
-  x = x.replace(/\s+/g,'_').replace(/_+/g,'_');
-  x = x.replace(/-+/g,'-');
-  x = x.replace(/^[_\-.]+|[_\-.]+$/g,'');
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  x=x.replace(/[^A-Za-z0-9\s\-_]/g,'');
+  x=x.replace(/\s+/g,'_').replace(/_+/g,'_');
+  x=x.replace(/-+/g,'-');
+  x=x.replace(/^[_\-.]+|[_\-.]+$/g,'');
   return x;
 }
 
-function gerarNome(m, ext){
-  var art = sanitize(m.artist) || 'desconhecido';
-  var tit = sanitize(m.title) || 'sem_titulo';
-  var limiteSemExt = LIMITE_NOME - ext.length;
-  if(limiteSemExt < 15) limiteSemExt = 15;
+function gerarNome(m,ext){
+  var art=sanitize(m.artist)||'desconhecido';
+  var tit=sanitize(m.title)||'sem_titulo';
+  var limiteSemExt=LIMITE_NOME-ext.length;
+  if(limiteSemExt<15) limiteSemExt=15;
 
-  if(norm(art) === norm(tit)){
-    var so = tit;
-    if(so.length > limiteSemExt) so = sanitize(abreviarTexto(m.title, limiteSemExt));
-    return so + ext;
+  if(norm(art)===norm(tit)){
+    var so=tit;
+    if(so.length>limiteSemExt) so=sanitize(abreviarTexto(m.title,limiteSemExt));
+    return so+ext;
   }
 
-  var nomeCompleto = art + '_' + tit;
-  if(nomeCompleto.length <= limiteSemExt) return nomeCompleto + ext;
+  var nomeCompleto=art+'_'+tit;
+  if(nomeCompleto.length<=limiteSemExt) return nomeCompleto+ext;
 
-  var espacoTit = limiteSemExt - art.length - 1;
-  if(espacoTit < 10) espacoTit = Math.floor(limiteSemExt * 0.45);
-  var tAbrev = sanitize(abreviarTexto(m.title, espacoTit));
-  if(!tAbrev) tAbrev = tit.slice(0, espacoTit);
+  var espacoTit=limiteSemExt-art.length-1;
+  if(espacoTit<10) espacoTit=Math.floor(limiteSemExt*0.45);
+  var tAbrev=sanitize(abreviarTexto(m.title,espacoTit));
+  if(!tAbrev) tAbrev=tit.slice(0,espacoTit);
 
-  nomeCompleto = art + '_' + tAbrev;
-  if(nomeCompleto.length > limiteSemExt){
-    var espacoArt = limiteSemExt - tAbrev.length - 1;
-    if(espacoArt < 5) espacoArt = 5;
-    var aAbrev = sanitize(abreviarTexto(m.artist, espacoArt));
-    if(!aAbrev) aAbrev = art.slice(0, espacoArt);
-    nomeCompleto = aAbrev + '_' + tAbrev;
+  nomeCompleto=art+'_'+tAbrev;
+  if(nomeCompleto.length>limiteSemExt){
+    var espacoArt=limiteSemExt-tAbrev.length-1;
+    if(espacoArt<5) espacoArt=5;
+    var aAbrev=sanitize(abreviarTexto(m.artist,espacoArt));
+    if(!aAbrev) aAbrev=art.slice(0,espacoArt);
+    nomeCompleto=aAbrev+'_'+tAbrev;
   }
-  if(nomeCompleto.length > limiteSemExt){
-    nomeCompleto = nomeCompleto.slice(0, limiteSemExt).replace(/[_\-.]+$/,'');
+  if(nomeCompleto.length>limiteSemExt){
+    nomeCompleto=nomeCompleto.slice(0,limiteSemExt).replace(/[_\-.]+$/,'');
   }
-  return nomeCompleto + ext;
+  return nomeCompleto+ext;
 }
 
-function aprenderLixo(textoOriginal, textoLimpo){
-  if(!textoOriginal) return;
-  var orig = String(textoOriginal).trim();
-  var limpoNorm = norm(textoLimpo || '');
-  var palavras = orig.split(/\s+/).filter(Boolean);
-  var aprendidos = [];
+/* ============================================================
+   APRENDIZADO
+   ============================================================ */
+function aprenderLixo(original,limpo){
+  if(!original) return;
+  var limpoNorm=norm(limpo||'');
+  var palavras=String(original).trim().split(/\s+/).filter(Boolean);
+  var aprendidos=[];
   palavras.forEach(function(p){
-    var pn = norm(p).replace(/[^\w\s]/g,'').trim();
-    if(!pn || pn.length < 3) return;
-    if(limpoNorm.indexOf(pn) === -1){
-      if(!brain.lixo[pn] && !ehLixo(pn) && pn.length <= 30){
-        brain.lixo[pn] = true;
-        aprendidos.push(p);
-      }
+    var pn=norm(p).replace(/[^\w\s]/g,'').trim();
+    if(!pn || pn.length<4) return; /* evita falsos positivos */
+    if(STOPWORDS.has(pn)) return;
+    if(limpoNorm.indexOf(pn)===-1 && !State.brain.lixo[pn] && pn.length<=30){
+      State.brain.lixo[pn]=true;
+      aprendidos.push(p);
     }
   });
   if(aprendidos.length){
-    _cacheHashLixo = '';
+    State.cache.hashLixo='';
     salvarBrain();
-    toast('🧠 Aprendi: ' + aprendidos.slice(0,3).join(', ') + (aprendidos.length > 3 ? '...' : ''), 'b');
+    toast('🧠 Aprendi: '+aprendidos.slice(0,3).join(', ')+(aprendidos.length>3?'...':''),'b');
   }
 }
 
 function aprenderArtista(nome){
   if(!nome) return;
-  var n = String(nome).trim();
-  if(n.length < 2) return;
-  var chave = norm(n);
-  if(brain.artistas[chave] !== n){ brain.artistas[chave] = n; salvarBrain(); }
-  if(!artistasConhecidos[chave]){
-    artistasConhecidos[chave] = n;
-    _cacheHashArt = '';
-    _dirtyArtistas = true;
-    if(salvarArtistas()) toast('🎨 Artista salvo: ' + n, 'save');
+  var n=String(nome).trim();
+  if(n.length<2) return;
+  var chave=norm(n);
+  if(State.brain.artistas[chave]!==n){ State.brain.artistas[chave]=n; salvarBrain(); }
+  if(!State.artistasConhecidos[chave]){
+    State.artistasConhecidos[chave]=n;
+    State.cache.hashArt='';
+    State.cache.dirtyArt=true;
+    if(salvarArtistas()) toast('🎨 Artista salvo: '+n,'save');
   }
 }
 
 function aprenderTitulo(nome){
   if(!nome) return;
-  var n = String(nome).trim();
-  if(n.length < 2) return;
-  var chave = norm(n);
-  if(brain.titulos[chave] !== n){
-    brain.titulos[chave] = n;
+  var n=String(nome).trim();
+  if(n.length<2) return;
+  var chave=norm(n);
+  if(State.brain.titulos[chave]!==n){
+    State.brain.titulos[chave]=n;
     salvarBrain();
-    toast('🧠 Título salvo: ' + n.substring(0,40), 'b');
+    toast('🧠 Título salvo: '+n.substring(0,40),'b');
   }
 }
 
+/* ============================================================
+   PROCESSAMENTO DE ARQUIVOS
+   ============================================================ */
 function addArquivos(fileList){
-  var arr = [];
-  for(var i = 0; i < fileList.length; i++){
+  var arr=[];
+  for(var i=0;i<fileList.length;i++){
     if(/\.(mp3|opus|m4a|flac|ogg|wav)$/i.test(fileList[i].name)) arr.push(fileList[i]);
   }
-  if(arr.length === 0){ toast('Nenhum arquivo suportado.', 'e'); return; }
-  toast('Lendo ' + arr.length + ' arquivo(s)...', 'i');
+  if(arr.length===0){ toast('Nenhum arquivo suportado.','e'); return; }
 
-  var vistos = {};
-  var naoDup = arr.filter(function(f){
-    var k = f.name + '|' + f.size;
+  var vistos={};
+  var naoDup=arr.filter(function(f){
+    var k=f.name+'|'+f.size;
     if(vistos[k]) return false;
-    vistos[k] = true; return true;
+    vistos[k]=true; return true;
   });
-  if(naoDup.length < arr.length){
-    toast('⚠️ ' + (arr.length - naoDup.length) + ' duplicado(s) ignorado(s)', 'w');
-  }
+  if(naoDup.length<arr.length) toast('⚠️ '+(arr.length-naoDup.length)+' duplicado(s) ignorado(s)','w');
 
-  var pendentes = naoDup.length;
-  if(pendentes === 0) return;
+  toast('Lendo '+naoDup.length+' arquivo(s)...','i');
+  var pendentes=naoDup.length;
+  if(pendentes===0) return;
 
   function concluir(){
     pendentes--;
-    if(pendentes === 0){
+    if(pendentes===0){
       render();
-      toast('✅ ' + naoDup.length + ' arquivo(s) carregado(s)', 's');
+      toast('✅ '+naoDup.length+' arquivo(s) carregado(s)','s');
     }
   }
 
   naoDup.forEach(function(file){
-    var respondeu = false;
-    function finalizar(){ if(!respondeu){ respondeu = true; concluir(); } }
-    var timeout = setTimeout(finalizar, 30000);
+    var respondeu=false;
+    function finalizar(){ if(!respondeu){ respondeu=true; concluir(); } }
+    var timeout=setTimeout(finalizar,30000);
     try{
-      var p = parseNome(file.name);
-      lerTags(file, function(tags){
+      var p=parseNome(file.name);
+      lerTags(file,function(tags){
         clearTimeout(timeout);
         try{
-          var tagArtist = (tags && tags.artist) ? limpar(tags.artist) : '';
-          var tagTitle  = (tags && tags.title)  ? limpar(tags.title)  : '';
-          var tagGenero = (tags && tags.genre) ? tags.genre : '';
+          var tagArtist=(tags&&tags.artist)?limpar(tags.artist):'';
+          var tagTitle=(tags&&tags.title)?limpar(tags.title):'';
+          var tagGenero=(tags&&tags.genre)?tags.genre:'';
 
-          var artist, title;
-          var pNorm = norm(p.a);
-          if(brain.artistas[pNorm]) artist = brain.artistas[pNorm];
-          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
-          else artist = p.a;
+          var artist,title;
+          var pNorm=norm(p.a);
+          if(State.brain.artistas[pNorm]) artist=State.brain.artistas[pNorm];
+          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist=tagArtist;
+          else artist=p.a;
+          artist=normalizarComAlias(artist);
 
-          artist = normalizarComAlias(artist);
+          var tNorm=norm(p.t);
+          if(State.brain.titulos[tNorm]) title=State.brain.titulos[tNorm];
+          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title=tagTitle;
+          else title=p.t;
+          title=removerArtistaDoTitulo(title,artist);
 
-          var tNorm = norm(p.t);
-          if(brain.titulos[tNorm]) title = brain.titulos[tNorm];
-          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
-          else title = p.t;
-
-          title = removerArtistaDoTitulo(title, artist);
-
-          var m = {
-            id: 'm_' + (++idc) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-            file: file,
-            originalName: file.name,
-            artist: artist || '',
-            title: title || '',
-            genero: tagGenero || '',
-            corrompido: ehLixo(artist) || ehLixo(title) || norm(artist) === norm(title)
+          var m={
+            id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+            file:file,
+            originalName:file.name,
+            artist:artist||'',
+            title:title||'',
+            genero:tagGenero||'',
+            corrompido:ehLixo(artist)||ehLixo(title)||norm(artist)===norm(title)
           };
-          m.newName = gerarNome(m, comExt(file.name));
-          musicas.push(m);
-          mapMusicas.set(m.id, m);
-        }catch(e){ console.error('Erro processando arquivo:', e); }
+          m.newName=gerarNome(m,comExt(file.name));
+          State.musicas.push(m);
+          State.map.set(m.id,m);
+        }catch(e){ console.error('Erro processando:',e); }
         finalizar();
       });
-    }catch(e){
-      clearTimeout(timeout);
-      finalizar();
-    }
+    }catch(e){ clearTimeout(timeout); finalizar(); }
   });
 }
 
-function render(){
-  var corpo = $('corpo');
-  var vazio = $('vazioCard');
+/* ============================================================
+   RENDER
+   ============================================================ */
+function stats(){
+  $('stTotal').textContent=State.musicas.length;
+  var ok=0,cor=0;
+  for(var i=0;i<State.musicas.length;i++){
+    if(State.musicas[i].corrompido) cor++; else ok++;
+  }
+  $('stOk').textContent=ok;
+  $('stCor').textContent=cor;
+  $('btnZip').disabled=!State.musicas.some(function(m){ return m.file; });
+  $('btnJson').disabled=State.musicas.length===0;
+  atualizarBrainStats();
+}
 
-  if(musicas.length === 0){
-    vazio.style.display = 'block';
-    corpo.innerHTML = '';
+function render(){
+  var corpo=$('corpo');
+  var vazio=$('vazioCard');
+
+  if(State.musicas.length===0){
+    vazio.style.display='block';
+    corpo.innerHTML='';
     stats();
     atualizarJson();
     return;
   }
-  vazio.style.display = 'none';
+  vazio.style.display='none';
 
-  var html = '';
-  for(var i = 0; i < musicas.length; i++){
-    var m = musicas[i];
-    var cls = m.corrompido ? 'cor' : '';
-    var st = m.corrompido ? '⚠️' : '✅';
-    html += '<div class="card-mus ' + cls + '" data-mid="' + m.id + '">' +
-      '<div class="topo">' +
-        '<span class="num">' + (i+1) + '</span>' +
-        '<span class="orig" title="' + escAttr(m.originalName) + '">' + esc(m.originalName) + '</span>' +
-        '<span class="st">' + st + '</span>' +
-      '</div>' +
-      '<div class="campos">' +
-        '<div class="campo"><label>Artista</label>' +
-          '<input data-id="' + m.id + '" data-campo="artist" value="' + escAttr(m.artist) + '" placeholder="Artista"></div>' +
-        '<div class="campo"><label>Título</label>' +
-          '<input data-id="' + m.id + '" data-campo="title" value="' + escAttr(m.title) + '" placeholder="Título"></div>' +
-        '<div class="campo"><label>Gênero</label>' +
-          '<input data-id="' + m.id + '" data-campo="genero" value="' + escAttr(m.genero) + '" placeholder="Gênero"></div>' +
-      '</div>' +
-      '<div class="novo-nome" title="' + escAttr(m.newName) + '"><b>→</b> ' + esc(m.newName) + '</div>' +
+  var html='';
+  for(var i=0;i<State.musicas.length;i++){
+    var m=State.musicas[i];
+    var cls=m.corrompido?'cor':'';
+    var st=m.corrompido?'⚠️':'✅';
+    html+='<div class="card-mus '+cls+'" data-mid="'+m.id+'">'+
+      '<div class="topo">'+
+        '<span class="num">'+(i+1)+'</span>'+
+        '<span class="orig" title="'+escAttr(m.originalName)+'">'+esc(m.originalName)+'</span>'+
+        '<span class="st">'+st+'</span>'+
+      '</div>'+
+      '<div class="campos">'+
+        '<div class="campo"><label>Artista</label>'+
+          '<input data-id="'+m.id+'" data-campo="artist" value="'+escAttr(m.artist)+'" placeholder="Artista"></div>'+
+        '<div class="campo"><label>Título</label>'+
+          '<input data-id="'+m.id+'" data-campo="title" value="'+escAttr(m.title)+'" placeholder="Título"></div>'+
+        '<div class="campo"><label>Gênero</label>'+
+          '<input data-id="'+m.id+'" data-campo="genero" value="'+escAttr(m.genero)+'" placeholder="Gênero"></div>'+
+      '</div>'+
+      '<div class="novo-nome" title="'+escAttr(m.newName)+'"><b>→</b> '+esc(m.newName)+'</div>'+
     '</div>';
   }
-  corpo.innerHTML = html;
+  corpo.innerHTML=html;
   stats();
   atualizarJson();
 }
 
 function onInputEdit(e){
-  var inp = e.target;
+  var inp=e.target;
   if(!inp.dataset || !inp.dataset.id) return;
-  var m = mapMusicas.get(inp.dataset.id);
+  var m=State.map.get(inp.dataset.id);
   if(!m) return;
-  m[inp.dataset.campo] = inp.value;
-  if(inp.dataset.campo === 'artist' || inp.dataset.campo === 'title'){
-    m.corrompido = ehLixo(m.artist) || ehLixo(m.title) || norm(m.artist) === norm(m.title);
-    m.newName = gerarNome(m, comExt(m.originalName));
-    var card = inp.closest('.card-mus');
+  m[inp.dataset.campo]=inp.value;
+  if(inp.dataset.campo==='artist'||inp.dataset.campo==='title'){
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+    var card=inp.closest('.card-mus');
     if(card){
-      card.classList.toggle('cor', m.corrompido);
-      var stEl = card.querySelector('.st');
-      if(stEl) stEl.textContent = m.corrompido ? '⚠️' : '✅';
-      var nn = card.querySelector('.novo-nome');
-      if(nn){ nn.innerHTML = '<b>→</b> ' + esc(m.newName); nn.title = m.newName; }
+      card.classList.toggle('cor',m.corrompido);
+      var stEl=card.querySelector('.st');
+      if(stEl) stEl.textContent=m.corrompido?'⚠️':'✅';
+      var nn=card.querySelector('.novo-nome');
+      if(nn){ nn.innerHTML='<b>→</b> '+esc(m.newName); nn.title=m.newName; }
     }
   }
   stats();
@@ -1463,165 +1388,146 @@ function onInputEdit(e){
 }
 
 function onInputBlur(e){
-  var inp = e.target;
+  var inp=e.target;
   if(!inp.dataset || !inp.dataset.id) return;
-  var m = mapMusicas.get(inp.dataset.id);
+  var m=State.map.get(inp.dataset.id);
   if(!m) return;
-  var campo = inp.dataset.campo;
-  var valor = inp.value.trim();
+  var campo=inp.dataset.campo;
+  var valor=inp.value.trim();
   if(!valor) return;
-  if(campo === 'artist') aprenderArtista(valor);
-  else if(campo === 'title') aprenderTitulo(valor);
+  if(campo==='artist') aprenderArtista(valor);
+  else if(campo==='title') aprenderTitulo(valor);
 }
 
-function stats(){
-  $('stTotal').textContent = musicas.length;
-  var ok = 0, cor = 0;
-  for(var i = 0; i < musicas.length; i++){
-    if(musicas[i].corrompido) cor++; else ok++;
-  }
-  $('stOk').textContent = ok;
-  $('stCor').textContent = cor;
-  $('btnZip').disabled = musicas.length === 0;
-  $('btnJson').disabled = musicas.length === 0;
-  atualizarBrainStats();
-}
-
+/* ============================================================
+   JSON
+   ============================================================ */
 function _atualizarJsonReal(){
-  var txt = $('jsonTexto');
-  var badge = $('jsonBadge');
-  var info = $('jsonInfo');
-  var tam = $('jsonTamanho');
+  var txt=$('jsonTexto'),badge=$('jsonBadge'),info=$('jsonInfo'),tam=$('jsonTamanho');
   if(!txt) return;
+  if(document.activeElement===txt) return;
 
-  var ativo = document.activeElement;
-  if(ativo && ativo !== txt && (ativo.tagName === 'INPUT' || ativo.tagName === 'TEXTAREA')) return;
-
-  if(musicas.length === 0){
-    txt.value = '';
-    txt.placeholder = 'Adicione músicas para gerar o JSON...';
-    badge.textContent = '0';
-    info.textContent = 'Aguardando músicas...';
-    info.style.color = '';
-    tam.textContent = '0 chars';
-    jsonAtual = '';
+  if(State.musicas.length===0){
+    txt.value='';
+    txt.placeholder='Adicione músicas para gerar o JSON...';
+    badge.textContent='0';
+    info.textContent='Aguardando músicas...';
+    info.style.color='';
+    tam.textContent='0 chars';
+    State.jsonAtual='';
     return;
   }
 
-  var idIni = parseInt($('idInicial').value, 10) || 1;
-  var gen = $('generoGeral').value.trim() || 'Music';
+  var idIni=parseInt($('idInicial').value,10)||1;
+  var gen=$('generoGeral').value.trim()||'Music';
 
-  var arr = musicas.map(function(m, i){
+  var arr=State.musicas.map(function(m,i){
     return {
-      id: idIni + i,
-      artist: m.artist || 'Desconhecido',
-      title: m.title || 'Sem título',
-      genero: m.genero || gen,
-      src: m.newName
+      id:idIni+i,
+      artist:m.artist||'Desconhecido',
+      title:m.title||'Sem título',
+      genero:m.genero||gen,
+      src:m.newName
     };
   });
 
-  jsonAtual = jsonMinificado
+  State.jsonAtual=State.jsonMinificado
     ? JSON.stringify(arr)
-    : '[\n' + arr.map(function(o){ return JSON.stringify(o); }).join(',\n') + '\n]';
+    : '[\n'+arr.map(function(o){ return JSON.stringify(o); }).join(',\n')+'\n]';
 
-  txt.value = jsonAtual;
-  badge.textContent = arr.length;
+  txt.value=State.jsonAtual;
+  badge.textContent=arr.length;
 
-  var corr = 0;
-  for(var i = 0; i < musicas.length; i++) if(musicas[i].corrompido) corr++;
-  if(corr > 0){
-    info.textContent = '⚠️ ' + corr + ' corrompida(s)';
-    info.style.color = '#f59e0b';
-  } else {
-    info.textContent = '✅ Pronto';
-    info.style.color = '#34b87a';
-  }
-  tam.textContent = jsonAtual.length.toLocaleString('pt-BR') + ' chars';
+  var corr=0;
+  for(var i=0;i<State.musicas.length;i++) if(State.musicas[i].corrompido) corr++;
+  if(corr>0){ info.textContent='⚠️ '+corr+' incompleta(s)'; info.style.color='#f59e0b'; }
+  else { info.textContent='✅ Pronto'; info.style.color='#34b87a'; }
+  tam.textContent=State.jsonAtual.length.toLocaleString('pt-BR')+' chars';
 }
 function atualizarJson(){ _atualizarJsonReal(); }
-var atualizarJsonDebounced = debounce(_atualizarJsonReal, 300);
+var atualizarJsonDebounced=debounce(_atualizarJsonReal,300);
 
+/* ============================================================
+   AÇÕES
+   ============================================================ */
 function limparTodos(){
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
-  var n = 0;
-  musicas.forEach(function(m){
-    var a = limpar(m.artist), t = limpar(m.title);
-    if(a !== m.artist || t !== m.title) n++;
-    if(a) m.artist = a;
-    if(t) m.title = t;
-    m.corrompido = ehLixo(m.artist) || ehLixo(m.title) || norm(m.artist) === norm(m.title);
-    m.newName = gerarNome(m, comExt(m.originalName));
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
+  var n=0;
+  State.musicas.forEach(function(m){
+    var a=limpar(m.artist),t=limpar(m.title);
+    if(a!==m.artist||t!==m.title) n++;
+    if(a) m.artist=a;
+    if(t) m.title=t;
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
   });
   render();
-  toast('🧹 ' + n + ' nome(s) limpo(s)', 's');
+  toast('🧹 '+n+' nome(s) limpo(s)','s');
 }
 
 function resetarCampos(){
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   return modalConfirm('Resetar todos os campos?').then(function(ok){
     if(!ok) return;
-    musicas.forEach(function(m){
-      var p = parseNome(m.originalName);
-      m.artist = p.a;
-      m.title = p.t;
-      m.genero = '';
-      m.corrompido = ehLixo(m.artist) || ehLixo(m.title) || norm(m.artist) === norm(m.title);
-      m.newName = gerarNome(m, comExt(m.originalName));
+    State.musicas.forEach(function(m){
+      var p=parseNome(m.originalName);
+      m.artist=p.a; m.title=p.t; m.genero='';
+      m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+      m.newName=gerarNome(m,comExt(m.originalName));
     });
     render();
-    toast('↺ Campos resetados', 'i');
+    toast('↺ Campos resetados','i');
   });
 }
 
 function limparTudo(){
-  if(musicas.length === 0) return;
+  if(State.musicas.length===0) return;
   return modalConfirm('Remover todas as músicas?').then(function(ok){
     if(!ok) return;
-    musicas = [];
-    mapMusicas.clear();
-    jsonAtual = '';
+    State.musicas=[];
+    State.map.clear();
+    State.jsonAtual='';
     render();
-    toast('🗑️ Tudo limpo', 'i');
+    toast('🗑️ Tudo limpo','i');
   });
 }
 
 function reanalisar(){
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
-  toast('Re-analisando...', 'i');
-  var pendentes = musicas.length;
-  musicas.forEach(function(m){
-    var respondeu = false;
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
+  toast('Re-analisando...','i');
+  var pendentes=State.musicas.length;
+  State.musicas.forEach(function(m){
+    var respondeu=false;
     function finalizar(){
       if(respondeu) return;
-      respondeu = true;
+      respondeu=true;
       pendentes--;
-      if(pendentes === 0){ render(); toast('🔄 Re-análise concluída', 's'); }
+      if(pendentes===0){ render(); toast('🔄 Re-análise concluída','s'); }
     }
-    var timeout = setTimeout(finalizar, 30000);
+    var timeout=setTimeout(finalizar,30000);
     try{
-      var p = parseNome(m.originalName);
-      lerTags(m.file, function(tags){
+      var p=parseNome(m.originalName);
+      lerTags(m.file,function(tags){
         clearTimeout(timeout);
         try{
-          var tagArtist = (tags && tags.artist) ? limpar(tags.artist) : '';
-          var tagTitle  = (tags && tags.title)  ? limpar(tags.title)  : '';
-          var artist, title;
-          var pNorm = norm(p.a);
-          if(brain.artistas[pNorm]) artist = brain.artistas[pNorm];
-          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
-          else artist = p.a;
-          artist = normalizarComAlias(artist);
-          var tNorm = norm(p.t);
-          if(brain.titulos[tNorm]) title = brain.titulos[tNorm];
-          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
-          else title = p.t;
-          title = removerArtistaDoTitulo(title, artist);
-          m.artist = artist || '';
-          m.title = title || '';
-          m.genero = (tags && tags.genre) ? tags.genre : m.genero;
-          m.corrompido = ehLixo(m.artist) || ehLixo(m.title) || norm(m.artist) === norm(m.title);
-          m.newName = gerarNome(m, comExt(m.originalName));
+          var tagArtist=(tags&&tags.artist)?limpar(tags.artist):'';
+          var tagTitle=(tags&&tags.title)?limpar(tags.title):'';
+          var artist,title;
+          var pNorm=norm(p.a);
+          if(State.brain.artistas[pNorm]) artist=State.brain.artistas[pNorm];
+          else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist=tagArtist;
+          else artist=p.a;
+          artist=normalizarComAlias(artist);
+          var tNorm=norm(p.t);
+          if(State.brain.titulos[tNorm]) title=State.brain.titulos[tNorm];
+          else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title=tagTitle;
+          else title=p.t;
+          title=removerArtistaDoTitulo(title,artist);
+          m.artist=artist||'';
+          m.title=title||'';
+          m.genero=(tags&&tags.genre)?tags.genre:m.genero;
+          m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+          m.newName=gerarNome(m,comExt(m.originalName));
         }catch(e){}
         finalizar();
       });
@@ -1630,265 +1536,247 @@ function reanalisar(){
 }
 
 function aplicarGenero(){
-  var g = $('generoGeral').value.trim();
-  if(!g){ toast('Digite um gênero.', 'w'); return; }
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
-  musicas.forEach(function(m){ m.genero = g; });
+  var g=$('generoGeral').value.trim();
+  if(!g){ toast('Digite um gênero.','w'); return; }
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
+  State.musicas.forEach(function(m){ m.genero=g; });
   render();
-  toast('🎼 Gênero aplicado!', 's');
+  toast('🎼 Gênero aplicado!','s');
 }
 
 function adicionarLixoManual(aplicarAgora){
-  var inp = $('lixoManual');
-  var val = inp.value.trim();
-  if(!val){ toast('Digite algo para remover.', 'w'); return; }
-  var itens = val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos = 0;
+  var inp=$('lixoManual');
+  var val=inp.value.trim();
+  if(!val){ toast('Digite algo para remover.','w'); return; }
+  var itens=val.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0;
   itens.forEach(function(item){
-    var chave = norm(item);
-    if(chave && !brain.lixo[chave]){ brain.lixo[chave] = true; novos++; }
+    var chave=norm(item);
+    if(chave && !State.brain.lixo[chave]){ State.brain.lixo[chave]=true; novos++; }
   });
-  if(novos === 0){ toast('Já estava na lista.', 'w'); return; }
-  _cacheHashLixo = '';
+  if(novos===0){ toast('Já estava na lista.','w'); return; }
+  State.cache.hashLixo='';
   salvarBrain();
-  inp.value = '';
-  toast('🧠 ' + novos + ' item(ns) adicionado(s)!', 'b');
-  if(aplicarAgora && musicas.length > 0) limparTodos();
-  if($('brainPainel') && $('brainPainel').classList.contains('on')) renderBrain();
+  inp.value='';
+  toast('🧠 '+novos+' item(ns) adicionado(s)!','b');
+  if(aplicarAgora && State.musicas.length>0) limparTodos();
+  if($('brainPainel').classList.contains('on')) renderBrain();
 }
 
+/* ============================================================
+   ARTISTAS / ALIASES / ABREV
+   ============================================================ */
 function renderArtistas(){
-  var lista = $('artLista');
-  if(!lista) return;
-  var chaves = Object.keys(artistasConhecidos).sort();
-  var filtro = norm(artBuscaAtual);
+  var lista=$('artLista'); if(!lista) return;
+  var chaves=Object.keys(State.artistasConhecidos).sort();
+  var filtro=norm(State.artBusca);
   if(filtro){
-    chaves = chaves.filter(function(k){
-      return k.indexOf(filtro) !== -1 || norm(artistasConhecidos[k]).indexOf(filtro) !== -1;
+    chaves=chaves.filter(function(k){
+      return k.indexOf(filtro)!==-1 || norm(State.artistasConhecidos[k]).indexOf(filtro)!==-1;
     });
   }
-  if(chaves.length === 0){
-    lista.innerHTML = '<div class="chip-vazio">' +
-      (filtro ? '🔍 Nenhum artista encontrado.' : 'Nenhum artista. Adicione acima.') +
-      '</div>';
+  if(chaves.length===0){
+    lista.innerHTML='<div class="chip-vazio">'+(filtro?'🔍 Nenhum artista encontrado.':'Nenhum artista. Adicione acima.')+'</div>';
   } else {
-    lista.innerHTML = chaves.map(function(k){
-      return '<div class="chip"><span>' + esc(artistasConhecidos[k]) + '</span><button data-k="' + escAttr(k) + '">✕</button></div>';
+    lista.innerHTML=chaves.map(function(k){
+      return '<div class="chip"><span>'+esc(State.artistasConhecidos[k])+'</span><button data-k="'+escAttr(k)+'">✕</button></div>';
     }).join('');
   }
-  var cont = $('artContador');
-  if(cont) cont.textContent = Object.keys(artistasConhecidos).length;
+  $('artContador').textContent=Object.keys(State.artistasConhecidos).length;
 }
 
 function adicionarArtistaConhecido(){
-  var inp = $('artNovo');
-  var val = inp.value.trim();
-  if(!val){ toast('Digite um nome.', 'w'); return; }
-  var itens = val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos = 0, duplicados = 0;
-  var adicionados = [];
-  var suspeitos = [];
+  var inp=$('artNovo');
+  var val=inp.value.trim();
+  if(!val){ toast('Digite um nome.','w'); return; }
+  var itens=val.split(/[,;]/).map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0,duplicados=0;
+  var adicionados=[];
+  var suspeitos=[];
 
-  for(var i = 0; i < itens.length; i++){
-    var item = itens[i];
-    var k = norm(item);
-    if(!k || k.length < 2) continue;
-    if(artistasConhecidos[k]){ duplicados++; continue; }
-    var similares = Object.keys(artistasConhecidos).filter(function(exist){
-      return exist !== k && (exist.indexOf(k) !== -1 || k.indexOf(exist) !== -1) &&
-        Math.abs(exist.length - k.length) <= 3;
+  for(var i=0;i<itens.length;i++){
+    var item=itens[i];
+    var k=norm(item);
+    if(!k || k.length<2) continue;
+    if(State.artistasConhecidos[k]){ duplicados++; continue; }
+    var similares=Object.keys(State.artistasConhecidos).filter(function(exist){
+      return exist!==k && (exist.indexOf(k)!==-1||k.indexOf(exist)!==-1) && Math.abs(exist.length-k.length)<=3;
     });
-    if(similares.length > 0) suspeitos.push({ item: item, k: k, existente: artistasConhecidos[similares[0]] });
-    else { artistasConhecidos[k] = item; novos++; adicionados.push(item); }
+    if(similares.length>0) suspeitos.push({ item:item,k:k,existente:State.artistasConhecidos[similares[0]] });
+    else { State.artistasConhecidos[k]=item; novos++; adicionados.push(item); }
   }
 
-  var continuar = Promise.resolve();
-  if(suspeitos.length > 0){
-    var lista = suspeitos.map(function(s){ return '"' + s.item + '" ≈ "' + s.existente + '"'; }).join('\n');
-    continuar = modalConfirm(lista + '\n\nAdicionar todos mesmo assim?').then(function(ok){
-      if(ok){
-        suspeitos.forEach(function(s){
-          artistasConhecidos[s.k] = s.item;
-          novos++; adicionados.push(s.item);
-        });
-      }
+  var continuar=Promise.resolve();
+  if(suspeitos.length>0){
+    var lista2=suspeitos.map(function(s){ return '"'+s.item+'" ≈ "'+s.existente+'"'; }).join('\n');
+    continuar=modalConfirm(lista2+'\n\nAdicionar todos mesmo assim?').then(function(ok){
+      if(ok) suspeitos.forEach(function(s){ State.artistasConhecidos[s.k]=s.item; novos++; adicionados.push(s.item); });
     });
   }
 
   return continuar.then(function(){
-    if(novos === 0){ toast(duplicados > 0 ? 'Já estava na lista.' : 'Nada válido.', 'w'); return; }
-    _cacheHashArt = '';
-    _dirtyArtistas = true;
-    if(!salvarArtistas()){ toast('❌ Não foi possível salvar!', 'e'); return; }
-    adicionados.forEach(function(a){ var kk = norm(a); if(!brain.artistas[kk]) brain.artistas[kk] = a; });
+    if(novos===0){ toast(duplicados>0?'Já estava na lista.':'Nada válido.','w'); return; }
+    State.cache.hashArt='';
+    State.cache.dirtyArt=true;
+    if(!salvarArtistas()) return;
+    adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
     salvarBrain();
-    inp.value = '';
+    inp.value='';
     renderArtistas();
-    toast('🎨 ' + novos + ' artista(s) salvo(s)!', 'save');
+    toast('🎨 '+novos+' artista(s) salvo(s)!','save');
   });
 }
 
 function adicionarMassa(){
-  var ta = $('artMassa');
-  var texto = ta.value;
-  if(!texto.trim()){ toast('Cole algo no campo.', 'w'); return; }
-  var itens = texto.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
-  var novos = 0, duplicados = 0;
-  var adicionados = [];
+  var ta=$('artMassa');
+  var texto=ta.value;
+  if(!texto.trim()){ toast('Cole algo no campo.','w'); return; }
+  var itens=texto.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+  var novos=0,duplicados=0;
+  var adicionados=[];
   itens.forEach(function(item){
-    var k = norm(item);
-    if(!k || k.length < 2) return;
-    if(artistasConhecidos[k]){ duplicados++; return; }
-    artistasConhecidos[k] = item;
-    novos++;
-    adicionados.push(item);
+    var k=norm(item);
+    if(!k || k.length<2) return;
+    if(State.artistasConhecidos[k]){ duplicados++; return; }
+    State.artistasConhecidos[k]=item; novos++; adicionados.push(item);
   });
-  if(novos === 0){ toast('Nada novo.', 'w'); return; }
-  _cacheHashArt = '';
-  _dirtyArtistas = true;
-  if(!salvarArtistas()){ toast('❌ Não foi possível salvar!', 'e'); return; }
-  adicionados.forEach(function(a){ var kk = norm(a); if(!brain.artistas[kk]) brain.artistas[kk] = a; });
+  if(novos===0){ toast('Nada novo.','w'); return; }
+  State.cache.hashArt='';
+  State.cache.dirtyArt=true;
+  if(!salvarArtistas()) return;
+  adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
   salvarBrain();
-  ta.value = '';
+  ta.value='';
   renderArtistas();
-  toast('📥 ' + novos + ' artista(s) salvo(s)!', 'save');
+  toast('📥 '+novos+' artista(s) salvo(s)!','save');
 }
 
 function adicionarArtistasDasMusicas(){
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
-  var novos = 0;
-  var adicionados = [];
-  musicas.forEach(function(m){
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
+  var novos=0;
+  var adicionados=[];
+  State.musicas.forEach(function(m){
     if(!m.artist) return;
-    var k = norm(m.artist);
-    if(k && !artistasConhecidos[k]){ artistasConhecidos[k] = m.artist; novos++; adicionados.push(m.artist); }
+    var k=norm(m.artist);
+    if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=m.artist; novos++; adicionados.push(m.artist); }
   });
-  if(novos === 0){ toast('Todos já estavam na lista.', 'w'); return; }
-  _cacheHashArt = '';
-  _dirtyArtistas = true;
-  if(!salvarArtistas()){ toast('❌ Não foi possível salvar!', 'e'); return; }
-  adicionados.forEach(function(a){ var kk = norm(a); if(!brain.artistas[kk]) brain.artistas[kk] = a; });
+  if(novos===0){ toast('Todos já estavam na lista.','w'); return; }
+  State.cache.hashArt='';
+  State.cache.dirtyArt=true;
+  if(!salvarArtistas()) return;
+  adicionados.forEach(function(a){ var kk=norm(a); if(!State.brain.artistas[kk]) State.brain.artistas[kk]=a; });
   salvarBrain();
   renderArtistas();
-  toast('🎨 ' + novos + ' artista(s) salvo(s)!', 'save');
+  toast('🎨 '+novos+' artista(s) salvo(s)!','save');
 }
 
 function resetarArtistas(){
   return modalConfirm('Restaurar lista padrão? Os que você adicionou serão mantidos.').then(function(ok){
     if(!ok) return;
-    var base = {};
-    ARTISTAS_BASE.forEach(function(a){ base[norm(a)] = a; });
-    Object.keys(artistasConhecidos).forEach(function(k){ base[k] = artistasConhecidos[k]; });
-    artistasConhecidos = base;
-    _cacheHashArt = '';
-    _dirtyArtistas = true;
-    if(salvarArtistas()){ renderArtistas(); toast('↺ Padrão restaurado', 'save'); }
+    var base={};
+    ARTISTAS_BASE.forEach(function(a){ base[norm(a)]=a; });
+    Object.keys(State.artistasConhecidos).forEach(function(k){ base[k]=State.artistasConhecidos[k]; });
+    State.artistasConhecidos=base;
+    State.cache.hashArt='';
+    State.cache.dirtyArt=true;
+    if(salvarArtistas()){ renderArtistas(); toast('↺ Padrão restaurado','save'); }
   });
 }
 
 function zerarArtistas(){
   return modalConfirm('⚠️ Apagar TODOS os artistas conhecidos?').then(function(ok){
     if(!ok) return;
-    artistasConhecidos = {};
-    _cacheHashArt = '';
-    _dirtyArtistas = true;
-    if(salvarArtistas()){ renderArtistas(); toast('🗑️ Lista zerada', 'i'); }
+    State.artistasConhecidos={};
+    State.cache.hashArt='';
+    State.cache.dirtyArt=true;
+    if(salvarArtistas()){ renderArtistas(); toast('🗑️ Lista zerada','i'); }
   });
 }
 
 function exportarArtistas(){
-  var arr = Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; }).sort();
-  var data = JSON.stringify({ artistas: arr, aliases: aliases }, null, 2);
-  var blob = new Blob([data], { type:'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'artistas_conhecidos.json';
+  var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }).sort();
+  var data=JSON.stringify({ artistas:arr, aliases:State.aliases },null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='artistas_conhecidos.json';
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('📤 ' + arr.length + ' artistas exportados', 'save');
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  toast('📤 '+arr.length+' artistas exportados','save');
 }
 
 function importarArtistas(){ $('inpImportArt').click(); }
 
 function processarImportArt(file){
-  var reader = new FileReader();
-  reader.onload = function(e){
+  var reader=new FileReader();
+  reader.onload=function(e){
     try{
-      var txt = e.target.result;
-      var novos = 0;
+      var txt=e.target.result;
+      var novos=0;
       if(/^\s*[\{\[]/.test(txt)){
-        var obj = JSON.parse(txt);
-        var arr = Array.isArray(obj) ? obj : (obj.artistas || []);
-        arr.forEach(function(a){ var k = norm(a); if(k && !artistasConhecidos[k]){ artistasConhecidos[k] = a; novos++; } });
-        if(obj.aliases) Object.keys(obj.aliases).forEach(function(k){ aliases[k] = obj.aliases[k]; });
+        var obj=JSON.parse(txt);
+        var arr=Array.isArray(obj)?obj:(obj.artistas||[]);
+        arr.forEach(function(a){ var k=norm(a); if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=a; novos++; } });
+        if(obj.aliases) Object.keys(obj.aliases).forEach(function(k){ State.aliases[k]=obj.aliases[k]; });
       } else {
-        var itens = txt.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
-        itens.forEach(function(a){ var k = norm(a); if(k && !artistasConhecidos[k]){ artistasConhecidos[k] = a; novos++; } });
+        var itens=txt.split(/[\n,;]+/).map(function(s){ return s.trim(); }).filter(Boolean);
+        itens.forEach(function(a){ var k=norm(a); if(k && !State.artistasConhecidos[k]){ State.artistasConhecidos[k]=a; novos++; } });
       }
-      _cacheHashArt = '';
-      _dirtyArtistas = true;
+      State.cache.hashArt='';
+      State.cache.dirtyArt=true;
       if(salvarArtistas()){
         salvarAliases();
         renderArtistas();
         renderAliases();
-        toast('📥 ' + novos + ' artista(s) importado(s)!', 'save');
+        toast('📥 '+novos+' artista(s) importado(s)!','save');
       }
-    }catch(err){ toast('Arquivo inválido.', 'e'); }
+    }catch(err){ toast('Arquivo inválido.','e'); }
   };
   reader.readAsText(file);
 }
 
 function renderAliases(){
-  var lista = $('aliasLista');
-  if(!lista) return;
-  var chaves = Object.keys(aliases).sort();
-  if(chaves.length === 0){
-    lista.innerHTML = '<div class="chip-vazio">Nenhum alias.</div>';
-    return;
-  }
-  lista.innerHTML = chaves.map(function(k){
-    return '<div class="chip"><span>' + esc(k) + ' = <b>' + esc(aliases[k]) + '</b></span><button data-k="' + escAttr(k) + '">✕</button></div>';
+  var lista=$('aliasLista'); if(!lista) return;
+  var chaves=Object.keys(State.aliases).sort();
+  if(chaves.length===0){ lista.innerHTML='<div class="chip-vazio">Nenhum alias.</div>'; return; }
+  lista.innerHTML=chaves.map(function(k){
+    return '<div class="chip"><span>'+esc(k)+' = <b>'+esc(State.aliases[k])+'</b></span><button data-k="'+escAttr(k)+'">✕</button></div>';
   }).join('');
 }
 
 function adicionarAlias(){
-  var de = $('aliasDe').value.trim();
-  var para = $('aliasPara').value.trim();
-  if(!de || !para){ toast('Preencha os dois campos.', 'w'); return; }
-  aliases[norm(de)] = para;
-  $('aliasDe').value = '';
-  $('aliasPara').value = '';
+  var de=$('aliasDe').value.trim();
+  var para=$('aliasPara').value.trim();
+  if(!de||!para){ toast('Preencha os dois campos.','w'); return; }
+  State.aliases[norm(de)]=para;
+  $('aliasDe').value='';
+  $('aliasPara').value='';
   salvarAliases();
   renderAliases();
-  toast('🔗 ' + de + ' = ' + para, 's');
-  if(musicas.length > 0) reanalisar();
+  toast('🔗 '+de+' = '+para,'s');
+  if(State.musicas.length>0) reanalisar();
 }
 
 function renderAbrev(){
-  var lista = $('abrevLista');
-  if(!lista) return;
-  var chaves = Object.keys(abrev).sort();
-  if(chaves.length === 0){
-    lista.innerHTML = '<div class="chip-vazio">Nenhuma abreviação. Clique em "Restaurar padrão".</div>';
-    return;
-  }
-  lista.innerHTML = chaves.map(function(k){
-    return '<div class="chip"><span>' + esc(k) + ' → <b>' + esc(abrev[k]) + '</b></span><button data-k="' + escAttr(k) + '">✕</button></div>';
+  var lista=$('abrevLista'); if(!lista) return;
+  var chaves=Object.keys(State.abrev).sort();
+  if(chaves.length===0){ lista.innerHTML='<div class="chip-vazio">Nenhuma abreviação. Clique em "Restaurar padrão".</div>'; return; }
+  lista.innerHTML=chaves.map(function(k){
+    return '<div class="chip"><span>'+esc(k)+' → <b>'+esc(State.abrev[k])+'</b></span><button data-k="'+escAttr(k)+'">✕</button></div>';
   }).join('');
 }
 
 function adicionarAbrev(){
-  var de = $('abrevDe').value.trim();
-  var para = $('abrevPara').value.trim();
-  if(!de || !para){ toast('Preencha os dois campos.', 'w'); return; }
-  abrev[norm(de)] = para;
-  $('abrevDe').value = '';
-  $('abrevPara').value = '';
+  var de=$('abrevDe').value.trim();
+  var para=$('abrevPara').value.trim();
+  if(!de||!para){ toast('Preencha os dois campos.','w'); return; }
+  State.abrev[norm(de)]=para;
+  $('abrevDe').value='';
+  $('abrevPara').value='';
   salvarAbrev();
-  toast('✂️ ' + de + ' → ' + para, 's');
-  if(musicas.length > 0){
-    musicas.forEach(function(m){ m.newName = gerarNome(m, comExt(m.originalName)); });
+  toast('✂️ '+de+' → '+para,'s');
+  if(State.musicas.length>0){
+    State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
     render();
   }
 }
@@ -1896,133 +1784,140 @@ function adicionarAbrev(){
 function resetarAbrev(){
   return modalConfirm('Restaurar todas as abreviações padrão?').then(function(ok){
     if(!ok) return;
-    abrev = JSON.parse(JSON.stringify(ABREV_PADRAO));
+    State.abrev=Object.assign({},ABREV_PADRAO);
     salvarAbrev();
-    toast('↺ Abreviações restauradas', 's');
-    if(musicas.length > 0){
-      musicas.forEach(function(m){ m.newName = gerarNome(m, comExt(m.originalName)); });
+    toast('↺ Abreviações restauradas','s');
+    if(State.musicas.length>0){
+      State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
       render();
     }
   });
 }
 
+/* ============================================================
+   DOWNLOADS
+   ============================================================ */
 function baixarZip(){
-  if(musicas.length === 0){ toast('Nenhuma música.', 'w'); return; }
-  if(typeof JSZip === 'undefined'){ toast('JSZip não carregou.', 'e'); return; }
-  toast('Preparando ZIP...', 'i');
+  var comFile=State.musicas.filter(function(m){ return m.file; });
+  if(comFile.length===0){ toast('Nenhum arquivo real para baixar.','w'); return; }
+  if(typeof JSZip==='undefined'){ toast('JSZip não carregou.','e'); return; }
+  toast('Preparando ZIP...','i');
   $('prog').classList.add('on');
-  var zip = new JSZip();
-  var total = musicas.length;
-  var i = 0;
-  var usados = {};
+  var zip=new JSZip();
+  var total=comFile.length;
+  var i=0;
+  var usados={};
 
   function proximo(){
-    if(i >= total){
-      zip.generateAsync({ type:'blob' }, function(meta){
-        $('progFill').style.width = Math.min(99, meta.percent).toFixed(0) + '%';
+    if(i>=total){
+      zip.generateAsync({type:'blob'},function(meta){
+        $('progFill').style.width=Math.min(99,meta.percent).toFixed(0)+'%';
       }).then(function(blob){
-        var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = 'musicas_corrigidas.zip';
+        var url=URL.createObjectURL(blob);
+        var a=document.createElement('a');
+        a.href=url; a.download='musicas_corrigidas.zip';
         document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+        setTimeout(function(){ URL.revokeObjectURL(url); },1000);
         $('prog').classList.remove('on');
-        $('progFill').style.width = '0%';
-        toast('✅ ZIP gerado: ' + total + ' música(s)', 's');
+        $('progFill').style.width='0%';
+        toast('✅ ZIP gerado: '+total+' música(s)','s');
       });
       return;
     }
-    var m = musicas[i];
-    $('progFill').style.width = ((i+1)/total*90).toFixed(0) + '%';
+    var m=comFile[i];
+    $('progFill').style.width=((i+1)/total*90).toFixed(0)+'%';
 
-    var chave = m.newName;
-    usados[chave] = (usados[chave] || 0) + 1;
-    var nomeFinal = usados[chave] === 1
-      ? chave
-      : chave.replace(/(\.[^.]+)$/, '_' + usados[chave] + '$1');
+    var chave=m.newName;
+    usados[chave]=(usados[chave]||0)+1;
+    var nomeFinal=usados[chave]===1?chave:chave.replace(/(\.[^.]+)$/,'_'+usados[chave]+'$1');
 
-    if(!m.file){
-      zip.file(nomeFinal, 'arquivo de exemplo — ' + m.title);
-      i++; proximo(); return;
-    }
-    var reader = new FileReader();
-    reader.onload = function(e){
-      var buf = e.target.result;
-      if(comExt(m.originalName).toLowerCase() === '.mp3'){
-        try{ buf = escreverTags(buf, { artist:m.artist, title:m.title, genre:m.genero }); }catch(err){}
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var buf=e.target.result;
+      if(comExt(m.originalName).toLowerCase()==='.mp3'){
+        try{ buf=escreverTags(buf,{artist:m.artist,title:m.title,genre:m.genero}); }catch(err){}
       }
-      zip.file(nomeFinal, buf);
+      zip.file(nomeFinal,buf);
       i++; proximo();
     };
-    reader.onerror = function(){ i++; proximo(); };
+    reader.onerror=function(){ i++; proximo(); };
     reader.readAsArrayBuffer(m.file);
   }
   proximo();
 }
 
 function baixarJson(){
-  if(!jsonAtual){ toast('Nenhuma música.', 'w'); return; }
-  var blob = new Blob([jsonAtual], { type:'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'play.json';
+  if(!State.jsonAtual){ toast('Nenhuma música.','w'); return; }
+  var blob=new Blob([State.jsonAtual],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='play.json';
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('📋 JSON baixado!', 's');
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  toast('📋 JSON baixado!','s');
 }
 
 function copiarJson(){
-  if(!jsonAtual){ toast('Nada pra copiar.', 'w'); return; }
+  if(!State.jsonAtual){ toast('Nada pra copiar.','w'); return; }
   if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(jsonAtual)
-      .then(function(){ toast('📋 JSON copiado!', 's'); })
-      .catch(function(){ $('jsonTexto').select(); document.execCommand('copy'); toast('📋 JSON copiado!', 's'); });
+    navigator.clipboard.writeText(State.jsonAtual)
+      .then(function(){ toast('📋 JSON copiado!','s'); })
+      .catch(function(){ $('jsonTexto').select(); document.execCommand('copy'); toast('📋 JSON copiado!','s'); });
   } else {
     $('jsonTexto').select();
     document.execCommand('copy');
-    toast('📋 JSON copiado!', 's');
+    toast('📋 JSON copiado!','s');
   }
 }
 
 function toggleMinificar(){
-  jsonMinificado = !jsonMinificado;
-  $('btnMinificar').textContent = jsonMinificado ? '📄' : '🔀';
+  State.jsonMinificado=!State.jsonMinificado;
+  $('btnMinificar').textContent=State.jsonMinificado?'📄':'🔀';
   atualizarJson();
-  toast(jsonMinificado ? '📦 JSON minificado' : '📄 JSON expandido', 'i');
+  toast(State.jsonMinificado?'📦 JSON minificado':'📄 JSON expandido','i');
+}
+
+/* ============================================================
+   BRAIN
+   ============================================================ */
+function atualizarBrainStats(){
+  var total=Object.keys(State.brain.lixo).length
+           +Object.keys(State.brain.artistas).length
+           +Object.keys(State.brain.titulos).length;
+  if($('brainBadge')) $('brainBadge').textContent=total+' itens';
+  if($('cntLixo')) $('cntLixo').textContent=Object.keys(State.brain.lixo).length;
+  if($('cntArt'))  $('cntArt').textContent=Object.keys(State.brain.artistas).length;
+  if($('cntTit'))  $('cntTit').textContent=Object.keys(State.brain.titulos).length;
 }
 
 function renderBrain(){
-  var cont = $('brainConteudo');
-  if(!cont) return;
-  var lista = brain[brainTabAtual] || {};
-  var chaves = Object.keys(lista).sort();
-  if(chaves.length === 0){
-    cont.innerHTML = '<div class="chip-vazio">Nada aprendido ainda nessa categoria.</div>';
+  var cont=$('brainConteudo'); if(!cont) return;
+  var lista=State.brain[State.brainTab]||{};
+  var chaves=Object.keys(lista).sort();
+  if(chaves.length===0){
+    cont.innerHTML='<div class="chip-vazio">Nada aprendido ainda nessa categoria.</div>';
     return;
   }
-  cont.innerHTML = '<div class="brain-lista">' + chaves.map(function(k){
-    var label = lista[k] === true ? k : (lista[k] || k);
-    return '<div class="chip"><span>' + esc(label) + '</span><button data-k="' + escAttr(k) + '" data-tab="' + brainTabAtual + '">✕</button></div>';
-  }).join('') + '</div>';
+  cont.innerHTML='<div class="brain-lista">'+chaves.map(function(k){
+    var label=lista[k]===true?k:(lista[k]||k);
+    return '<div class="chip"><span>'+esc(label)+'</span><button data-k="'+escAttr(k)+'" data-tab="'+State.brainTab+'">✕</button></div>';
+  }).join('')+'</div>';
 }
 
 function exportarBrain(){
-  var data = JSON.stringify({
-    brain: brain,
-    abrev: abrev,
-    artistas: Object.keys(artistasConhecidos).map(function(k){ return artistasConhecidos[k]; }),
-    aliases: aliases
-  }, null, 2);
-  var blob = new Blob([data], { type:'application/json' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'cerebro_editor.json';
+  var data=JSON.stringify({
+    brain:State.brain,
+    abrev:State.abrev,
+    artistas:Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }),
+    aliases:State.aliases
+  },null,2);
+  var blob=new Blob([data],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url; a.download='cerebro_editor.json';
   document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-  toast('🧠 Cérebro exportado!', 'save');
+  setTimeout(function(){ URL.revokeObjectURL(url); },1000);
+  toast('🧠 Cérebro exportado!','save');
 }
 
 function importarBrain(){ $('inpBrain').click(); }
@@ -2030,16 +1925,19 @@ function importarBrain(){ $('inpBrain').click(); }
 function resetarBrain(){
   return modalConfirm('Apagar TODO o aprendizado?').then(function(ok){
     if(!ok) return;
-    brain = { lixo:{}, artistas:{}, titulos:{} };
-    _cacheHashLixo = '';
+    State.brain={lixo:{},artistas:{},titulos:{}};
+    State.cache.hashLixo='';
     salvarBrain();
     renderBrain();
-    toast('🧠 Cérebro zerado', 'i');
+    toast('🧠 Cérebro zerado','i');
   });
 }
 
+/* ============================================================
+   DEMO
+   ============================================================ */
 function demo(){
-  var exemplos = [
+  var exemplos=[
     'Meu Amor Voltou Querem Nos Separar 5 da Manha - Ze Cantor.mp3',
     'Ze Cantor - Meu Amor Voltou Querem Nos Separar 5 da Manha.mp3',
     'Boa Sorte Pra Voce Na Pressao do Paredao - Brasas do Forro.mp3',
@@ -2052,243 +1950,246 @@ function demo(){
     '-Wando-Moça.mp3',
     'amor bom-Gustavo Lima.mp3'
   ];
-  musicas = exemplos.map(function(nome){
-    var p = parseNome(nome);
-    var m = {
-      id: 'm_' + (++idc) + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,6),
-      file: null,
-      originalName: nome,
-      artist: p.a,
-      title: p.t,
-      genero: 'Music',
-      corrompido: ehLixo(p.a) || ehLixo(p.t) || norm(p.a) === norm(p.t)
+  State.musicas=exemplos.map(function(nome){
+    var p=parseNome(nome);
+    var m={
+      id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      file:null,
+      originalName:nome,
+      artist:p.a,
+      title:p.t,
+      genero:'Music',
+      corrompido:ehLixo(p.a)||ehLixo(p.t)||norm(p.a)===norm(p.t)
     };
-    m.newName = gerarNome(m, comExt(nome));
+    m.newName=gerarNome(m,comExt(nome));
     return m;
   });
-  mapMusicas.clear();
-  musicas.forEach(function(m){ mapMusicas.set(m.id, m); });
+  State.map.clear();
+  State.musicas.forEach(function(m){ State.map.set(m.id,m); });
   render();
-  toast('🎯 Exemplo carregado!', 's');
+  toast('🎯 Exemplo carregado! (sem áudio real para ZIP)','s');
 }
 
+/* ============================================================
+   INIT
+   ============================================================ */
 function init(){
   try{
-    carregarBrain();
-    carregarAliases();
+    carregarTudo();
     atualizarBrainStats();
     renderAbrev();
     renderArtistas();
     renderAliases();
 
-    var zona = $('zona');
-    var inp = $('inp');
-    zona.addEventListener('click', function(e){ if(e.target !== inp) inp.click(); });
-    zona.addEventListener('dragover', function(e){ e.preventDefault(); zona.classList.add('drag'); });
-    zona.addEventListener('dragleave', function(e){ e.preventDefault(); zona.classList.remove('drag'); });
-    zona.addEventListener('drop', function(e){
+    /* Upload */
+    var zona=$('zona'),inp=$('inp');
+    zona.addEventListener('click',function(e){ if(e.target!==inp) inp.click(); });
+    zona.addEventListener('dragover',function(e){ e.preventDefault(); zona.classList.add('drag'); });
+    zona.addEventListener('dragleave',function(e){ e.preventDefault(); zona.classList.remove('drag'); });
+    zona.addEventListener('drop',function(e){
       e.preventDefault(); zona.classList.remove('drag');
-      if(e.dataTransfer && e.dataTransfer.files.length) addArquivos(e.dataTransfer.files);
+      if(e.dataTransfer&&e.dataTransfer.files.length) addArquivos(e.dataTransfer.files);
     });
-    inp.addEventListener('change', function(e){
-      if(e.target.files && e.target.files.length) addArquivos(e.target.files);
-      inp.value = '';
+    inp.addEventListener('change',function(e){
+      if(e.target.files&&e.target.files.length) addArquivos(e.target.files);
+      inp.value='';
     });
-    document.addEventListener('dragover', function(e){ e.preventDefault(); });
-    document.addEventListener('drop', function(e){ e.preventDefault(); });
+    document.addEventListener('dragover',function(e){ e.preventDefault(); });
+    document.addEventListener('drop',function(e){ e.preventDefault(); });
 
+    /* Toggles */
     document.querySelectorAll('[data-toggle]').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var box = $(btn.dataset.toggle);
+      btn.addEventListener('click',function(){
+        var box=$(btn.dataset.toggle);
         if(!box) return;
         box.classList.toggle('on');
-        btn.textContent = box.classList.contains('on') ? '🙈' : '👁️';
+        btn.textContent=box.classList.contains('on')?'🙈':'👁️';
       });
     });
 
-    $('btnAddLixo').addEventListener('click', function(){ adicionarLixoManual(false); });
-    $('btnAddLixoAplicar').addEventListener('click', function(){ adicionarLixoManual(true); });
-    $('lixoManual').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarLixoManual(false); });
+    /* Lixo */
+    $('btnAddLixo').addEventListener('click',function(){ adicionarLixoManual(false); });
+    $('btnAddLixoAplicar').addEventListener('click',function(){ adicionarLixoManual(true); });
+    $('lixoManual').addEventListener('keydown',function(e){ if(e.key==='Enter') adicionarLixoManual(false); });
 
-    $('btnAddAbrev').addEventListener('click', adicionarAbrev);
-    $('btnResetAbrev').addEventListener('click', resetarAbrev);
-    $('abrevPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAbrev(); });
+    /* Abreviações */
+    $('btnAddAbrev').addEventListener('click',adicionarAbrev);
+    $('btnResetAbrev').addEventListener('click',resetarAbrev);
+    $('abrevPara').addEventListener('keydown',function(e){ if(e.key==='Enter') adicionarAbrev(); });
 
-    $('btnAddArt').addEventListener('click', adicionarArtistaConhecido);
-    $('btnAddArtAtual').addEventListener('click', adicionarArtistasDasMusicas);
-    $('btnResetArt').addEventListener('click', resetarArtistas);
-    $('btnZerarArt').addEventListener('click', zerarArtistas);
-    $('btnExportArt').addEventListener('click', exportarArtistas);
-    $('btnImportArt').addEventListener('click', importarArtistas);
-    $('btnAddMassa').addEventListener('click', adicionarMassa);
-    $('btnLimparMassa').addEventListener('click', function(){ $('artMassa').value = ''; });
-    $('artNovo').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarArtistaConhecido(); });
-    $('artBusca').addEventListener('input', function(e){
-      artBuscaAtual = e.target.value;
+    /* Artistas */
+    $('btnAddArt').addEventListener('click',adicionarArtistaConhecido);
+    $('btnAddArtAtual').addEventListener('click',adicionarArtistasDasMusicas);
+    $('btnResetArt').addEventListener('click',resetarArtistas);
+    $('btnZerarArt').addEventListener('click',zerarArtistas);
+    $('btnExportArt').addEventListener('click',exportarArtistas);
+    $('btnImportArt').addEventListener('click',importarArtistas);
+    $('btnAddMassa').addEventListener('click',adicionarMassa);
+    $('btnLimparMassa').addEventListener('click',function(){ $('artMassa').value=''; });
+    $('artNovo').addEventListener('keydown',function(e){ if(e.key==='Enter') adicionarArtistaConhecido(); });
+    $('artBusca').addEventListener('input',function(e){
+      State.artBusca=e.target.value;
       renderArtistas();
     });
-    $('btnLimparBusca').addEventListener('click', function(){
-      $('artBusca').value = '';
-      artBuscaAtual = '';
+    $('btnLimparBusca').addEventListener('click',function(){
+      $('artBusca').value='';
+      State.artBusca='';
       renderArtistas();
     });
-    $('btnAddAlias').addEventListener('click', adicionarAlias);
-    $('aliasPara').addEventListener('keydown', function(e){ if(e.key === 'Enter') adicionarAlias(); });
-    $('inpImportArt').addEventListener('change', function(e){
-      var f = e.target.files[0];
+    $('btnAddAlias').addEventListener('click',adicionarAlias);
+    $('aliasPara').addEventListener('keydown',function(e){ if(e.key==='Enter') adicionarAlias(); });
+    $('inpImportArt').addEventListener('change',function(e){
+      var f=e.target.files[0];
       if(f) processarImportArt(f);
-      e.target.value = '';
+      e.target.value='';
     });
 
-    document.addEventListener('click', function(e){
-      var btn = e.target.closest('.chip button');
+    /* Delegated chips */
+    document.addEventListener('click',function(e){
+      var btn=e.target.closest('.chip button');
       if(!btn) return;
-      if(btn.dataset.tab !== undefined){
-        var k = btn.dataset.k;
-        delete brain[btn.dataset.tab][k];
-        if(btn.dataset.tab === 'lixo') _cacheHashLixo = '';
+      if(btn.dataset.tab!==undefined){
+        delete State.brain[btn.dataset.tab][btn.dataset.k];
+        if(btn.dataset.tab==='lixo') State.cache.hashLixo='';
         salvarBrain();
         renderBrain();
-        toast('Removido', 'i');
+        toast('Removido','i');
       } else if(btn.closest('#artLista')){
-        var k2 = btn.dataset.k;
-        var nome = artistasConhecidos[k2];
-        delete artistasConhecidos[k2];
-        _cacheHashArt = '';
-        _dirtyArtistas = true;
-        if(salvarArtistas()){ renderArtistas(); toast('🗑️ Removido: ' + nome, 'i'); }
+        var nome=State.artistasConhecidos[btn.dataset.k];
+        delete State.artistasConhecidos[btn.dataset.k];
+        State.cache.hashArt='';
+        State.cache.dirtyArt=true;
+        if(salvarArtistas()){ renderArtistas(); toast('🗑️ Removido: '+nome,'i'); }
       } else if(btn.closest('#aliasLista')){
-        delete aliases[btn.dataset.k];
+        delete State.aliases[btn.dataset.k];
         salvarAliases();
         renderAliases();
-        toast('Alias removido', 'i');
+        toast('Alias removido','i');
       } else if(btn.closest('#abrevLista')){
-        delete abrev[btn.dataset.k];
+        delete State.abrev[btn.dataset.k];
         salvarAbrev();
-        toast('Removido: ' + btn.dataset.k, 'i');
-        if(musicas.length > 0){
-          musicas.forEach(function(m){ m.newName = gerarNome(m, comExt(m.originalName)); });
+        toast('Removido: '+btn.dataset.k,'i');
+        if(State.musicas.length>0){
+          State.musicas.forEach(function(m){ m.newName=gerarNome(m,comExt(m.originalName)); });
           render();
         }
       }
     });
 
-    $('corpo').addEventListener('input', onInputEdit);
-    $('corpo').addEventListener('blur', onInputBlur, true);
+    /* Inputs */
+    $('corpo').addEventListener('input',onInputEdit);
+    $('corpo').addEventListener('blur',onInputBlur,true);
 
-    $('btnLimpar').addEventListener('click', limparTodos);
-    $('btnReanalisar').addEventListener('click', reanalisar);
-    $('btnReset').addEventListener('click', resetarCampos);
-    $('btnClear').addEventListener('click', limparTudo);
-    $('btnDemo').addEventListener('click', demo);
-    $('btnZip').addEventListener('click', baixarZip);
-    $('btnJson').addEventListener('click', baixarJson);
-    $('btnGenero').addEventListener('click', aplicarGenero);
-    $('btnCopyJson2').addEventListener('click', copiarJson);
-    $('btnDownloadJson2').addEventListener('click', baixarJson);
-    $('btnMinificar').addEventListener('click', toggleMinificar);
+    /* Ações */
+    $('btnLimpar').addEventListener('click',limparTodos);
+    $('btnReanalisar').addEventListener('click',reanalisar);
+    $('btnReset').addEventListener('click',resetarCampos);
+    $('btnClear').addEventListener('click',limparTudo);
+    $('btnDemo').addEventListener('click',demo);
+    $('btnZip').addEventListener('click',baixarZip);
+    $('btnJson').addEventListener('click',baixarJson);
+    $('btnGenero').addEventListener('click',aplicarGenero);
+    $('btnCopyJson2').addEventListener('click',copiarJson);
+    $('btnDownloadJson2').addEventListener('click',baixarJson);
+    $('btnMinificar').addEventListener('click',toggleMinificar);
 
-    $('btnToggleJson').addEventListener('click', function(){
-      var p = $('jsonPainel');
+    $('btnToggleJson').addEventListener('click',function(){
+      var p=$('jsonPainel');
       p.classList.toggle('on');
-      $('btnToggleJson').textContent = p.classList.contains('on') ? '📋 Fechar' : '📋 JSON';
-      if(p.classList.contains('on')) p.scrollIntoView({ behavior:'smooth' });
+      $('btnToggleJson').textContent=p.classList.contains('on')?'📋 Fechar':'📋 JSON';
+      if(p.classList.contains('on')) p.scrollIntoView({behavior:'smooth'});
     });
 
-    $('btnBrain').addEventListener('click', function(){
-      var p = $('brainPainel');
+    $('btnBrain').addEventListener('click',function(){
+      var p=$('brainPainel');
       p.classList.toggle('on');
-      if(p.classList.contains('on')){ renderBrain(); p.scrollIntoView({ behavior:'smooth' }); }
+      if(p.classList.contains('on')){ renderBrain(); p.scrollIntoView({behavior:'smooth'}); }
     });
 
     document.querySelectorAll('.brain-tab').forEach(function(tab){
-      tab.addEventListener('click', function(){
+      tab.addEventListener('click',function(){
         document.querySelectorAll('.brain-tab').forEach(function(t){ t.classList.remove('on'); });
         tab.classList.add('on');
-        brainTabAtual = tab.dataset.tab;
+        State.brainTab=tab.dataset.tab;
         renderBrain();
       });
     });
 
-    $('btnExportBrain').addEventListener('click', exportarBrain);
-    $('btnImportBrain').addEventListener('click', importarBrain);
-    $('btnResetBrain').addEventListener('click', resetarBrain);
+    $('btnExportBrain').addEventListener('click',exportarBrain);
+    $('btnImportBrain').addEventListener('click',importarBrain);
+    $('btnResetBrain').addEventListener('click',resetarBrain);
 
-    $('inpBrain').addEventListener('change', function(e){
-      var f = e.target.files[0];
+    $('inpBrain').addEventListener('change',function(e){
+      var f=e.target.files[0];
       if(!f) return;
-      var r = new FileReader();
-      r.onload = function(ev){
+      var r=new FileReader();
+      r.onload=function(ev){
         try{
-          var obj = JSON.parse(ev.target.result);
+          var obj=JSON.parse(ev.target.result);
           if(obj.brain){
-            brain.lixo = obj.brain.lixo || {};
-            brain.artistas = obj.brain.artistas || {};
-            brain.titulos = obj.brain.titulos || {};
+            State.brain.lixo=obj.brain.lixo||{};
+            State.brain.artistas=obj.brain.artistas||{};
+            State.brain.titulos=obj.brain.titulos||{};
           }
-          if(obj.abrev) abrev = obj.abrev;
-          if(obj.aliases) aliases = obj.aliases;
+          if(obj.abrev) State.abrev=obj.abrev;
+          if(obj.aliases) State.aliases=obj.aliases;
           if(obj.artistas && Array.isArray(obj.artistas)){
-            artistasConhecidos = {};
-            obj.artistas.forEach(function(a){ artistasConhecidos[norm(a)] = a; });
+            State.artistasConhecidos={};
+            obj.artistas.forEach(function(a){ State.artistasConhecidos[norm(a)]=a; });
           }
-          _cacheHashLixo = '';
-          _cacheHashArt = '';
-          _dirtyArtistas = true;
-          salvarBrain();
-          salvarAbrev();
-          salvarAliases();
-          salvarArtistas();
-          renderBrain();
-          renderAliases();
-          renderArtistas();
-          toast('🧠 Cérebro importado!', 'save');
-        }catch(err){ toast('Arquivo inválido.', 'e'); }
+          State.cache.hashLixo='';
+          State.cache.hashArt='';
+          State.cache.dirtyArt=true;
+          salvarBrain(); salvarAbrev(); salvarAliases(); salvarArtistas();
+          renderBrain(); renderAliases(); renderArtistas();
+          toast('🧠 Cérebro importado!','save');
+        }catch(err){ toast('Arquivo inválido.','e'); }
       };
       r.readAsText(f);
-      e.target.value = '';
+      e.target.value='';
     });
 
-    $('idInicial').addEventListener('input', atualizarJsonDebounced);
-    $('generoGeral').addEventListener('input', atualizarJsonDebounced);
+    $('idInicial').addEventListener('input',atualizarJsonDebounced);
+    $('generoGeral').addEventListener('input',atualizarJsonDebounced);
 
-    window.addEventListener('beforeunload', function(){
+    /* Save on exit */
+    window.addEventListener('beforeunload',function(){
       try{
-        if(Object.keys(artistasConhecidos).length > 0){ _dirtyArtistas = true; salvarArtistas(); }
-        if(Object.keys(aliases).length > 0) salvarAliases();
-        _salvarBrainReal();
+        if(Object.keys(State.artistasConhecidos).length>0){ State.cache.dirtyArt=true; salvarArtistas(); }
+        if(Object.keys(State.aliases).length>0) salvarAliases();
+        salvarBrainReal();
       }catch(e){}
     });
 
-    document.addEventListener('visibilitychange', function(){
-      if(document.visibilityState === 'hidden'){
+    document.addEventListener('visibilitychange',function(){
+      if(document.visibilityState==='hidden'){
         try{
-          _dirtyArtistas = true;
-          salvarArtistas(); salvarAliases(); _salvarBrainReal();
+          State.cache.dirtyArt=true;
+          salvarArtistas(); salvarAliases(); salvarBrainReal();
         }catch(e){}
       }
     });
 
     setInterval(function(){
-      try{ if(_dirtyArtistas && Object.keys(artistasConhecidos).length > 0) salvarArtistas(); }catch(e){}
-    }, 60000);
+      try{ if(State.cache.dirtyArt && Object.keys(State.artistasConhecidos).length>0) salvarArtistas(); }catch(e){}
+    },60000);
 
     setTimeout(function(){
-      var ok1 = typeof JSZip !== 'undefined';
-      var ok2 = typeof ID3Writer !== 'undefined';
-      if(!ok1) toast('⚠️ JSZip não carregou', 'w');
-      if(!ok2) toast('⚠️ ID3Writer não carregou', 'w');
-    }, 500);
+      if(typeof JSZip==='undefined') toast('⚠️ JSZip não carregou','w');
+      if(typeof ID3Writer==='undefined') toast('⚠️ ID3Writer não carregou','w');
+    },500);
 
-    console.log('🎵 Editor v11 iniciado | ' + Object.keys(artistasConhecidos).length + ' artistas');
-    toast('💾 Salvamento blindado ativo!', 'save');
+    console.log('🎵 Editor v12 | '+Object.keys(State.artistasConhecidos).length+' artistas');
+    toast('💾 Salvamento blindado ativo!','save');
   }catch(e){
-    console.error('ERRO NO INIT:', e);
-    alert('Erro ao iniciar: ' + e.message + '\n\n' + (e.stack || ''));
+    console.error('ERRO NO INIT:',e);
+    alert('Erro ao iniciar: '+e.message+'\n\n'+(e.stack||''));
   }
 }
 
-init();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+else init();
+
 })();
 </script>
 </body>
