@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b0b12">
-<title>🎵 Editor de Músicas v15</title>
+<title>🎵 Editor de Músicas v16</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -104,9 +104,6 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
   background:var(--bg);border:none;color:#a8d8a8;
   font-family:'Courier New',monospace;font-size:12px;padding:14px;
   resize:vertical;outline:none;line-height:1.5}
-.painel-info{padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);
-  font-size:11px;color:var(--txt3);display:flex;justify-content:space-between;
-  flex-wrap:wrap;gap:6px}
 .toast-wrap{position:fixed;top:calc(12px + var(--safe-top));
   left:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;
   pointer-events:none}
@@ -142,40 +139,24 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .modal .inp{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
   border-radius:10px;padding:12px 14px;color:var(--txt);font-size:15px;outline:none}
 .modal .inp:focus{border-color:var(--purple2)}
-.modal select{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
-  border-radius:10px;padding:12px 14px;color:var(--txt);font-size:15px;outline:none}
-.modal select:focus{border-color:var(--purple2)}
 .preview{background:var(--bg);border:1px dashed var(--border2);border-radius:10px;
   padding:10px 12px;font-family:'Courier New',monospace;font-size:12px;
   color:#a8d8a8;line-height:1.7;margin-bottom:12px;word-break:break-word;min-height:60px;max-height:180px;overflow-y:auto}
 .preview .antes{color:#e05a5a}
 .preview .depois{color:#34b87a;margin-bottom:8px}
 .preview .vazio{color:#6a6a8e;font-style:italic}
-.check-group{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.check-item{background:var(--bg3);border:1.5px solid var(--border2);border-radius:8px;
-  padding:8px 12px;font-size:13px;cursor:pointer;user-select:none;
-  display:flex;align-items:center;gap:6px;transition:all .15s}
-.check-item:active{transform:scale(.96)}
-.check-item.on{background:rgba(124,108,240,.2);border-color:var(--purple2);color:#fff}
-.check-item .check{width:16px;height:16px;border-radius:4px;
-  border:1.5px solid var(--border2);display:flex;align-items:center;
-  justify-content:center;font-size:11px;font-weight:900;flex-shrink:0}
-.check-item.on .check{background:var(--purple2);border-color:var(--purple2);color:#fff}
-.radio-group{display:flex;gap:8px;margin-bottom:10px}
-.radio-item{flex:1;background:var(--bg3);border:1.5px solid var(--border2);
-  border-radius:8px;padding:10px;font-size:13px;text-align:center;cursor:pointer;
-  transition:all .15s;font-weight:600}
-.radio-item:active{transform:scale(.96)}
-.radio-item.on{background:var(--purple2);border-color:var(--purple2);color:#fff}
 .sec-title{font-size:11px;color:var(--purple);font-weight:800;
   text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;
   padding-bottom:4px;border-bottom:1px solid var(--border)}
 .sec-title:first-child{margin-top:0}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.row-2 label{display:block;font-size:11px;color:var(--txt3);
-  margin-bottom:4px;text-transform:uppercase;font-weight:600}
-.inp-small{background:var(--bg3);border:1px solid var(--border2);
-  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none;width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow-y:auto;padding:2px}
+.chip{background:var(--bg4);border:1px solid var(--border2);
+  padding:6px 10px;border-radius:8px;font-size:13px;color:var(--txt);
+  display:flex;align-items:center;gap:6px;max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.chip button{background:transparent;color:var(--red);padding:2px;min-height:auto;
+  font-size:16px;line-height:1;border-radius:4px}
+.chip-vazio{color:var(--txt3);font-size:12px;padding:16px;text-align:center;width:100%}
 .vazio-card{background:var(--bg3);border-radius:var(--radius);padding:48px 20px;
   text-align:center;color:var(--txt3);border:1px dashed var(--border2)}
 .vazio-card .big{font-size:52px;display:block;margin-bottom:12px;opacity:.5}
@@ -199,8 +180,8 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
 <body>
 
 <div class="header">
-  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v15</span></h1>
-  <div class="sub">🧠 Sabe artista + música • ✏️ Edita em lote • <b style="color:var(--green)">💾 Blindado</b></div>
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v16</span></h1>
+  <div class="sub">🧠 Regras permanentes • 🎨 Sabe artista + música • <b style="color:var(--green)">💾 Blindado</b></div>
   <div class="stats">
     <span>📄 <b id="stTotal">0</b></span>
     <span>✅ <b class="ok" id="stOk">0</b></span>
@@ -217,8 +198,8 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
 </div>
 
 <div class="acoes-sec">
-  <button class="b6 full" id="btnLote">✏️ Editar em lote (todas)</button>
-  <button class="b3" id="btnLimpeza">🧹 Limpeza rápida</button>
+  <button class="b6 full" id="btnEnsinar">🧠 Ensinar ao código (regras permanentes)</button>
+  <button class="b3" id="btnLimpar">🧹 Limpar nomes</button>
   <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
   <button class="b5" id="btnReset">↺ Resetar</button>
   <button class="b4" id="btnClear">🗑️ Limpar tudo</button>
@@ -264,100 +245,30 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
   </div>
 </div>
 
-<!-- MODAL EDIÇÃO EM LOTE -->
-<div class="modal-overlay" id="loteOverlay">
+<!-- MODAL ENSINAR -->
+<div class="modal-overlay" id="ensinarOverlay">
   <div class="modal">
-    <h3>✏️ Editar em lote</h3>
-    <div class="sub-modal">Aplica em <b>TODAS</b> as músicas carregadas</div>
+    <h3>🧠 Ensinar ao código</h3>
+    <div class="sub-modal">Regras salvas aplicam em <b>TODAS</b> as músicas atuais e futuras</div>
 
-    <div class="sec-title">🗑️ TIRAR (remover texto)</div>
+    <div class="sec-title">➕ Adicionar regra</div>
     <div class="campo">
-      <label>Texto para tirar de todas as músicas</label>
-      <input type="text" class="inp" id="loteTirar" placeholder="Ex: VEVO, #, Pout-Pourri, Official">
+      <label>Texto/símbolo pra tirar</label>
+      <input type="text" class="inp" id="ensDe" placeholder="Ex: VEVO, #, Pout-Pourri, Official">
     </div>
+    <button class="b6" id="ensAdd" style="width:100%;margin-bottom:12px">➕ Adicionar à lista</button>
 
-    <div class="sec-title">➕ ADICIONAR (texto fixo)</div>
-    <div class="campo">
-      <label>Texto para adicionar</label>
-      <input type="text" class="inp" id="loteAdd" placeholder="Ex: #, [TOP], A ">
-    </div>
-    <div class="radio-group" id="loteAddOnde">
-      <div class="radio-item on" data-onde="inicio">No início</div>
-      <div class="radio-item" data-onde="fim">No fim</div>
-    </div>
+    <div class="sec-title">📋 Regras salvas (aplicam sempre)</div>
+    <div class="chips" id="ensLista" style="margin-bottom:12px"></div>
 
-    <div class="sec-title">🔄 SUBSTITUIR</div>
-    <div class="campo">
-      <label>De</label>
-      <input type="text" class="inp" id="loteSubDe" placeholder="Ex: Pout-Pourri">
+    <div class="sec-title">👁️ Preview em música real</div>
+    <div class="preview" id="ensPreview">
+      <span class="vazio">Adicione uma regra pra ver o preview...</span>
     </div>
-    <div class="campo">
-      <label>Para (vazio = remover)</label>
-      <input type="text" class="inp" id="loteSubPara" placeholder="Ex: (deixe vazio)">
-    </div>
-
-    <div class="sec-title">🎯 ONDE APLICAR</div>
-    <div class="check-group">
-      <div class="check-item on" data-alvo="artist">
-        <div class="check">✓</div> Artista
-      </div>
-      <div class="check-item on" data-alvo="title">
-        <div class="check">✓</div> Título
-      </div>
-    </div>
-
-    <div class="sec-title">👁️ Preview (primeiras 5)</div>
-    <div class="preview" id="lotePreview"><span class="vazio">Digite algo acima para ver o preview...</span></div>
 
     <div class="btns">
-      <button class="btn-cancel" id="loteCancel">Cancelar</button>
-      <button class="btn-ok" id="loteOk">✅ Aplicar em TODAS</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL LIMPEZA RÁPIDA -->
-<div class="modal-overlay" id="limpezaOverlay">
-  <div class="modal">
-    <h3>🧹 Limpeza rápida</h3>
-    <div class="sub-modal">Marque o que quer tirar de <b>TODAS</b> as músicas</div>
-
-    <div class="check-group" id="limpezaChecks">
-      <div class="check-item on" data-txt="VEVO"><div class="check">✓</div> VEVO</div>
-      <div class="check-item on" data-txt="#"><div class="check">✓</div> # (cerquilha)</div>
-      <div class="check-item on" data-txt="Pout-Pourri"><div class="check">✓</div> Pout-Pourri</div>
-      <div class="check-item on" data-txt="Official"><div class="check">✓</div> Official</div>
-      <div class="check-item on" data-txt="Oficial"><div class="check">✓</div> Oficial</div>
-      <div class="check-item on" data-txt="Topic"><div class="check">✓</div> Topic</div>
-      <div class="check-item" data-txt="Records"><div class="check">✓</div> Records</div>
-      <div class="check-item" data-txt="Music"><div class="check">✓</div> Music</div>
-      <div class="check-item" data-txt="HD"><div class="check">✓</div> HD</div>
-      <div class="check-item" data-txt="HQ"><div class="check">✓</div> HQ</div>
-      <div class="check-item" data-txt="Lyric"><div class="check">✓</div> Lyric</div>
-      <div class="check-item" data-txt="Video"><div class="check">✓</div> Video</div>
-      <div class="check-item" data-txt="Clipe"><div class="check">✓</div> Clipe</div>
-      <div class="check-item" data-txt="Ao Vivo"><div class="check">✓</div> Ao Vivo</div>
-      <div class="check-item" data-txt="Remix"><div class="check">✓</div> Remix</div>
-      <div class="check-item" data-txt="Cover"><div class="check">✓</div> Cover</div>
-    </div>
-
-    <div class="campo" style="margin-top:12px">
-      <label>Outro texto (opcional)</label>
-      <input type="text" class="inp" id="limpezaOutro" placeholder="Digite mais um texto pra tirar...">
-    </div>
-
-    <div class="sec-title">🎯 ONDE APLICAR</div>
-    <div class="check-group">
-      <div class="check-item on" data-alvo-limpeza="artist"><div class="check">✓</div> Artista</div>
-      <div class="check-item on" data-alvo-limpeza="title"><div class="check">✓</div> Título</div>
-    </div>
-
-    <div class="sec-title">👁️ Preview</div>
-    <div class="preview" id="limpezaPreview"><span class="vazio">Selecione os itens acima...</span></div>
-
-    <div class="btns">
-      <button class="btn-cancel" id="limpezaCancel">Cancelar</button>
-      <button class="btn-ok" id="limpezaOk">🧹 Aplicar em TODAS</button>
+      <button class="btn-cancel" id="ensCancel">Fechar</button>
+      <button class="btn-ok" id="ensOk">✅ Aplicar em TODAS</button>
     </div>
   </div>
 </div>
@@ -371,27 +282,14 @@ button:disabled{opacity:.4;cursor:not-allowed;transform:none}
    ============================================================ */
 var LIMITE_NOME = 60;
 
-var ABREV_PADRAO = {
-  'você':'vc','voce':'vc','para':'pra','com':'c/','sem':'s/',
-  'coração':'cor.','coracao':'cor.','música':'mús.','musica':'mús.',
-  'canção':'can.','cancao':'can.','amor':'am.','saudade':'saúd.',
-  'loucura':'louc.','verdade':'verd.','felicidade':'felic.',
-  'eternamente':'etern.','simplesmente':'simpl.','realmente':'real.',
-  'finalmente':'final.','novamente':'nov.'
-};
-
-/* Lixo que aparece como palavra separada */
+/* Lixo que aparece como palavra separada (fallback padrão) */
 var LIXO_BASE = [
-  'vevo','official','oficial','topic','records','music','channel','tv',
-  'hd','hq','lyric','lyrics','video','vídeo','clipe','clip','audio','áudio',
   'ao vivo','aovivo','live','acoustic','acústico','acustico','unplugged',
   'remaster','remastered','remasterizado','remix','rework','mashup',
   'instrumental','playback','karaoke','cover','demo',
   'single','album','ep','lp','mixtape','playlist','coletânea','coletanea',
-  'pout-pourri','pout pourri','poutpourri','pot-pourri','pot pourri','potpourri',
   'download','baixar','grátis','gratis','free','completo','completa',
-  'lançamento','lancamento','exclusivo','exclusiva','oficial','official',
-  'prod','produção','producao','youtube','spotify','deezer','soundcloud',
+  'lançamento','lancamento','exclusivo','exclusiva','prod','produção','producao',
   'kbps','mp3','mp4','m4a','flac','opus','ogg','wav','aac',
   'stereo','mono','hires','hi-res','24bit','16bit','1080p','720p','4k','8k'
 ];
@@ -453,11 +351,13 @@ var State = {
   jsonMinificado: false,
   jsonAtual: '',
   artistasConhecidos: {},
-  cache: { hashArt:'', dirtyArt:false }
+  regras: [],
+  cache: { dirtyArt:false }
 };
 
 var KEYS = {
-  art:'editor_musicas_artistas_v15'
+  art: 'editor_musicas_artistas_v16',
+  regras: 'editor_musicas_regras_v16'
 };
 
 /* ============================================================
@@ -524,7 +424,7 @@ function setSaveStatus(status){
 }
 
 /* ============================================================
-   PERSISTÊNCIA (só artistas)
+   PERSISTÊNCIA
    ============================================================ */
 function safeSetItem(key,value){
   try{ localStorage.setItem(key,value); return true; }
@@ -556,6 +456,83 @@ function salvarArtistas(){
 }
 
 /* ============================================================
+   REGRAS PERMANENTES
+   ============================================================ */
+function carregarRegras(){
+  var raw=safeGetItem(KEYS.regras);
+  if(raw){ try{ State.regras=JSON.parse(raw)||[]; }catch(e){ State.regras=[]; } }
+  else State.regras=[];
+}
+function salvarRegras(){
+  safeSetItem(KEYS.regras, JSON.stringify(State.regras));
+}
+function adicionarRegra(texto){
+  var t=String(texto||'').trim();
+  if(!t) return false;
+  for(var i=0;i<State.regras.length;i++){
+    if(norm(State.regras[i])===norm(t)) return false;
+  }
+  State.regras.push(t);
+  salvarRegras();
+  return true;
+}
+function removerRegra(texto){
+  var t=norm(texto);
+  State.regras=State.regras.filter(function(r){ return norm(r)!==t; });
+  salvarRegras();
+}
+
+/* Aplica todas as regras num texto.
+   Remove: colado no fim, colado no início, palavra inteira no meio. */
+function aplicarRegrasTexto(texto){
+  if(!texto || State.regras.length===0) return texto;
+  var s=texto;
+
+  State.regras.forEach(function(regra){
+    if(!regra) return;
+    var esq=escapeRegex(regra);
+
+    // 1. Colado no FIM: "ForeignerVEVO" → "Foreigner"
+    var reFim=new RegExp(esq+'$','i');
+    if(reFim.test(s)){
+      s=s.replace(reFim,'').replace(/[\s\-_.]+$/,'');
+    }
+
+    // 2. Colado no INÍCIO: "VEVOForeigner" → "Foreigner"
+    var reIni=new RegExp('^'+esq,'i');
+    if(reIni.test(s)){
+      s=s.replace(reIni,'').replace(/^[\s\-_.]+/,'');
+    }
+
+    // 3. Palavra inteira no meio
+    var reWord=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])'+esq+'([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
+    s=s.replace(reWord,' ');
+  });
+
+  // Limpeza final
+  s=s.replace(/\s+/g,' ')
+     .replace(/^[\s\-–—_,;:.|]+/,'')
+     .replace(/[\s\-–—_,;:.|]+$/,'')
+     .trim();
+
+  return s;
+}
+
+function aplicarRegrasEmTodas(){
+  if(State.musicas.length===0) return 0;
+  var n=0;
+  State.musicas.forEach(function(m){
+    var antesA=m.artist, antesT=m.title;
+    m.artist=aplicarRegrasTexto(m.artist);
+    m.title =aplicarRegrasTexto(m.title);
+    if(m.artist!==antesA || m.title!==antesT) n++;
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+  });
+  return n;
+}
+
+/* ============================================================
    LIMPEZA
    ============================================================ */
 function removerSimbolos(s){
@@ -567,10 +544,7 @@ function removerSimbolos(s){
 
 function limparPalavras(s){
   if(!s) return '';
-  var palavras=Object.keys(State.lixo||{});
-  // usa LIXO_BASE sempre (não depende do cérebro)
-  var lista=LIXO_BASE.slice();
-  lista.sort(function(a,b){ return b.length-a.length; });
+  var lista=LIXO_BASE.slice().sort(function(a,b){ return b.length-a.length; });
   var LOTE=50;
   for(var i=0;i<lista.length;i+=LOTE){
     var lote=lista.slice(i,i+LOTE);
@@ -586,33 +560,6 @@ function removerNumeros(s){
   return String(s).replace(/\b\d+\b/g,' ').replace(/\d+/g,' ').replace(/\s+/g,' ').trim();
 }
 
-function removerSufixoColado(s){
-  if(!s) return s;
-  // Remove VEVO, Official, Topic etc COLADOS no fim (ForeignerVEVO → Foreigner)
-  var sufixos=['vevo','official','oficial','topic','records','music','channel','brasil','brazil'];
-  sufixos.sort(function(a,b){ return b.length-a.length; });
-  var mudou=true, iter=0;
-  while(mudou && iter<5){
-    mudou=false; iter++;
-    var lower=s.toLowerCase();
-    for(var i=0;i<sufixos.length;i++){
-      var suf=sufixos[i];
-      if(lower.endsWith(suf)){
-        var resto=s.slice(0, s.length-suf.length).replace(/[\s\-_.]+$/,'');
-        if(resto.length>=2 && /[a-z0-9]$/i.test(resto)){
-          s=resto; mudou=true; break;
-        }
-      }
-    }
-  }
-  return s;
-}
-
-function removerCerquilha(s){
-  if(!s) return s;
-  return s.replace(/#+/g,' ').replace(/\s+/g,' ').trim();
-}
-
 function limpar(txt){
   if(!txt) return '';
   var s=String(txt).replace(/_/g,' ');
@@ -620,7 +567,6 @@ function limpar(txt){
   s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
   s=limparPalavras(s);
   s=removerNumeros(s);
-  s=removerCerquilha(s);
   s=s.replace(/[!?'"`´~^*@$%&=+,;:]+/g,' ');
   s=s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
   s=s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
@@ -712,14 +658,13 @@ function dedupArtistaNoTitulo(title,artist){
 function parseNome(nomeOriginal){
   var base=String(nomeOriginal).replace(/\.[^.]+$/,'');
 
-  /* Remove sufixos colados antes de tudo */
-  base=removerSufixoColado(base);
+  /* APLICA REGRAS PRIMEIRO */
+  base=aplicarRegrasTexto(base);
 
   var s=base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
   s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
   s=limparPalavras(s);
   s=removerNumeros(s);
-  s=removerCerquilha(s);
   s=s.replace(/\s+/g,' ').trim();
 
   /* Extrai feat */
@@ -730,7 +675,7 @@ function parseNome(nomeOriginal){
     s=s.slice(0,featMatch.index).trim();
   }
 
-  /* Quebra em partes por separador forte */
+  /* Quebra por separador forte */
   var partes=s.split(/\s*[|\-–—]\s*/).map(function(p){ return p.trim(); }).filter(Boolean);
   partes=partes.map(limpar).filter(function(p){ return p && !ehLixo(p); });
 
@@ -739,10 +684,10 @@ function parseNome(nomeOriginal){
   if(partes.length===0){
     title=limpar(s);
   } else if(partes.length===1){
-    var conhecido=encontrarArtistaEm(partes[0]);
-    if(conhecido && norm(conhecido)!==norm(partes[0])){
-      artist=conhecido;
-      title=limpar(dedupArtistaNoTitulo(partes[0], conhecido));
+    var conhec=encontrarArtistaEm(partes[0]);
+    if(conhec && norm(conhec)!==norm(partes[0])){
+      artist=conhec;
+      title=limpar(dedupArtistaNoTitulo(partes[0],conhec));
     } else {
       title=partes[0];
     }
@@ -760,12 +705,8 @@ function parseNome(nomeOriginal){
     else { artist=p1; title=p2; }
   }
 
-  /* Normaliza artistas */
-  if(artist){
-    artist=normalizarArtista(artist);
-  }
+  if(artist) artist=normalizarArtista(artist);
 
-  /* Adiciona feat extra */
   if(featTrecho && norm(featTrecho)!==norm(artist)){
     var outroArt=encontrarArtistaEm(featTrecho);
     if(outroArt && norm(outroArt)!==norm(artist)){
@@ -775,13 +716,11 @@ function parseNome(nomeOriginal){
     }
   }
 
-  /* Refinamento */
   if(artist){
     title=dedupArtistaNoTitulo(title,artist);
     title=removerArtistaDoInicio(title,artist);
   }
 
-  /* Se ficou igual, limpa artista */
   if(artist && title && norm(artist)===norm(title)) artist='';
   if(!title) title=limpar(s);
   if(!artist && !title) title='Sem título';
@@ -790,7 +729,7 @@ function parseNome(nomeOriginal){
 }
 
 /* ============================================================
-   TAGS (MP3/OGG/FLAC)
+   TAGS
    ============================================================ */
 function lerTags(file,cb){
   if(!file){ cb(null); return; }
@@ -980,12 +919,18 @@ function addArquivos(fileList){
           var tagGenero=(tags&&tags.genre)?tags.genre:'';
           var artist=tagArtist||p.a;
           var title=tagTitle||p.t;
+
+          /* APLICA REGRAS NOVAMENTE (caso o tag tenha lixo) */
+          artist=aplicarRegrasTexto(artist);
+          title=aplicarRegrasTexto(title);
+
           var m={
             id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
             file:file, originalName:file.name,
             artist:artist||'', title:title||'', genero:tagGenero||'Music',
-            corrompido:ehLixo(artist)||ehLixo(title)||norm(artist)===norm(title)
+            corrompido:false
           };
+          m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
           m.newName=gerarNome(m,comExt(file.name));
           State.musicas.push(m);
         }catch(e){ console.error('Erro:',e); }
@@ -1104,200 +1049,77 @@ function copiarJson(){
 }
 
 /* ============================================================
-   EDIÇÃO EM LOTE
+   MODAL ENSINAR
    ============================================================ */
-var loteState = { addOnde:'inicio', alvos:['artist','title'] };
-
-function abrirLote(){
-  $('loteTirar').value='';
-  $('loteAdd').value='';
-  $('loteSubDe').value='';
-  $('loteSubPara').value='';
-  loteState.addOnde='inicio';
-  loteState.alvos=['artist','title'];
-  document.querySelectorAll('#loteAddOnde .radio-item').forEach(function(el){
-    el.classList.toggle('on', el.dataset.onde==='inicio');
-  });
-  document.querySelectorAll('#loteOverlay .check-item[data-alvo]').forEach(function(el){
-    el.classList.add('on');
-  });
-  atualizarPreviewLote();
-  $('loteOverlay').classList.add('on');
+function abrirEnsinar(){
+  $('ensDe').value='';
+  renderListaRegras();
+  atualizarPreviewEnsinar();
+  $('ensinarOverlay').classList.add('on');
+  setTimeout(function(){ $('ensDe').focus(); },200);
 }
+function fecharEnsinar(){ $('ensinarOverlay').classList.remove('on'); }
 
-function fecharLote(){ $('loteOverlay').classList.remove('on'); }
-
-function atualizarPreviewLote(){
-  var prev=$('lotePreview');
-  if(State.musicas.length===0){
-    prev.innerHTML='<span class="vazio">Nenhuma música carregada.</span>';
+function renderListaRegras(){
+  var lista=$('ensLista');
+  if(!lista) return;
+  if(State.regras.length===0){
+    lista.innerHTML='<div class="chip-vazio">Nenhuma regra ainda. Adicione acima.</div>';
     return;
   }
-  var tirar=$('loteTirar').value;
-  var add=$('loteAdd').value;
-  var subDe=$('loteSubDe').value;
-  var subPara=$('loteSubPara').value;
-  var onde=loteState.addOnde;
-  var alvos=loteState.alvos;
+  lista.innerHTML=State.regras.map(function(r){
+    return '<div class="chip"><span>🗑️ '+esc(r)+'</span><button data-regra="'+escAttr(r)+'">✕</button></div>';
+  }).join('');
+}
 
-  if(!tirar && !add && !subDe){
-    prev.innerHTML='<span class="vazio">Digite algo acima para ver o preview...</span>';
+function atualizarPreviewEnsinar(){
+  var prev=$('ensPreview');
+  if(!prev) return;
+  if(State.regras.length===0){
+    prev.innerHTML='<span class="vazio">Adicione uma regra pra ver o preview...</span>';
     return;
   }
-
-  var mostrar=State.musicas.slice(0,5);
-  var html='';
-  mostrar.forEach(function(m){
-    var antesA=m.artist, antesT=m.title;
-    var depA=alvos.indexOf('artist')!==-1 ? aplicarTransformacoes(antesA, tirar, add, subDe, subPara, onde) : antesA;
-    var depT=alvos.indexOf('title')!==-1 ? aplicarTransformacoes(antesT, tirar, add, subDe, subPara, onde) : antesT;
-    html+='<div class="antes">🔴 '+esc(antesA)+' — '+esc(antesT)+'</div>';
-    html+='<div class="depois">🟢 '+esc(depA)+' — '+esc(depT)+'</div>';
-  });
-  if(State.musicas.length>5) html+='<span class="vazio">... e mais '+(State.musicas.length-5)+'</span>';
-  prev.innerHTML=html;
+  var exemplo;
+  if(State.musicas.length>0){
+    var m0=State.musicas[0];
+    exemplo={ a:m0.artist, t:m0.title };
+  } else {
+    exemplo={ a:'ForeignerVEVO', t:'Sweet Love #1 Pout-Pourri' };
+  }
+  var depA=aplicarRegrasTexto(exemplo.a);
+  var depT=aplicarRegrasTexto(exemplo.t);
+  prev.innerHTML=
+    '<div class="antes">🔴 '+esc(exemplo.a)+' — '+esc(exemplo.t)+'</div>'+
+    '<div class="depois">🟢 '+esc(depA)+' — '+esc(depT)+'</div>';
 }
 
-function aplicarTransformacoes(texto, tirar, add, subDe, subPara, onde){
-  if(!texto) return texto;
-  var s=texto;
-
-  /* TIRAR (case-insensitive, borda ou colado) */
-  if(tirar){
-    // Se o texto é curto (<=6), remove até colado no fim/início
-    if(tirar.length<=6){
-      var reSuf=new RegExp(escapeRegex(tirar)+'$','i');
-      s=s.replace(reSuf,'').replace(/[\s\-_.]+$/,'');
-      var rePre=new RegExp('^'+escapeRegex(tirar),'i');
-      s=s.replace(rePre,'').replace(/^[\s\-_.]+/,'');
+function addRegraDoInput(){
+  var inp=$('ensDe');
+  var val=inp.value.trim();
+  if(!val){ toast('Digite algo pra tirar.','w'); return; }
+  var ok=adicionarRegra(val);
+  if(ok){
+    inp.value='';
+    renderListaRegras();
+    atualizarPreviewEnsinar();
+    toast('🧠 Regra salva: '+val+' (aplica sempre)','s');
+    var n=aplicarRegrasEmTodas();
+    if(n>0){
+      render();
+      toast('✅ Aplicado em '+n+' música(s) atual(is)','s');
     }
-    // Remove palavra inteira também
-    var reWord=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])'+escapeRegex(tirar)+'([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
-    s=s.replace(reWord,' ');
-    s=s.replace(/\s+/g,' ').trim();
+  } else {
+    toast('Essa regra já existe.','w');
   }
-
-  /* SUBSTITUIR */
-  if(subDe){
-    var reSub=new RegExp(escapeRegex(subDe),'gi');
-    s=s.replace(reSub, subPara||'');
-    s=s.replace(/\s+/g,' ').trim();
-  }
-
-  /* ADICIONAR */
-  if(add){
-    if(onde==='inicio') s=add+s;
-    else s=s+add;
-  }
-
-  return s.trim() || texto;
 }
 
-function aplicarLote(){
-  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
-  var tirar=$('loteTirar').value;
-  var add=$('loteAdd').value;
-  var subDe=$('loteSubDe').value;
-  var subPara=$('loteSubPara').value;
-  var onde=loteState.addOnde;
-  var alvos=loteState.alvos;
-
-  if(!tirar && !add && !subDe){ toast('Digite algo pra aplicar.','w'); return; }
-  if(alvos.length===0){ toast('Escolha onde aplicar (Artista/Título).','w'); return; }
-
-  var n=0;
-  State.musicas.forEach(function(m){
-    var antesA=m.artist, antesT=m.title;
-    if(alvos.indexOf('artist')!==-1) m.artist=aplicarTransformacoes(m.artist, tirar, add, subDe, subPara, onde);
-    if(alvos.indexOf('title')!==-1) m.title=aplicarTransformacoes(m.title, tirar, add, subDe, subPara, onde);
-    if(m.artist!==antesA || m.title!==antesT) n++;
-    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-    m.newName=gerarNome(m,comExt(m.originalName));
-  });
+function aplicarRegrasAgora(){
+  if(State.musicas.length===0){ toast('Nenhuma música carregada.','w'); return; }
+  if(State.regras.length===0){ toast('Nenhuma regra salva.','w'); return; }
+  var n=aplicarRegrasEmTodas();
   render();
-  fecharLote();
-  toast('✏️ '+n+' música(s) editada(s)!','s');
-}
-
-/* ============================================================
-   LIMPEZA RÁPIDA
-   ============================================================ */
-var limpezaState = { alvos:['artist','title'] };
-
-function abrirLimpeza(){
-  $('limpezaOutro').value='';
-  limpezaState.alvos=['artist','title'];
-  document.querySelectorAll('#limpezaOverlay .check-item[data-alvo-limpeza]').forEach(function(el){
-    el.classList.add('on');
-  });
-  atualizarPreviewLimpeza();
-  $('limpezaOverlay').classList.add('on');
-}
-
-function fecharLimpeza(){ $('limpezaOverlay').classList.remove('on'); }
-
-function getTextosLimpeza(){
-  var arr=[];
-  document.querySelectorAll('#limpezaChecks .check-item.on').forEach(function(el){
-    if(el.dataset.txt) arr.push(el.dataset.txt);
-  });
-  var outro=$('limpezaOutro').value.trim();
-  if(outro) arr.push(outro);
-  return arr;
-}
-
-function aplicarLimpezaTxt(texto, textos){
-  if(!texto || textos.length===0) return texto;
-  var s=texto;
-  textos.forEach(function(t){
-    if(!t) return;
-    // Remove colado no fim
-    if(t.length<=8){
-      var reSuf=new RegExp(escapeRegex(t)+'$','i');
-      s=s.replace(reSuf,'').replace(/[\s\-_.]+$/,'');
-      var rePre=new RegExp('^'+escapeRegex(t),'i');
-      s=s.replace(rePre,'').replace(/^[\s\-_.]+/,'');
-    }
-    // Remove palavra inteira
-    var reWord=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])'+escapeRegex(t)+'([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
-    s=s.replace(reWord,' ');
-  });
-  return s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'').trim();
-}
-
-function atualizarPreviewLimpeza(){
-  var prev=$('limpezaPreview');
-  if(State.musicas.length===0){ prev.innerHTML='<span class="vazio">Nenhuma música.</span>'; return; }
-  var textos=getTextosLimpeza();
-  if(textos.length===0){ prev.innerHTML='<span class="vazio">Selecione algo...</span>'; return; }
-  var mostrar=State.musicas.slice(0,5);
-  var html='';
-  mostrar.forEach(function(m){
-    var depA=limpezaState.alvos.indexOf('artist')!==-1 ? aplicarLimpezaTxt(m.artist, textos) : m.artist;
-    var depT=limpezaState.alvos.indexOf('title')!==-1 ? aplicarLimpezaTxt(m.title, textos) : m.title;
-    html+='<div class="antes">🔴 '+esc(m.artist)+' — '+esc(m.title)+'</div>';
-    html+='<div class="depois">🟢 '+esc(depA)+' — '+esc(depT)+'</div>';
-  });
-  if(State.musicas.length>5) html+='<span class="vazio">... e mais '+(State.musicas.length-5)+'</span>';
-  prev.innerHTML=html;
-}
-
-function aplicarLimpeza(){
-  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
-  var textos=getTextosLimpeza();
-  if(textos.length===0){ toast('Marque pelo menos um item.','w'); return; }
-  var n=0;
-  State.musicas.forEach(function(m){
-    var antesA=m.artist, antesT=m.title;
-    if(limpezaState.alvos.indexOf('artist')!==-1) m.artist=aplicarLimpezaTxt(m.artist, textos);
-    if(limpezaState.alvos.indexOf('title')!==-1) m.title=aplicarLimpezaTxt(m.title, textos);
-    if(m.artist!==antesA || m.title!==antesT) n++;
-    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
-    m.newName=gerarNome(m,comExt(m.originalName));
-  });
-  render();
-  fecharLimpeza();
-  toast('🧹 '+n+' música(s) limpa(s)!','s');
+  fecharEnsinar();
+  toast('✅ '+n+' música(s) editada(s)!','s');
 }
 
 /* ============================================================
@@ -1315,6 +1137,21 @@ function reanalisar(){
   });
   render();
   toast('🔄 Concluído','s');
+}
+
+function limparNomes(){
+  if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
+  var n=0;
+  State.musicas.forEach(function(m){
+    var a=limpar(m.artist), t=limpar(m.title);
+    if(a!==m.artist||t!==m.title) n++;
+    if(a) m.artist=a;
+    if(t) m.title=t;
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+  });
+  render();
+  toast('🧹 '+n+' nome(s) limpo(s)','s');
 }
 
 function resetarCampos(){
@@ -1420,6 +1257,7 @@ function demo(){
 function init(){
   try{
     carregarArtistas();
+    carregarRegras();
 
     var zona=$('zona'),inp=$('inp');
     zona.addEventListener('click',function(e){ if(e.target!==inp) inp.click(); });
@@ -1438,8 +1276,8 @@ function init(){
 
     $('corpo').addEventListener('input',onInputEdit);
 
-    $('btnLote').addEventListener('click',abrirLote);
-    $('btnLimpeza').addEventListener('click',abrirLimpeza);
+    $('btnEnsinar').addEventListener('click',abrirEnsinar);
+    $('btnLimpar').addEventListener('click',limparNomes);
     $('btnReanalisar').addEventListener('click',reanalisar);
     $('btnReset').addEventListener('click',resetarCampos);
     $('btnClear').addEventListener('click',limparTudo);
@@ -1454,65 +1292,26 @@ function init(){
       $('btnToggleJson').textContent=p.classList.contains('on')?'📋 Fechar':'📋 JSON';
     });
 
-    /* Lote - radio */
-    document.querySelectorAll('#loteAddOnde .radio-item').forEach(function(el){
-      el.addEventListener('click',function(){
-        document.querySelectorAll('#loteAddOnde .radio-item').forEach(function(x){ x.classList.remove('on'); });
-        el.classList.add('on');
-        loteState.addOnde=el.dataset.onde;
-        atualizarPreviewLote();
-      });
+    /* Modal Ensinar */
+    $('ensCancel').addEventListener('click',fecharEnsinar);
+    $('ensOk').addEventListener('click',aplicarRegrasAgora);
+    $('ensAdd').addEventListener('click',addRegraDoInput);
+    $('ensDe').addEventListener('keydown',function(e){ if(e.key==='Enter') addRegraDoInput(); });
+    $('ensinarOverlay').addEventListener('click',function(e){
+      if(e.target===$('ensinarOverlay')) fecharEnsinar();
+    });
+    $('ensLista').addEventListener('click',function(e){
+      var btn=e.target.closest('button[data-regra]');
+      if(!btn) return;
+      var r=btn.dataset.regra;
+      removerRegra(r);
+      renderListaRegras();
+      atualizarPreviewEnsinar();
+      toast('🗑️ Regra removida: '+r,'i');
     });
 
-    /* Lote - checks */
-    document.querySelectorAll('#loteOverlay .check-item[data-alvo]').forEach(function(el){
-      el.addEventListener('click',function(){
-        el.classList.toggle('on');
-        loteState.alvos=[];
-        document.querySelectorAll('#loteOverlay .check-item[data-alvo].on').forEach(function(x){
-          loteState.alvos.push(x.dataset.alvo);
-        });
-        atualizarPreviewLote();
-      });
-    });
-
-    /* Lote - inputs */
-    ['loteTirar','loteAdd','loteSubDe','loteSubPara'].forEach(function(id){
-      $(id).addEventListener('input',atualizarPreviewLote);
-    });
-
-    $('loteCancel').addEventListener('click',fecharLote);
-    $('loteOk').addEventListener('click',aplicarLote);
-    $('loteOverlay').addEventListener('click',function(e){
-      if(e.target===$('loteOverlay')) fecharLote();
-    });
-
-    /* Limpeza - checks */
-    document.querySelectorAll('#limpezaChecks .check-item').forEach(function(el){
-      el.addEventListener('click',function(){
-        el.classList.toggle('on');
-        atualizarPreviewLimpeza();
-      });
-    });
-    document.querySelectorAll('#limpezaOverlay .check-item[data-alvo-limpeza]').forEach(function(el){
-      el.addEventListener('click',function(){
-        el.classList.toggle('on');
-        limpezaState.alvos=[];
-        document.querySelectorAll('#limpezaOverlay .check-item[data-alvo-limpeza].on').forEach(function(x){
-          limpezaState.alvos.push(x.dataset.alvoLimpeza);
-        });
-        atualizarPreviewLimpeza();
-      });
-    });
-    $('limpezaOutro').addEventListener('input',atualizarPreviewLimpeza);
-    $('limpezaCancel').addEventListener('click',fecharLimpeza);
-    $('limpezaOk').addEventListener('click',aplicarLimpeza);
-    $('limpezaOverlay').addEventListener('click',function(e){
-      if(e.target===$('limpezaOverlay')) fecharLimpeza();
-    });
-
-    console.log('🎵 Editor v15 iniciado | '+Object.keys(State.artistasConhecidos).length+' artistas');
-    toast('🎓 Editor pronto!','s');
+    console.log('🎵 Editor v16 iniciado | '+Object.keys(State.artistasConhecidos).length+' artistas | '+State.regras.length+' regras');
+    toast('🧠 Editor pronto!','s');
   }catch(e){
     console.error('ERRO:',e);
     alert('Erro: '+e.message);
