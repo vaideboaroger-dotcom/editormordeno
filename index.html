@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b0b12">
-<title>🎵 Editor de Músicas v24</title>
+<title>🎵 Editor de Músicas v25</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -234,7 +234,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 <datalist id="listaArtistas"></datalist>
 
 <div class="header">
-  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v24</span></h1>
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v25</span></h1>
   <div class="sub">🎯 1 traço = artista antes • 2 traços = artista no meio • 🔄 Trocar artista/título • 🔍 Buscar por nome</div>
   <div class="stats">
     <span>📄 <b id="stTotal">0</b></span>
@@ -313,7 +313,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 
 <div class="box">
   <div class="box-head">
-    <label>✂️ Abreviações (título &gt; 60 chars)</label>
+    <label>✂️ Abreviações (título &gt; 40 chars)</label>
     <button class="b5" data-toggle="abrevBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
   </div>
   <div class="box-conteudo" id="abrevBox">
@@ -437,8 +437,6 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 (function(){
 'use strict';
 
-var LIMITE_NOME = 60;
-
 var ABREV_PADRAO = {
   'você':'vc','voce':'vc','vocês':'vcs','voces':'vcs',
   'por':'p.','para':'pra','com':'c/','sem':'s/',
@@ -476,7 +474,9 @@ var ABREV_PADRAO = {
   'aluguel':'alug.','vaqueira':'vaq.','vaqueiro':'vaq.',
   'carinhoso':'carinh.','carinhosa':'carinh.',
   'imperador':'imp.','fernandinha':'fernand.',
-  'embaixador':'embaix.'
+  'embaixador':'embaix.',
+  'instinto':'inst.','animal':'anim.','homem':'h.',
+  'quando':'qdo.','ainda':'ain.'
 };
 
 var LIXO_BASE = [
@@ -582,7 +582,8 @@ var ARTISTAS_BASE = [
   'Coldplay','Radiohead','Nirvana','Pearl Jam','Red Hot Chili Peppers',
   'Metallica','Iron Maiden','AC/DC','Guns N Roses','Aerosmith',
   'Foreigner','Journey','Chicago','Eagles','Fleetwood Mac','Toto',
-  'Bruno & Marrone','Armandinho','Michel Teló','Jota Quest','Brasas do Forró'
+  'Bruno & Marrone','Armandinho','Michel Teló','Jota Quest','Brasas do Forró',
+  'Miguel Alves'
 ];
 
 var State = {
@@ -602,11 +603,11 @@ var State = {
 };
 
 var KEYS = {
-  brain:'editor_musicas_brain_v24',
-  abrev:'editor_musicas_abrev_v24',
-  art:'editor_musicas_artistas_v24',
-  alias:'editor_musicas_aliases_v24',
-  busca:'editor_musicas_busca_v24'
+  brain:'editor_musicas_brain_v25',
+  abrev:'editor_musicas_abrev_v25',
+  art:'editor_musicas_artistas_v25',
+  alias:'editor_musicas_aliases_v25',
+  busca:'editor_musicas_busca_v25'
 };
 
 function $(id){ return document.getElementById(id); }
@@ -711,7 +712,6 @@ function salvarArtistas(){
   return ok;
 }
 
-/* 🆕 v24: datalist global com todos os artistas */
 function atualizarDatalist(){
   var dl=$('listaArtistas'); if(!dl) return;
   var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }).sort();
@@ -719,7 +719,7 @@ function atualizarDatalist(){
 }
 
 function carregarTudo(){
-  var raw=safeGetItem(KEYS.brain) || safeGetItem('editor_musicas_brain_v23') || safeGetItem('editor_musicas_brain_v19');
+  var raw=safeGetItem(KEYS.brain) || safeGetItem('editor_musicas_brain_v24') || safeGetItem('editor_musicas_brain_v19');
   if(raw){ try{
     var o=JSON.parse(raw);
     State.brain.lixo=o.lixo||{};
@@ -728,7 +728,7 @@ function carregarTudo(){
     State.brain.regras=o.regras||[];
   }catch(e){} }
 
-  var rawArt=safeGetItem(KEYS.art) || safeGetItem('editor_musicas_artistas_v23') || safeGetItem('editor_musicas_artistas_v19');
+  var rawArt=safeGetItem(KEYS.art) || safeGetItem('editor_musicas_artistas_v24') || safeGetItem('editor_musicas_artistas_v19');
   var arrArt=null;
   if(rawArt){ try{ arrArt=JSON.parse(rawArt); }catch(e){} }
   if(Array.isArray(arrArt) && arrArt.length>0){
@@ -740,11 +740,17 @@ function carregarTudo(){
     salvarArtistas();
   }
 
-  var rawAb=safeGetItem(KEYS.abrev) || safeGetItem('editor_musicas_abrev_v23') || safeGetItem('editor_musicas_abrev_v19');
+  var rawAb=safeGetItem(KEYS.abrev) || safeGetItem('editor_musicas_abrev_v24') || safeGetItem('editor_musicas_abrev_v19');
   if(rawAb){ try{ State.abrev=JSON.parse(rawAb); }catch(e){ State.abrev=Object.assign({},ABREV_PADRAO); } }
   else State.abrev=Object.assign({},ABREV_PADRAO);
+  // 🆕 v25: garante abreviações novas do título
+  if(!State.abrev['instinto']) State.abrev['instinto']='inst.';
+  if(!State.abrev['animal']) State.abrev['animal']='anim.';
+  if(!State.abrev['homem']) State.abrev['homem']='h.';
+  if(!State.abrev['quando']) State.abrev['quando']='qdo.';
+  if(!State.abrev['ainda']) State.abrev['ainda']='ain.';
 
-  var rawAl=safeGetItem(KEYS.alias) || safeGetItem('editor_musicas_aliases_v23') || safeGetItem('editor_musicas_aliases_v19');
+  var rawAl=safeGetItem(KEYS.alias) || safeGetItem('editor_musicas_aliases_v24') || safeGetItem('editor_musicas_aliases_v19');
   if(rawAl){ try{ State.aliases=JSON.parse(rawAl); }catch(e){ State.aliases={}; } }
 }
 
@@ -1173,6 +1179,13 @@ function escreverTags(buffer,tags){
   }catch(err){ return buffer; }
 }
 
+/* ============================================================
+   🎯 v25 — gerarNome: artista_titulo.ext
+   - Limite: 40 chars (sem extensão)
+   - Artista: prioridade total, sem abreviar
+   - Título: abrevia palavras grandes + corta se sobrar
+   - Extensão: sempre minúscula
+   ============================================================ */
 function sanitizeArtista(s){
   if(!s) return '';
   var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -1190,24 +1203,47 @@ function sanitizeTitulo(s){
   return x.trim();
 }
 function juntarPalavras(s){ return s.replace(/\s+/g,''); }
+
+function abreviarTitulo(tit){
+  if(!tit) return '';
+  var palavras = tit.split(/\s+/).filter(Boolean);
+  var out = palavras.map(function(p){
+    if(State.abrev[p]) return State.abrev[p];
+    if(p.length >= 8) return p.slice(0,5) + '.';
+    return p;
+  });
+  return out.join('').replace(/\./g,'');
+}
+
 function gerarNome(m,ext){
-  var art = juntarPalavras(sanitizeArtista(m.artist||'')) || 'desconhecido';
-  var tit = juntarPalavras(sanitizeTitulo(m.title||'')) || 'sem_titulo';
+  var extLower = String(ext||'').toLowerCase();
+  var LIMITE = 40;
 
-  var limite = LIMITE_NOME - ext.length;
-  if(limite < 15) limite = 15;
+  var art = sanitizeArtista(m.artist||'') || 'desconhecido';
+  var tit = sanitizeTitulo(m.title||'') || 'sem_titulo';
 
-  var nome = art + '_' + tit;
-  if(nome.length > limite){
-    var espA = Math.floor(limite*0.4);
-    var espT = limite - espA - 1;
-    if(art.length > espA) art = art.slice(0, espA);
-    if(tit.length > espT) tit = tit.slice(0, espT);
-    nome = art + '_' + tit;
+  var artFinal = art;
+  var espacoTit = LIMITE - artFinal.length - 1;
+
+  if(espacoTit < 3){
+    artFinal = artFinal.slice(0, LIMITE - 4);
+    espacoTit = 3;
   }
-  if(nome.length > limite) nome = nome.slice(0,limite);
+
+  var titJunto = tit.replace(/\s+/g,'');
+  if(titJunto.length > espacoTit){
+    titJunto = abreviarTitulo(tit);
+    if(titJunto.length > espacoTit){
+      titJunto = titJunto.slice(0, espacoTit);
+    }
+  }
+
+  var nome = artFinal + '_' + titJunto;
+  if(nome.length > LIMITE){
+    nome = nome.slice(0, LIMITE);
+  }
   nome = nome.replace(/_+$/,'').replace(/^_+/,'');
-  return nome + ext;
+  return nome + extLower;
 }
 
 function aprenderArtista(nome){
@@ -1241,7 +1277,7 @@ async function buscarMusicBrainz(termo){
   _ultimaBuscaRede = Date.now();
   try{
     var resp = await fetch('https://musicbrainz.org/ws/2/artist?query='+encodeURIComponent(termo)+'&fmt=json&limit=4', {
-      headers: { 'User-Agent': 'EditorMusicas/24 (contato@exemplo.com)' }
+      headers: { 'User-Agent': 'EditorMusicas/25 (contato@exemplo.com)' }
     });
     if(!resp.ok) return null;
     var data = await resp.json();
@@ -1330,7 +1366,6 @@ function aplicarSugestao(mid, nome){
   toast('✅ Artista atualizado: '+nome,'s');
 }
 
-/* 🆕 v24: trocar artista ↔ título */
 function trocarArtistaTitulo(mid){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m) return;
@@ -1347,7 +1382,6 @@ function trocarArtistaTitulo(mid){
   toast('🔄 Artista ↔ Título trocados','s');
 }
 
-/* 🆕 v24: salvar artista atual no brain */
 function salvarArtistaDoCard(mid){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m || !m.artist){ toast('Sem artista pra salvar.','w'); return; }
@@ -1356,7 +1390,6 @@ function salvarArtistaDoCard(mid){
   toast('📥 Artista salvo: '+m.artist,'save');
 }
 
-/* 🆕 v24: salvar título atual no brain */
 function salvarTituloDoCard(mid){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m || !m.title){ toast('Sem título pra salvar.','w'); return; }
@@ -1364,13 +1397,11 @@ function salvarTituloDoCard(mid){
   toast('📥 Título salvo: '+m.title,'save');
 }
 
-/* 🆕 v24: buscar artista por nome (substituição direta) */
 function buscarArtistaPorNome(mid, termo){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m) return;
   var t = String(termo||'').trim();
   if(!t){ toast('Digite um nome.','w'); return; }
-  // Se o nome exato existe, aplica direto
   var k = norm(t);
   var oficial = State.artistasConhecidos[k] || State.brain.artistas[k] || State.aliases[k];
   if(oficial){
@@ -1383,7 +1414,6 @@ function buscarArtistaPorNome(mid, termo){
     toast('✅ Artista trocado: '+oficial,'s');
     return;
   }
-  // Senão, tenta encontrar artista conhecido que contenha o termo
   var achou = null;
   Object.keys(State.artistasConhecidos).forEach(function(chave){
     if(!achou && chave.indexOf(k)!==-1){
@@ -1400,7 +1430,6 @@ function buscarArtistaPorNome(mid, termo){
     toast('✅ Artista trocado: '+achou,'s');
     return;
   }
-  // Se não encontrou, adiciona o que foi digitado como novo artista
   m.artist = capitalizar(t);
   m.editada = true;
   m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
@@ -1465,7 +1494,7 @@ function addArquivos(fileList){
         }catch(e){ console.error('Erro:',e); }
         finalizar();
       });
-    }catch(e){ clearTimeout(timer); finalizar(); }
+    }catch(e){ clearTimeout(timeout); finalizar(); }
   });
 }
 
@@ -1569,7 +1598,6 @@ function onInputBlur(e){
   else if(campo==='title') aprenderTitulo(valor);
 }
 
-/* 🆕 v24: input da caixa "buscar artista por nome" — Enter aplica */
 function onBuscaArtistaKey(e){
   var inp=e.target;
   if(!inp.dataset || !inp.dataset.buscaId) return;
@@ -1579,7 +1607,6 @@ function onBuscaArtistaKey(e){
     inp.value='';
   }
 }
-/* 🆕 v24: change da caixa (quando o usuário clica numa sugestão do datalist) */
 function onBuscaArtistaChange(e){
   var inp=e.target;
   if(!inp.dataset || !inp.dataset.buscaId) return;
@@ -2115,12 +2142,12 @@ function resetarBrain(){
 
 function demo(){
   var exemplos=[
+    'Miguel Alves - Instinto Animal Um Homem Quando Ama.MP3',
     'Bruno & Marrone - Devolve (Ao Vivo) De Volta aos Bares.mp3',
     'Desenho De Deus -Armandinho- (Ao Vivo) - 320.mp3',
     'Alceu Valença - Girassol.opus',
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
-    'Ai Se Eu Te Pego -Michel Teló- Ao Vivo 230.mp3',
-    'Jota Quest - Tim Maia - Réu Confesso.mp3'
+    'Ai Se Eu Te Pego -Michel Teló- Ao Vivo 230.mp3'
   ];
   State.musicas=exemplos.map(function(nome){
     var p=parseNome(nome);
