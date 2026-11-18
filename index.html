@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0b0b12">
-<title>🎵 Editor de Músicas v22</title>
+<title>🎵 Editor de Músicas v23</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
 <style>
@@ -93,6 +93,7 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
   margin-bottom:10px;border:1px solid var(--border);
   border-left:3px solid var(--green);transition:border-color .2s}
 .card-mus.cor{border-left-color:var(--orange);background:rgba(245,158,11,.04)}
+.card-mus.editada{border-left-color:var(--blue)}
 .card-mus .topo{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .card-mus .num{background:var(--bg4);color:var(--txt2);font-size:11px;
   font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0}
@@ -108,10 +109,6 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .card-mus .campo input{width:100%;background:var(--bg4);border:1px solid var(--border2);
   border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none}
 .card-mus .campo input:focus{border-color:var(--purple2)}
-.card-mus .campo input.fixo{background:rgba(52,184,122,.08);border-color:var(--green)}
-.card-mus .campo .lock-btn{background:var(--bg4);color:var(--txt3);
-  border:1px solid var(--border2);min-height:36px;padding:6px 10px;font-size:14px}
-.card-mus .campo .lock-btn.on{background:rgba(52,184,122,.2);color:var(--green);border-color:var(--green)}
 .card-mus .novo-nome{font-size:11px;color:var(--txt3);margin-top:8px;
   padding:8px 10px;background:var(--bg4);border-radius:8px;
   font-family:'Courier New',monospace;word-break:break-all;line-height:1.3}
@@ -119,8 +116,6 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 .card-mus .sugestoes{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
 .card-mus .sugestoes button{background:var(--bg4);border:1px solid var(--cyan);
   color:var(--cyan);font-size:11px;padding:4px 8px;min-height:26px;border-radius:6px}
-.campo-fixo-row{display:flex;gap:6px;align-items:flex-end}
-.campo-fixo-row .campo{flex:1;margin-bottom:0}
 .barra-fixa{position:fixed;bottom:0;left:0;right:0;
   padding:8px 12px calc(8px + var(--safe-bottom));
   background:linear-gradient(0deg,var(--bg) 60%,transparent 100%);
@@ -230,8 +225,8 @@ textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
 <body>
 
 <div class="header">
-  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v22</span></h1>
-  <div class="sub">🎯 1 traço = artista antes • 2 traços = artista no meio • 🔒 Campos fixos • 🧠 Aprende sozinho</div>
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v23</span></h1>
+  <div class="sub">🎯 1 traço = artista antes • 2 traços = artista no meio • 🧠 Aprende sozinho</div>
   <div class="stats">
     <span>📄 <b id="stTotal">0</b></span>
     <span>✅ <b class="ok" id="stOk">0</b></span>
@@ -597,11 +592,11 @@ var State = {
 };
 
 var KEYS = {
-  brain:'editor_musicas_brain_v22',
-  abrev:'editor_musicas_abrev_v22',
-  art:'editor_musicas_artistas_v22',
-  alias:'editor_musicas_aliases_v22',
-  busca:'editor_musicas_busca_v22'
+  brain:'editor_musicas_brain_v23',
+  abrev:'editor_musicas_abrev_v23',
+  art:'editor_musicas_artistas_v23',
+  alias:'editor_musicas_aliases_v23',
+  busca:'editor_musicas_busca_v23'
 };
 
 function $(id){ return document.getElementById(id); }
@@ -737,8 +732,7 @@ function carregarTudo(){
 
 function snapshot(){
   var snap = State.musicas.map(function(m){
-    return { id:m.id, artist:m.artist, title:m.title, genero:m.genero, idNum:m.idNum,
-             fixoArtist:m.fixoArtist, fixoTitle:m.fixoTitle };
+    return { id:m.id, artist:m.artist, title:m.title, genero:m.genero, idNum:m.idNum, editada:m.editada };
   });
   State.historico = State.historico.slice(0, State.histIdx+1);
   State.historico.push(JSON.stringify(snap));
@@ -763,8 +757,7 @@ function aplicarSnapshot(str){
     snap.forEach(function(s){
       var m=State.musicas.find(function(x){ return x.id===s.id; });
       if(m){
-        m.artist=s.artist; m.title=s.title; m.genero=s.genero; m.idNum=s.idNum;
-        m.fixoArtist=s.fixoArtist; m.fixoTitle=s.fixoTitle;
+        m.artist=s.artist; m.title=s.title; m.genero=s.genero; m.idNum=s.idNum; m.editada=!!s.editada;
         m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
         m.newName=gerarNome(m,comExt(m.originalName));
       }
@@ -806,10 +799,10 @@ function aplicarRegrasEmTodas(){
   if(State.musicas.length===0) return 0;
   var n=0;
   State.musicas.forEach(function(m){
-    if(m.fixoArtist && m.fixoTitle) return;
+    if(m.editada) return;
     var antesA=m.artist, antesT=m.title;
-    if(!m.fixoArtist) m.artist=aplicarRegrasTexto(m.artist);
-    if(!m.fixoTitle)  m.title =aplicarRegrasTexto(m.title);
+    m.artist=aplicarRegrasTexto(m.artist);
+    m.title =aplicarRegrasTexto(m.title);
     if(m.artist!==antesA || m.title!==antesT) n++;
     m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
     m.newName=gerarNome(m,comExt(m.originalName));
@@ -972,16 +965,10 @@ function dedupArtistaNoTitulo(title,artist){
 }
 
 /* ============================================================
-   🎯 v22 — PARSE COM SUAS REGRAS
-   Regra A (1 traço):  Artista - Título
-   Regra B (2 traços): Título -Artista- lixo
+   🎯 v23 — PARSE
+   1 traço (com espaço): Artista - Título
+   2 traços (hífen colado ou espaçado): Título -Artista- lixo
    ============================================================ */
-function contarTracos(s){
-  // Conta separadores reais: " - " (com espaço) ou "-X-" (hífen colado tipo -Armandinho-)
-  var matches = s.match(/\s+[-–—]\s+|(?<=\s)-[^-]+-(?=\s|$)/g);
-  return matches ? matches.length : 0;
-}
-
 function parseNome(nomeOriginal){
   var base=String(nomeOriginal).replace(/\.[^.]+$/,'');
   base=aplicarRegrasTexto(base);
@@ -991,7 +978,6 @@ function parseNome(nomeOriginal){
   s=removerNumeros(s);
   s=s.replace(/\s+/g,' ').trim();
 
-  // Detecta feat antes de tudo
   var featMatch=s.match(FEAT_RE);
   var featTrecho='';
   if(featMatch){
@@ -1001,37 +987,29 @@ function parseNome(nomeOriginal){
 
   var artist='', title='';
 
-  // Conta traços para decidir a regra
-  // Padrão A: "X - Y" (espaço antes e depois do hífen)
-  // Padrão B: "Y -X- Z" (hífen colado no artista)
-  var temPadraoB = /(^|\s)-[^-]+-(\s|$)/.test(s);
-  var partesComEspaco = s.split(/\s+[|\-–—]\s+/).map(function(p){ return p.trim(); }).filter(Boolean);
-  var numTracosEspaco = partesComEspaco.length - 1;
+  // Detecta padrão B: "-Artista-" (hífen colado dos dois lados)
+  var matchB = s.match(/^(.*?)\s*-([^-]+)-\s*(.*)$/);
+  // Conta traços com espaço
+  var partesEspaco = s.split(/\s+[|\-–—]\s+/).map(function(p){ return p.trim(); }).filter(Boolean);
+  var numEspaco = partesEspaco.length - 1;
 
-  if(numTracosEspaco === 1 && !temPadraoB){
-    // REGRA A: 1 traço com espaço → Artista - Título
-    artist = limpar(partesComEspaco[0]);
-    title  = limpar(partesComEspaco[1]);
-  }
-  else if(temPadraoB){
+  if(matchB && (matchB[2]||'').trim()){
     // REGRA B: título -Artista- lixo
-    // Extrai o miolo entre hífens
-    var matchB = s.match(/(.*?)\s*-([^-]+)-\s*(.*)/);
-    if(matchB){
-      title  = limpar(matchB[1]);
-      artist = limpar(matchB[2]);
-    } else {
-      title = limpar(s);
-    }
+    title  = limpar(matchB[1]);
+    artist = limpar(matchB[2]);
   }
-  else if(numTracosEspaco >= 2){
-    // 2+ traços com espaço: título - Artista - lixo
-    // Artista = segundo segmento, título = primeiro
-    artist = limpar(partesComEspaco[1]);
-    title  = limpar(partesComEspaco[0]);
+  else if(numEspaco === 1){
+    // REGRA A: 1 traço com espaço
+    artist = limpar(partesEspaco[0]);
+    title  = limpar(partesEspaco[1]);
+  }
+  else if(numEspaco >= 2){
+    // 2+ traços com espaço: título - artista - lixo
+    title  = limpar(partesEspaco[0]);
+    artist = limpar(partesEspaco[1]);
   }
   else {
-    // 0 traços: tenta descobrir artista conhecido no meio
+    // 0 traços: tenta achar artista conhecido
     var conhec = encontrarArtistaEm(s);
     if(conhec && norm(conhec)!==norm(s)){
       artist = conhec;
@@ -1190,38 +1168,28 @@ function escreverTags(buffer,tags){
 }
 
 /* ============================================================
-   🎯 v22 — gerarNome: artista_titulo.ext
-   - tudo minúsculo
-   - remove & + @ espaços acentos
-   - remove de/da/do/das/dos/e do TÍTULO
+   🎯 v23 — gerarNome: artista_titulo.ext
    ============================================================ */
 function sanitizeArtista(s){
   if(!s) return '';
-  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x=x.toLowerCase();
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   x=x.replace(/&/g,'').replace(/\+/g,'').replace(/@/g,'');
   x=x.replace(/[^a-z0-9]/g,'');
   return x;
 }
 function sanitizeTitulo(s){
   if(!s) return '';
-  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  x=x.toLowerCase();
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   x=x.replace(/&/g,'').replace(/\+/g,'').replace(/@/g,'');
-  // Remove conectores pequenos
   x=x.replace(/\b(de|da|do|das|dos|e)\b/g,' ');
   x=x.replace(/[^a-z0-9\s]/g,'');
   x=x.replace(/\s+/g,' ');
   return x.trim();
 }
-function juntarPalavras(s){
-  return s.replace(/\s+/g,'');
-}
+function juntarPalavras(s){ return s.replace(/\s+/g,''); }
 function gerarNome(m,ext){
-  var artRaw = m.fixoArtist && m.artistFixo ? m.artistFixo : (m.artist||'');
-  var titRaw = m.fixoTitle && m.titleFixo ? m.titleFixo : (m.title||'');
-  var art = juntarPalavras(sanitizeArtista(artRaw)) || 'desconhecido';
-  var tit = juntarPalavras(sanitizeTitulo(titRaw)) || 'sem_titulo';
+  var art = juntarPalavras(sanitizeArtista(m.artist||'')) || 'desconhecido';
+  var tit = juntarPalavras(sanitizeTitulo(m.title||'')) || 'sem_titulo';
 
   var limite = LIMITE_NOME - ext.length;
   if(limite < 15) limite = 15;
@@ -1239,9 +1207,6 @@ function gerarNome(m,ext){
   return nome + ext;
 }
 
-/* ============================================================
-   🧠 v22 — Aprendizado automático (infinito)
-   ============================================================ */
 function aprenderArtista(nome){
   if(!nome) return;
   var n=String(nome).trim();
@@ -1265,7 +1230,7 @@ function aprenderTitulo(nome){
 }
 
 /* ============================================================
-   🌐 v22 — Busca sequencial (MusicBrainz → iTunes → Deezer)
+   🌐 v23 — Busca sequencial
    ============================================================ */
 var _ultimaBuscaRede = 0;
 
@@ -1276,7 +1241,7 @@ async function buscarMusicBrainz(termo){
   _ultimaBuscaRede = Date.now();
   try{
     var resp = await fetch('https://musicbrainz.org/ws/2/artist?query='+encodeURIComponent(termo)+'&fmt=json&limit=4', {
-      headers: { 'User-Agent': 'EditorMusicas/22 (contato@exemplo.com)' }
+      headers: { 'User-Agent': 'EditorMusicas/23 (contato@exemplo.com)' }
     });
     if(!resp.ok) return null;
     var data = await resp.json();
@@ -1356,6 +1321,7 @@ function aplicarSugestao(mid, nome){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m) return;
   m.artist = nome;
+  m.editada = true;
   m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
   m.newName = gerarNome(m, comExt(m.originalName));
   aprenderArtista(nome);
@@ -1365,7 +1331,7 @@ function aplicarSugestao(mid, nome){
 }
 
 /* ============================================================
-   📂 v22 — addArquivos com aprendizado automático
+   📂 v23 — addArquivos
    ============================================================ */
 function addArquivos(fileList){
   var arr=[];
@@ -1392,7 +1358,6 @@ function addArquivos(fileList){
           var tagTitle=(tags&&tags.title)?limpar(aplicarRegrasTexto(tags.title)):'';
           var tagGenero=(tags&&tags.genre)?tags.genre:'';
 
-          // prioridade: brain > tag > parse
           var artist;
           if(State.brain.artistas[norm(p.a)]) artist = State.brain.artistas[norm(p.a)];
           else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
@@ -1407,7 +1372,6 @@ function addArquivos(fileList){
           artist=aplicarRegrasTexto(artist);
           title=aplicarRegrasTexto(title);
 
-          // 🧠 Aprendizado infinito
           if(artist) aprenderArtista(artist);
           if(title) aprenderTitulo(title);
 
@@ -1415,9 +1379,7 @@ function addArquivos(fileList){
             id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
             file:file, originalName:file.name,
             artist:artist||'', title:title||'', genero:tagGenero||'Music',
-            idNum:null,
-            fixoArtist:false, fixoTitle:false,
-            artistFixo:'', titleFixo:'',
+            idNum:null, editada:false,
             corrompido:ehLixo(artist)||ehLixo(title)||norm(artist)===norm(title)
           };
           m.newName=gerarNome(m,comExt(file.name));
@@ -1442,9 +1404,6 @@ function stats(){
   atualizarBrainStats();
 }
 
-/* ============================================================
-   🎨 v22 — Render com campos fixos
-   ============================================================ */
 function render(){
   var corpo=$('corpo');
   var vazio=$('vazioCard');
@@ -1459,8 +1418,8 @@ function render(){
   var html='';
   for(var i=0;i<State.musicas.length;i++){
     var m=State.musicas[i];
-    var cls=m.corrompido?'cor':'';
-    var st=m.corrompido?'⚠️':'✅';
+    var cls = m.corrompido?'cor':(m.editada?'editada':'');
+    var st = m.corrompido?'⚠️':(m.editada?'✏️':'✅');
     var numExibir=m.idNum||(i+1);
     html+='<div class="card-mus '+cls+'" data-mid="'+m.id+'">'+
       '<div class="topo">'+
@@ -1473,18 +1432,6 @@ function render(){
         '<div class="campo"><label>Artista</label><input data-id="'+m.id+'" data-campo="artist" value="'+escAttr(m.artist)+'" placeholder="Artista"></div>'+
         '<div class="campo"><label>Título</label><input data-id="'+m.id+'" data-campo="title" value="'+escAttr(m.title)+'" placeholder="Título"></div>'+
         '<div class="campo"><label>Gênero</label><input data-id="'+m.id+'" data-campo="genero" value="'+escAttr(m.genero)+'" placeholder="Gênero"></div>'+
-      '</div>'+
-      '<div class="campo-fixo-row" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border2)">'+
-        '<div class="campo" style="flex:1"><label>🔒 Artista fixo</label>'+
-          '<input data-id="'+m.id+'" data-campo="artistFixo" value="'+escAttr(m.artistFixo||'')+'" placeholder="Forçar artista...">'+
-        '</div>'+
-        '<button class="lock-btn '+(m.fixoArtist?'on':'')+'" data-lock="artist" data-mid="'+m.id+'">'+(m.fixoArtist?'🔒':'🔓')+'</button>'+
-      '</div>'+
-      '<div class="campo-fixo-row" style="margin-top:6px">'+
-        '<div class="campo" style="flex:1"><label>🔒 Título fixo</label>'+
-          '<input data-id="'+m.id+'" data-campo="titleFixo" value="'+escAttr(m.titleFixo||'')+'" placeholder="Forçar título...">'+
-        '</div>'+
-        '<button class="lock-btn '+(m.fixoTitle?'on':'')+'" data-lock="title" data-mid="'+m.id+'">'+(m.fixoTitle?'🔒':'🔓')+'</button>'+
       '</div>'+
       '<div class="novo-nome" title="'+escAttr(m.newName)+'"><b>→</b> '+esc(m.newName)+'</div>'+
     '</div>';
@@ -1501,31 +1448,20 @@ function onInputEdit(e){
   if(!m) return;
   var campo=inp.dataset.campo;
   m[campo]=inp.value;
-
-  if(campo==='artistFixo' && inp.value.trim()){
-    m.fixoArtist=true;
-  }
-  if(campo==='titleFixo' && inp.value.trim()){
-    m.fixoTitle=true;
-  }
-
-  if(campo==='artist'||campo==='title'||campo==='artistFixo'||campo==='titleFixo'){
+  if(campo==='artist'||campo==='title'){
+    m.editada = true;
     m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
     m.newName=gerarNome(m,comExt(m.originalName));
     var card=inp.closest('.card-mus');
     if(card){
       card.classList.toggle('cor',m.corrompido);
+      card.classList.toggle('editada',!m.corrompido && m.editada);
       var stEl=card.querySelector('.st');
-      if(stEl) stEl.textContent=m.corrompido?'⚠️':'✅';
+      if(stEl) stEl.textContent=m.corrompido?'⚠️':(m.editada?'✏️':'✅');
       var nn=card.querySelector('.novo-nome');
       if(nn){ nn.innerHTML='<b>→</b> '+esc(m.newName); nn.title=m.newName; }
       var sug=card.querySelector('.sugestoes');
       if(sug) sug.remove();
-      // atualiza botões de lock
-      var lockA=card.querySelector('[data-lock="artist"]');
-      if(lockA){ lockA.textContent=m.fixoArtist?'🔒':'🔓'; lockA.classList.toggle('on',m.fixoArtist); }
-      var lockT=card.querySelector('[data-lock="title"]');
-      if(lockT){ lockT.textContent=m.fixoTitle?'🔒':'🔓'; lockT.classList.toggle('on',m.fixoTitle); }
     }
   }
   stats();
@@ -1542,23 +1478,6 @@ function onInputBlur(e){
   if(!valor) return;
   if(campo==='artist') aprenderArtista(valor);
   else if(campo==='title') aprenderTitulo(valor);
-}
-
-function toggleLock(mid, tipo){
-  var m=State.musicas.find(function(x){ return x.id===mid; });
-  if(!m) return;
-  if(tipo==='artist'){
-    m.fixoArtist=!m.fixoArtist;
-    if(m.fixoArtist && !m.artistFixo) m.artistFixo=m.artist;
-    if(!m.fixoArtist) m.artistFixo='';
-  } else {
-    m.fixoTitle=!m.fixoTitle;
-    if(m.fixoTitle && !m.titleFixo) m.titleFixo=m.title;
-    if(!m.fixoTitle) m.titleFixo='';
-  }
-  m.newName=gerarNome(m,comExt(m.originalName));
-  render();
-  toast(m.fixoArtist||m.fixoTitle?'🔒 Travado':'🔓 Destravado','s');
 }
 
 function _atualizarJsonReal(){
@@ -1600,7 +1519,7 @@ function aplicarGeneroEmTodas(){
   if(!g){ toast('Digite um gênero.','w'); return; }
   State.musicas.forEach(function(m){ m.genero=g; });
   snapshot(); render();
-  toast('🎼 Gênero aplicado em '+State.musicas.length+' música(s)!','s');
+  toast('🎼 Gênero aplicado!','s');
 }
 function aplicarIdsEmTodas(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
@@ -1624,11 +1543,11 @@ function limparTodos(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   var n=0;
   State.musicas.forEach(function(m){
-    if(m.fixoArtist && m.fixoTitle) return;
+    if(m.editada) return;
     var a=limpar(m.artist), t=limpar(m.title);
     if(a!==m.artist||t!==m.title) n++;
-    if(a && !m.fixoArtist) m.artist=a;
-    if(t && !m.fixoTitle) m.title=t;
+    if(a) m.artist=a;
+    if(t) m.title=t;
     m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
     m.newName=gerarNome(m,comExt(m.originalName));
   });
@@ -1640,9 +1559,9 @@ function resetarCampos(){
   return modalConfirm('Resetar todos os campos?').then(function(ok){
     if(!ok) return;
     State.musicas.forEach(function(m){
-      if(m.fixoArtist || m.fixoTitle) return;
       var p=parseNome(m.originalName);
       m.artist=p.a; m.title=p.t; m.genero='Music';
+      m.editada=false;
       m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
       m.newName=gerarNome(m,comExt(m.originalName));
     });
@@ -1664,7 +1583,11 @@ function reanalisar(){
   toast('Re-analisando...','i');
   var pendentes=State.musicas.length;
   State.musicas.forEach(function(m){
-    if(m.fixoArtist && m.fixoTitle){ pendentes--; if(pendentes===0){ snapshot(); render(); toast('🔄 Concluído','s'); } return; }
+    if(m.editada){
+      pendentes--;
+      if(pendentes===0){ snapshot(); render(); toast('🔄 Concluído (editadas preservadas)','s'); }
+      return;
+    }
     var respondeu=false;
     function finalizar(){
       if(respondeu) return;
@@ -1680,15 +1603,13 @@ function reanalisar(){
           var tagArtist=(tags&&tags.artist)?limpar(aplicarRegrasTexto(tags.artist)):'';
           var tagTitle=(tags&&tags.title)?limpar(aplicarRegrasTexto(tags.title)):'';
           var artist;
-          if(m.fixoArtist && m.artistFixo) artist=m.artistFixo;
-          else if(State.brain.artistas[norm(p.a)]) artist = State.brain.artistas[norm(p.a)];
+          if(State.brain.artistas[norm(p.a)]) artist = State.brain.artistas[norm(p.a)];
           else if(tagArtist && !tagPareceCanal(tagArtist) && !ehLixo(tagArtist)) artist = tagArtist;
           else artist = p.a;
           artist = normalizarComAlias(artist||'');
 
           var title;
-          if(m.fixoTitle && m.titleFixo) title=m.titleFixo;
-          else if(State.brain.titulos[norm(p.t)]) title = State.brain.titulos[norm(p.t)];
+          if(State.brain.titulos[norm(p.t)]) title = State.brain.titulos[norm(p.t)];
           else if(tagTitle && !ehLixo(tagTitle) && !tagPareceCanal(tagTitle)) title = tagTitle;
           else title = p.t;
 
@@ -2089,18 +2010,14 @@ function demo(){
     'Alceu Valença - Girassol.opus',
     'Gusttavo Lima - VOCÊ AINDA MORA AQUI AI Studio.mp3',
     'Ai Se Eu Te Pego -Michel Teló- Ao Vivo 230.mp3',
-    'Jota Quest - Tim Maia - Réu Confesso.mp3',
-    'A_Loba_OPUS_48kbps-Alcione.opus',
-    '-Gustavo Lima-amor bom.mp3',
-    'amor bom-Gustavo Lima.mp3'
+    'Jota Quest - Tim Maia - Réu Confesso.mp3'
   ];
   State.musicas=exemplos.map(function(nome){
     var p=parseNome(nome);
     var m={
       id:'m_'+(++State.idc)+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
       file:null, originalName:nome,
-      artist:p.a, title:p.t, genero:'Music', idNum:null,
-      fixoArtist:false, fixoTitle:false, artistFixo:'', titleFixo:'',
+      artist:p.a, title:p.t, genero:'Music', idNum:null, editada:false,
       corrompido:ehLixo(p.a)||ehLixo(p.t)||norm(p.a)===norm(p.t)
     };
     m.newName=gerarNome(m,comExt(nome));
@@ -2261,8 +2178,6 @@ function init(){
       if(t && t.dataset && t.dataset.id) onInputBlur(e);
     },true);
     document.addEventListener('click',function(e){
-      var lock=e.target.closest('button[data-lock]');
-      if(lock){ toggleLock(lock.dataset.mid, lock.dataset.lock); return; }
       var btn=e.target.closest('button[data-net]');
       if(btn){ buscarNoCard(btn.dataset.net); return; }
       var sug=e.target.closest('.sugestoes button[data-nome]');
