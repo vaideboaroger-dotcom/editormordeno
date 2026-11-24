@@ -1,6 +1,1321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0b0b12">
+<title>🎵 Editor de Músicas v26</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/browser-id3-writer@6.0.0/dist/browser-id3-writer.min.js"></script>
+<style>
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#0b0b12;--bg2:#13131f;--bg3:#0f0f1a;--bg4:#1a1a2e;
+  --border:#1f1f30;--border2:#2a2a4a;
+  --txt:#e8e8f0;--txt2:#a8a8c8;--txt3:#6a6a8e;
+  --purple:#c084fc;--purple2:#7c6cf0;
+  --green:#34b87a;--red:#e05a5a;--orange:#f59e0b;--blue:#60a5fa;--cyan:#22d3ee;
+  --touch:44px;--radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none}
+body{padding:calc(8px + var(--safe-top)) 12px calc(90px + var(--safe-bottom));overflow-x:hidden}
+input,textarea,button,select{font-family:inherit;font-size:16px}
+.header{position:sticky;top:calc(-1 * var(--safe-top));z-index:100;
+  background:linear-gradient(180deg,var(--bg) 0%,var(--bg) 90%,transparent 100%);
+  margin:0 -12px 12px;padding:8px 12px 12px}
+.header h1{font-size:20px;color:var(--purple);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.header .sub{font-size:12px;color:var(--txt3);margin-bottom:10px}
+.stats{background:var(--bg2);padding:10px 12px;border-radius:var(--radius);
+  font-size:13px;display:flex;gap:12px;flex-wrap:wrap;border:1px solid var(--border);align-items:center}
+.stats b{color:#fff}
+.stats .ok{color:var(--green)}
+.stats .warn{color:var(--orange)}
+.save-status{font-size:11px;padding:4px 10px;border-radius:8px;
+  background:var(--bg4);color:var(--txt3);border:1px solid var(--border2);
+  transition:all .3s;margin-left:auto;white-space:nowrap}
+.save-status.saved{background:rgba(52,184,122,.15);color:var(--green);border-color:var(--green)}
+.zona{border:2px dashed var(--border2);border-radius:16px;padding:32px 16px;
+  text-align:center;cursor:pointer;background:var(--bg3);margin-bottom:12px;
+  transition:all .2s;min-height:140px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.zona:active,.zona.drag{border-color:var(--purple);background:var(--bg4)}
+.zona .ic{font-size:42px;display:block;margin-bottom:10px}
+.zona .t1{font-size:15px;font-weight:600;color:#ddd;margin-bottom:4px}
+.zona .t2{font-size:12px;color:var(--txt3)}
+.zona input{display:none}
+button{border:none;font-weight:600;cursor:pointer;
+  transition:transform .1s,filter .2s;display:inline-flex;align-items:center;
+  justify-content:center;gap:6px;min-height:var(--touch);border-radius:10px;
+  padding:10px 16px;font-size:14px}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.b1{background:var(--purple2);color:#fff}
+.b2{background:var(--green);color:#fff}
+.b3{background:var(--orange);color:#fff}
+.b4{background:var(--red);color:#fff}
+.b5{background:var(--border2);color:var(--txt2)}
+.b6{background:var(--purple);color:#1a0033}
+.box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:12px;margin-bottom:12px}
+.box-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.box-head label{font-size:13px;color:var(--purple);font-weight:700;flex:1;min-width:0}
+.badge{background:var(--border2);color:var(--txt2);font-size:11px;
+  padding:2px 8px;border-radius:8px;font-weight:700}
+.badge.dup{background:rgba(224,90,90,.2);color:var(--red);border:1px solid var(--red)}
+.box-conteudo{display:none}
+.box-conteudo.on{display:block}
+.inp{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:12px 14px;color:var(--txt);font-size:16px;
+  outline:none;transition:border-color .2s}
+.inp:focus{border-color:var(--purple2);box-shadow:0 0 0 3px rgba(124,108,240,.15)}
+.inp-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.inp-row .inp{flex:1;min-width:0}
+.hint{font-size:11px;color:var(--txt3);line-height:1.4;margin-top:6px}
+.hint b{color:var(--green)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;max-height:220px;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding:2px}
+.chip{background:var(--bg4);border:1px solid var(--border2);
+  padding:6px 10px;border-radius:8px;font-size:13px;color:var(--txt);
+  display:flex;align-items:center;gap:6px;max-width:100%}
+.chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.chip b{color:var(--purple);font-weight:700}
+.chip button{background:transparent;color:var(--red);padding:2px;min-height:auto;
+  font-size:16px;line-height:1;border-radius:4px}
+.chip button:active{transform:scale(1.2)}
+.chip-vazio{color:var(--txt3);font-size:12px;padding:16px;text-align:center;width:100%}
+textarea.inp{min-height:90px;resize:vertical;font-size:14px;line-height:1.4}
+.lista{margin-bottom:12px}
+.card-mus{background:var(--bg3);border-radius:var(--radius);padding:12px;
+  margin-bottom:10px;border:1px solid var(--border);
+  border-left:3px solid var(--green);transition:border-color .2s}
+.card-mus.cor{border-left-color:var(--orange);background:rgba(245,158,11,.04)}
+.card-mus.editada{border-left-color:var(--blue)}
+.card-mus.dup{border-left-color:var(--red);background:rgba(224,90,90,.04)}
+.card-mus .topo{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.card-mus .num{background:var(--bg4);color:var(--txt2);font-size:11px;
+  font-weight:700;padding:3px 8px;border-radius:6px;flex-shrink:0}
+.card-mus .orig{flex:1;min-width:0;font-size:11px;color:var(--txt3);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-mus .st{font-size:20px;flex-shrink:0}
+.card-mus .btn-net{background:var(--bg4);color:var(--cyan);font-size:11px;
+  padding:4px 8px;min-height:28px;border-radius:6px;border:1px solid var(--border2)}
+.card-mus .campo{margin-bottom:8px}
+.card-mus .campo:last-child{margin-bottom:0}
+.card-mus .campo label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.card-mus .campo input{width:100%;background:var(--bg4);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none}
+.card-mus .campo input:focus{border-color:var(--purple2)}
+.card-mus .campo .busca-art-row{display:flex;gap:6px;align-items:center}
+.card-mus .campo .busca-art-row input{flex:1}
+.card-mus .acoes-card{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.card-mus .acoes-card button{font-size:12px;padding:8px 10px;min-height:36px;border-radius:8px}
+.card-mus .acoes-card .btn-swap{background:var(--orange);color:#fff}
+.card-mus .acoes-card .btn-salvar-art{background:var(--purple2);color:#fff}
+.card-mus .acoes-card .btn-salvar-tit{background:var(--blue);color:#fff}
+.card-mus .novo-nome{font-size:11px;color:var(--txt3);margin-top:8px;
+  padding:8px 10px;background:var(--bg4);border-radius:8px;
+  font-family:'Courier New',monospace;word-break:break-all;line-height:1.3}
+.card-mus .novo-nome b{color:var(--cyan)}
+.card-mus .score{font-size:10px;padding:2px 6px;border-radius:6px;font-weight:700;flex-shrink:0}
+.card-mus .score.alt{background:rgba(52,184,122,.15);color:var(--green)}
+.card-mus .score.med{background:rgba(245,158,11,.15);color:var(--orange)}
+.card-mus .score.baixo{background:rgba(224,90,90,.15);color:var(--red)}
+.card-mus .sugestoes{margin-top:6px;display:flex;flex-wrap:wrap;gap:4px}
+.card-mus .sugestoes button{background:var(--bg4);border:1px solid var(--cyan);
+  color:var(--cyan);font-size:11px;padding:4px 8px;min-height:26px;border-radius:6px}
+.barra-fixa{position:fixed;bottom:0;left:0;right:0;
+  padding:8px 12px calc(8px + var(--safe-bottom));
+  background:linear-gradient(0deg,var(--bg) 60%,transparent 100%);
+  display:flex;gap:8px;z-index:90;border-top:1px solid var(--border)}
+.barra-fixa button{flex:1;font-size:13px;padding:12px 8px}
+.barra-fixa button span{display:none}
+.painel{background:var(--bg3);border-radius:var(--radius);border:1px solid var(--border);
+  margin-bottom:12px;overflow:hidden;display:none}
+.painel.on{display:block}
+.painel-head{padding:12px;background:var(--bg4);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.painel-head .tt{font-size:13px;font-weight:700;color:var(--purple);
+  display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.painel-head .acoes{display:flex;gap:6px;flex-wrap:wrap}
+.painel-head .acoes button{padding:8px 12px;font-size:12px;min-height:36px}
+.painel-corpo textarea{width:100%;min-height:200px;max-height:400px;
+  background:var(--bg);border:none;color:#a8d8a8;
+  font-family:'Courier New',monospace;font-size:12px;padding:14px;
+  resize:vertical;outline:none;line-height:1.5}
+.painel-info{padding:8px 12px;background:var(--bg2);border-top:1px solid var(--border);
+  font-size:11px;color:var(--txt3);display:flex;justify-content:space-between;
+  flex-wrap:wrap;gap:6px}
+.brain-tabs{display:flex;gap:6px;padding:10px;flex-wrap:wrap;
+  background:var(--bg2);border-bottom:1px solid var(--border)}
+.brain-tab{padding:8px 12px;border-radius:8px;background:var(--bg4);
+  border:1px solid var(--border2);color:var(--txt2);font-size:12px;
+  cursor:pointer;font-weight:600;min-height:36px}
+.brain-tab.on{background:var(--purple2);color:#fff;border-color:var(--purple2)}
+.brain-lista{padding:10px;display:flex;flex-wrap:wrap;gap:6px;
+  max-height:300px;overflow-y:auto}
+.toast-wrap{position:fixed;top:calc(12px + var(--safe-top));
+  left:12px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:8px;
+  pointer-events:none}
+.toast{padding:12px 16px;border-radius:var(--radius);background:var(--bg4);
+  border:1px solid var(--border2);color:var(--txt);font-size:14px;
+  box-shadow:0 8px 32px rgba(0,0,0,.7);font-weight:500;
+  animation:slideDown .3s;pointer-events:auto}
+.toast.s{border-left:4px solid var(--green)}
+.toast.e{border-left:4px solid var(--red)}
+.toast.w{border-left:4px solid var(--orange)}
+.toast.i{border-left:4px solid var(--blue)}
+.toast.b{border-left:4px solid var(--purple)}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);
+  z-index:99999;display:none;align-items:flex-end;justify-content:center;padding:20px}
+.modal-overlay.on{display:flex}
+.modal{background:var(--bg2);border-radius:20px 20px 0 0;
+  padding:20px 20px calc(20px + var(--safe-bottom));
+  width:100%;max-width:560px;border:1px solid var(--border2);
+  transform:translateY(100%);transition:transform .3s;max-height:92vh;overflow-y:auto}
+.modal-overlay.on .modal{transform:translateY(0)}
+.modal::before{content:'';display:block;width:40px;height:4px;
+  background:var(--border2);border-radius:4px;margin:0 auto 16px}
+.modal h3{color:var(--txt);font-size:17px;margin-bottom:6px;text-align:center}
+.modal .sub-modal{font-size:12px;color:var(--txt3);text-align:center;margin-bottom:16px}
+.modal .btns{display:flex;gap:8px;margin-top:16px}
+.modal .btns button{flex:1;min-height:48px;font-size:15px}
+.modal .btn-ok{background:var(--purple2);color:#fff}
+.modal .btn-cancel{background:var(--bg4);color:var(--txt2)}
+.modal .btn-perigo{background:var(--red);color:#fff}
+.modal label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.modal .campo{margin-bottom:12px}
+.modal .inp{width:100%;background:var(--bg3);border:1.5px solid var(--border2);
+  border-radius:10px;padding:12px 14px;color:var(--txt);font-size:15px;outline:none}
+.modal .inp:focus{border-color:var(--purple2)}
+.preview{background:var(--bg);border:1px dashed var(--border2);border-radius:10px;
+  padding:10px 12px;font-family:'Courier New',monospace;font-size:12px;
+  color:#a8d8a8;line-height:1.7;margin-bottom:12px;word-break:break-word;min-height:60px;max-height:180px;overflow-y:auto}
+.preview .antes{color:#e05a5a}
+.preview .depois{color:#34b87a;margin-bottom:8px}
+.preview .vazio{color:#6a6a8e;font-style:italic}
+.sec-title{font-size:11px;color:var(--purple);font-weight:800;
+  text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px;
+  padding-bottom:4px;border-bottom:1px solid var(--border)}
+.sec-title:first-child{margin-top:0}
+.acoes-sec{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.acoes-sec button{font-size:13px;padding:12px 8px}
+.acoes-sec button.full{grid-column:1/-1}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.row-2 label{display:block;font-size:11px;color:var(--txt3);
+  margin-bottom:4px;text-transform:uppercase;font-weight:600}
+.inp-small{background:var(--bg3);border:1px solid var(--border2);
+  border-radius:8px;padding:10px 12px;color:var(--txt);font-size:15px;outline:none;width:100%}
+.inp-small:focus{border-color:var(--purple2)}
+.vazio-card{background:var(--bg3);border-radius:var(--radius);padding:48px 20px;
+  text-align:center;color:var(--txt3);border:1px dashed var(--border2)}
+.vazio-card .big{font-size:52px;display:block;margin-bottom:12px;opacity:.5}
+.vazio-card .t{font-size:14px;line-height:1.5}
+@media(min-width:768px){
+  body{padding:20px;max-width:900px;margin:0 auto;padding-bottom:20px}
+  .header{position:relative;top:0}
+  .barra-fixa{position:relative;background:transparent;border:none;padding:0;margin-bottom:12px}
+  .barra-fixa button span{display:inline}
+  .card-mus{padding:14px}
+  .card-mus .campos{display:grid;grid-template-columns:1fr 1fr 0.8fr;gap:10px}
+  .card-mus .campo{margin-bottom:0}
+  .acoes-sec{grid-template-columns:repeat(4,1fr)}
+  .toast-wrap{top:20px;left:auto;right:20px;max-width:400px}
+  .modal-overlay{align-items:center}
+  .modal{border-radius:16px;transform:scale(.9);opacity:0}
+  .modal-overlay.on .modal{transform:scale(1);opacity:1}
+  .modal::before{display:none}
+}
+@media(min-width:1024px){body{max-width:1200px}}
+</style>
+</head>
+<body>
+
+<datalist id="listaArtistas"></datalist>
+
+<div class="header">
+  <h1>🎵 Editor de Músicas <span style="font-size:12px;background:var(--purple);color:#1a0033;padding:2px 8px;border-radius:8px">v26</span></h1>
+  <div class="sub">🎯 1 traço = artista antes • 2 traços = artista no meio • 🔄 Trocar • 🧠 Aprende com correções</div>
+  <div class="stats">
+    <span>📄 <b id="stTotal">0</b></span>
+    <span>✅ <b class="ok" id="stOk">0</b></span>
+    <span>⚠️ <b class="warn" id="stCor">0</b></span>
+    <span class="badge dup" id="stDup" style="display:none">🔁 <b id="stDupN">0</b></span>
+    <span class="save-status" id="saveStatus">💾 Pronto</span>
+  </div>
+</div>
+
+<div class="zona" id="zona">
+  <span class="ic">📂</span>
+  <div class="t1">Toque para escolher arquivos</div>
+  <div class="t2">.mp3 .opus .m4a .flac .ogg .wav</div>
+  <input type="file" id="inp" multiple accept="audio/*">
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>🗑️ Apagar sempre (palavra inteira)</label>
+    <button class="b5" data-toggle="lixoBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="lixoBox">
+    <div class="inp-row">
+      <input type="text" class="inp" id="lixoManual" placeholder="Palavra/frase pra remover...">
+    </div>
+    <div class="inp-row">
+      <button class="b6" id="btnAddLixo" style="flex:1">➕ Adicionar</button>
+      <button class="b2" id="btnAddLixoAplicar" style="flex:1">➕ Aplicar agora</button>
+    </div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>🎨 Artistas e bandas</label>
+    <span class="badge" id="artContador">0</span>
+    <button class="b5" data-toggle="artBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="artBox">
+    <div class="inp-row">
+      <input type="text" class="inp" id="artBusca" placeholder="🔍 Buscar artista...">
+      <button class="b5" id="btnLimparBusca" style="min-width:48px">✕</button>
+    </div>
+    <div class="chips" id="artLista"></div>
+    <div class="inp-row" style="margin-top:10px">
+      <input type="text" class="inp" id="artNovo" placeholder="Nome do artista/banda...">
+      <button class="b6" id="btnAddArt">➕</button>
+    </div>
+    <div class="inp-row">
+      <button class="b2" id="btnAddArtAtual" style="flex:1">➕ Adicionar das músicas</button>
+    </div>
+    <div class="hint" style="margin-top:10px;margin-bottom:6px">📥 Colar lista em massa:</div>
+    <textarea class="inp" id="artMassa" placeholder="Alceu Valença, Gusttavo Lima&#10;Zeca Pagodinho"></textarea>
+    <div class="inp-row" style="margin-top:8px">
+      <button class="b2" id="btnAddMassa" style="flex:1">➕ Adicionar todos</button>
+      <button class="b5" id="btnLimparMassa">🗑️</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
+      <div style="font-size:12px;color:var(--txt2);font-weight:600;margin-bottom:8px">🔗 Aliases</div>
+      <div class="chips" id="aliasLista"></div>
+      <div class="inp-row" style="margin-top:8px">
+        <input type="text" class="inp" id="aliasDe" placeholder="Nome alternativo">
+        <input type="text" class="inp" id="aliasPara" placeholder="Nome oficial">
+        <button class="b6" id="btnAddAlias">➕</button>
+      </div>
+    </div>
+    <div class="inp-row" style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border2)">
+      <button class="b5" id="btnResetArt" style="flex:1">↺ Padrão</button>
+      <button class="b2" id="btnExportArt" style="flex:1">📤 Exportar</button>
+      <button class="b1" id="btnImportArt" style="flex:1">📥 Importar</button>
+      <button class="b4" id="btnZerarArt" style="flex:1">🗑️ Zerar</button>
+    </div>
+    <input type="file" id="inpImportArt" accept=".json,.txt" style="display:none">
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-head">
+    <label>✂️ Abreviações (título &gt; 40 chars)</label>
+    <button class="b5" data-toggle="abrevBox" style="padding:6px 12px;font-size:12px;min-height:36px">👁️</button>
+  </div>
+  <div class="box-conteudo" id="abrevBox">
+    <div class="chips" id="abrevLista"></div>
+    <div class="inp-row" style="margin-top:8px">
+      <input type="text" class="inp" id="abrevDe" placeholder="Palavra completa">
+      <input type="text" class="inp" id="abrevPara" placeholder="Abreviação">
+      <button class="b6" id="btnAddAbrev">➕</button>
+    </div>
+    <div class="inp-row"><button class="b5" id="btnResetAbrev" style="flex:1">↺ Restaurar padrão</button></div>
+  </div>
+</div>
+
+<div class="box">
+  <div class="box-head"><label>✅ Aplicar em TODAS as músicas</label></div>
+  <div class="row-2">
+    <div><label>ID inicial</label><input type="number" id="idInicial" value="1" min="1" class="inp-small"></div>
+    <div><label>Gênero</label><input type="text" id="generoGeral" value="Music" class="inp-small"></div>
+  </div>
+  <div class="inp-row">
+    <button class="b1" id="btnAplicarGenero" style="flex:1">🎼 Aplicar gênero em TODAS</button>
+    <button class="b2" id="btnAplicarId" style="flex:1">🔢 Aplicar IDs em TODAS</button>
+  </div>
+  <button class="b6" id="btnAplicarTudo" style="width:100%;margin-top:8px">✅ Aplicar gênero + IDs em TODAS</button>
+</div>
+
+<div class="acoes-sec">
+  <button class="b6 full" id="btnEnsinar">🧠 Ensinar ao código (regras permanentes)</button>
+  <button class="b3" id="btnLimpar">🧹 Limpar nomes</button>
+  <button class="b1" id="btnReanalisar">🔄 Re-analisar</button>
+  <button class="b5" id="btnReset">↺ Resetar</button>
+  <button class="b4" id="btnClear">🗑️ Limpar tudo</button>
+  <button class="b5 full" id="btnDemo">🎯 Testar exemplo</button>
+  <button class="b6 full" id="btnBrain">🧠 Ver Aprendizados</button>
+</div>
+
+<div class="lista" id="listaWrap">
+  <div class="vazio-card" id="vazioCard">
+    <span class="big">🎶</span>
+    <div class="t">Nenhuma música carregada ainda.<br>Toque na área acima para escolher.</div>
+  </div>
+  <div id="corpo"></div>
+</div>
+
+<div class="barra-fixa">
+  <button class="b2" id="btnZip" disabled>⬇️ <span>Baixar</span> ZIP</button>
+  <button class="b5" id="btnJson" disabled>⬇️ <span>Baixar</span> JSON</button>
+  <button class="b1" id="btnToggleJson">📋 JSON</button>
+</div>
+
+<div class="painel" id="jsonPainel">
+  <div class="painel-head">
+    <div class="tt">📋 JSON <span class="badge" id="jsonBadge">0</span></div>
+    <div class="acoes">
+      <button class="b2" id="btnCopyJson2">📋</button>
+      <button class="b5" id="btnDownloadJson2">⬇️</button>
+      <button class="b5" id="btnMinificar">🔀</button>
+    </div>
+  </div>
+  <div class="painel-corpo"><textarea id="jsonTexto" readonly placeholder="Arraste músicas..."></textarea></div>
+  <div class="painel-info">
+    <span id="jsonInfo">Aguardando músicas...</span>
+    <span id="jsonTamanho">0 chars</span>
+  </div>
+</div>
+
+<div class="painel" id="brainPainel">
+  <div class="painel-head">
+    <div class="tt">🧠 Cérebro <span class="badge" id="brainBadge">0</span></div>
+    <div class="acoes">
+      <button class="b2" id="btnExportBrain">📤</button>
+      <button class="b1" id="btnImportBrain">📥</button>
+      <button class="b4" id="btnResetBrain">🗑️</button>
+    </div>
+  </div>
+  <div class="brain-tabs">
+    <div class="brain-tab on" data-tab="lixo">🗑️ Lixo (<span id="cntLixo">0</span>)</div>
+    <div class="brain-tab" data-tab="artistas">🎨 Artistas (<span id="cntArt">0</span>)</div>
+    <div class="brain-tab" data-tab="titulos">🎵 Títulos (<span id="cntTit">0</span>)</div>
+    <div class="brain-tab" data-tab="correcoes">🧠 Correções (<span id="cntCorr">0</span>)</div>
+    <div class="brain-tab" data-tab="regras">📋 Regras (<span id="cntRegras">0</span>)</div>
+  </div>
+  <div id="brainConteudo"></div>
+</div>
+
+<input type="file" id="inpBrain" accept=".json" style="display:none">
+<div class="toast-wrap" id="toastWrap"></div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Título</h3>
+    <p id="modalMsg" style="color:var(--txt2);text-align:center;margin-bottom:16px">Mensagem</p>
+    <div class="btns">
+      <button class="btn-cancel" id="modalCancel">Cancelar</button>
+      <button class="btn-ok" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ensinarOverlay">
+  <div class="modal">
+    <h3>🧠 Ensinar ao código</h3>
+    <div class="sub-modal">Regras salvas aplicam em <b>TODAS</b> as músicas atuais e futuras</div>
+    <div class="sec-title">➕ Adicionar regra</div>
+    <div class="campo">
+      <label>Texto/símbolo pra tirar</label>
+      <input type="text" class="inp" id="ensDe" placeholder="Ex: VEVO, #, Pout-Pourri, Official">
+    </div>
+    <button class="b6" id="ensAdd" style="width:100%;margin-bottom:12px">➕ Adicionar à lista</button>
+    <div class="sec-title">📋 Regras salvas (aplicam sempre)</div>
+    <div class="chips" id="ensLista" style="margin-bottom:12px"></div>
+    <div class="sec-title">👁️ Preview em música real</div>
+    <div class="preview" id="ensPreview"><span class="vazio">Adicione uma regra pra ver o preview...</span></div>
+    <div class="btns">
+      <button class="btn-cancel" id="ensCancel">Fechar</button>
+      <button class="btn-ok" id="ensOk">✅ Aplicar em TODAS</button>
+    </div>
+  </div>
+</div><script>
+(function(){
+'use strict';
+
 /* ============================================================
-   🔧 v26 — APRENDIZADO
+   🔧 v26 — DICIONÁRIOS BASE
    ============================================================ */
+var ABREV_PADRAO = {
+  'você':'vc','voce':'vc','vocês':'vcs','voces':'vcs',
+  'por':'p.','para':'pra','com':'c/','sem':'s/',
+  'meu':'m.','minha':'m.','meus':'m.','minhas':'m.',
+  'seu':'s.','sua':'s.','seus':'s.','suas':'s.',
+  'nosso':'n.','nossa':'n.','nossos':'n.','nossas':'n.',
+  'este':'st.','esta':'st.','esse':'ss.','essa':'ss.',
+  'aquele':'aq.','aquela':'aq.',
+  'loucura':'louc.','saudade':'saúd.','saudades':'saúd.',
+  'coração':'cor.','coracao':'cor.','corações':'cors.','coracoes':'cors.',
+  'música':'mús.','musica':'mús.','canção':'can.','cancao':'can.',
+  'versão':'vs.','versao':'vs.','parte':'pt.',
+  'amor':'am.','paixão':'paix.','paixao':'paix.',
+  'cabeça':'cab.','cabeca':'cab.',
+  'cidade':'cid.','história':'hist.','historia':'hist.',
+  'memória':'mem.','memoria':'mem.',
+  'eternamente':'etern.','simplesmente':'simpl.',
+  'praticamente':'prat.','realmente':'real.',
+  'finalmente':'final.','principalmente':'princ.',
+  'novamente':'nov.','rapidamente':'rapid.',
+  'felicidade':'felic.','verdade':'verd.','liberdade':'lib.',
+  'oportunidade':'oport.','necessidade':'neces.',
+  'possibilidade':'possib.','responsabilidade':'resp.',
+  'universo':'univ.','sentimento':'sent.',
+  'pensamento':'pens.','sofrimento':'sofr.',
+  'nascimento':'nasc.','crescimento':'cresc.',
+  'conhecimento':'conhec.','entendimento':'entend.',
+  'compreensão':'compr.','compreensao':'compr.',
+  'separar':'sep.','separação':'sep.','separacao':'sep.',
+  'querem':'quer.','querer':'quer.','queria':'quer.',
+  'voltou':'volt.','voltar':'volt.','voltando':'volt.',
+  'parabéns':'parab.','parabens':'parab.',
+  'pressão':'press.','pressao':'press.',
+  'paredão':'pared.','paredao':'pared.',
+  'aluguel':'alug.','vaqueira':'vaq.','vaqueiro':'vaq.',
+  'carinhoso':'carinh.','carinhosa':'carinh.',
+  'imperador':'imp.','fernandinha':'fernand.',
+  'embaixador':'embaix.',
+  'instinto':'inst.','animal':'anim.','homem':'h.',
+  'quando':'qdo.','ainda':'ain.'
+};
+
+var LIXO_BASE = [
+  'audio oficial','áudio oficial','official audio','audio','áudio',
+  'official music video','official video','music video',
+  'video clipe','vídeo clipe','video clip','videoclipe','clipe','clip',
+  'lyric video','lyrics video','lyric','lyrics','letra','letras',
+  'video','vídeo','mv',
+  'ao vivo','aovivo','live','acoustic','acústico','acustico','unplugged',
+  'remaster','remastered','remasterização','remasterizacao','remasterizado',
+  're-recorded','re recorded','rerecorded','regravado','regravação','regravacao',
+  'long version','original long version','versão longa','versao longa',
+  'extended version','versão estendida','versao estendida','extended',
+  'original version','versão original','versao original',
+  'radio edit','radio version','radio mix','radio',
+  'version','versão','versao','single version','album version',
+  'original','original mix','original song',
+  'remix','rework','re-work','bootleg','mashup',
+  'edit','edit version',
+  'instrumental','playback','karaoke','acapella','a cappella',
+  'demo','demo version','outtake',
+  'cover','cover oficial','official cover','cover by',
+  'live version',
+  'show','show ao vivo','show completo','apresentação','apresentacao',
+  'turnê','turne','tour','em turnê','em turne',
+  'hd','hq','full hd','fullhd','4k','8k','1080p','720p',
+  'kbps','320kbps','192kbps','128kbps','256kbps','1411kbps',
+  'mp3','mp4','m4a','flac','opus','ogg','wav','aac','wma',
+  'lame','cbr','vbr','stereo','mono','joint stereo',
+  'hires','hi-res','hi res','24bit','16bit',
+  'dvd','cd','bluray','blu-ray','blu ray','vhs',
+  'deluxe','deluxe edition','edição especial','edicao especial',
+  'special edition','collector','collectors edition',
+  'limited','limited edition',
+  'youtube','yt','y2mate','ytmp3','youtubetomp3',
+  'spotify','deezer','soundcloud','tidal','amazon','apple music',
+  '4shared','mediafire','mega','zippyshare','turbobit',
+  'baixaki','baixemusica','musicas','musicasgratis',
+  'palcomp3','palco mp3','suamusica','kuakua','vagalume',
+  'letras.mus.br','cifraclub','cifra club',
+  'oficial','official','promo','promotional','promo only','promo cd',
+  'single','album','ep','lp','mixtape',
+  'best of','greatest hits','as melhores',
+  'playlist','coletânea','coletanea','compilation','various artists','v.a.',
+  'ai studio','ai studios','studio','estúdio','estudio',
+  'canal','channel','official channel','canal oficial',
+  'records','record','music','música','musica','músicas','musicas',
+  'tv','web','net','online','play','player',
+  'prod','produção','producao','produzido por',
+  'download','baixar','baixe','grátis','gratis','free','free download',
+  'full','completo','completa','inteiro','inteira',
+  'novo','nova','lançamento','lancamento','lançado','lancado',
+  'exclusivo','exclusiva','exclusividade',
+  'participação','participacao','part',
+  'ao vivo em','gravado em','direto de',
+  'rip','cd rip','web rip','radio rip','vinyl rip',
+  'fm','am','live fm','radio fm',
+  'canção','cancao','canções','cancoes',
+  'sucesso','sucessos','hit','hits',
+  'chamego','single_version','single version','remastered version',
+  're-recorded version','video oficial','vídeo oficial'
+];
+
+var FEAT_RE = /\s+(feat\.?|ft\.?|part\.?|participação|participacao)\s+/i;
+
+var ARTISTAS_BASE = [
+  'Alcione','Alceu Valença','Cartola','Clara Nunes','Djavan',
+  'Emílio Santiago','Wando','Xande de Pilares','Zé Cantor',
+  'Zeca Pagodinho','Beth Carvalho','Martinho da Vila','Fundo de Quintal',
+  'Jorge Aragão','Dona Ivone Lara','Paulinho da Viola',
+  'Chico Buarque','Caetano Veloso','Gilberto Gil','Gal Costa','Maria Bethânia',
+  'Elis Regina','Tom Jobim','Vinicius de Moraes','João Gilberto',
+  'Roberto Carlos','Erasmo Carlos','Tim Maia','Jorge Ben Jor',
+  'Novos Baianos','Raul Seixas','Legião Urbana','Titãs',
+  'Paralamas do Sucesso','Barão Vermelho','Cazuza','Renato Russo',
+  'Cássia Eller','Marisa Monte','Adriana Calcanhotto','Zélia Duncan',
+  'Ana Carolina','Seu Jorge','Marcelo D2','Criolo','Racionais MCs',
+  'Ludmilla','Anitta','Ivete Sangalo','Claudia Leitte','Bell Marques',
+  'Chiclete com Banana','Asa de Águia','Ara Ketu','É o Tchan',
+  'Harmonia do Samba','Psirico','Leo Santana','Wesley Safadão',
+  'Gusttavo Lima','Luan Santana','Jorge e Mateus',
+  'Matheus e Kauan','Henrique e Juliano','Zé Neto e Cristiano',
+  'Marília Mendonça','Maiara e Maraísa',
+  'Chitãozinho e Xororó','Chrystian e Ralf',
+  'Leandro e Leonardo','João Paulo e Daniel','Rick e Renner',
+  'Chico Rey e Paraná','Gino e Geno','Tião Carreiro e Pardinho',
+  'Pena Branca e Xavantinho','Almir Sater','Renato Teixeira',
+  'Sérgio Reis','Péricles','Thiaguinho','Ferrugem',
+  'Dilsinho','Mumuzinho','Sorriso Maroto','Exaltasamba','Revelação',
+  'Katinguelê','Negritude Junior','Soweto','Raça Negra',
+  'Brasas do Forró','Augeboys','Fernandinha','Vitinho Imperador',
+  'Jota Quest','Skank','Capital Inicial','Charlie Brown Jr','CPM 22',
+  'Los Hermanos','O Rappa','Detonautas','NX Zero','Fresno',
+  'Madonna','Michael Jackson','Prince','Whitney Houston','Mariah Carey',
+  'Celine Dion','Cher','Tina Turner','Aretha Franklin','Diana Ross',
+  'The Weeknd','Drake','Beyoncé','Rihanna','Lady Gaga','Katy Perry',
+  'Taylor Swift','Adele','Ed Sheeran','Bruno Mars','Justin Bieber',
+  'Ariana Grande','Dua Lipa','Billie Eilish','Olivia Rodrigo','Harry Styles',
+  'The Beatles','John Lennon','Paul McCartney','George Harrison','Ringo Starr',
+  'Rolling Stones','Queen','Freddie Mercury','Led Zeppelin','Pink Floyd',
+  'David Bowie','Elton John','Bob Dylan','Bob Marley','ABBA','Bee Gees',
+  'George Michael','Wham','Cyndi Lauper','Bon Jovi','U2',
+  'Coldplay','Radiohead','Nirvana','Pearl Jam','Red Hot Chili Peppers',
+  'Metallica','Iron Maiden','AC/DC','Guns N Roses','Aerosmith',
+  'Foreigner','Journey','Chicago','Eagles','Fleetwood Mac','Toto',
+  'Bruno & Marrone','Armandinho','Michel Teló','Jota Quest','Brasas do Forró',
+  'Miguel Alves'
+];
+
+var GENEROS = {
+  'Sertanejo':['Gusttavo Lima','Luan Santana','Jorge e Mateus','Matheus e Kauan','Henrique e Juliano','Zé Neto e Cristiano','Marília Mendonça','Maiara e Maraísa','Chitãozinho e Xororó','Chrystian e Ralf','Leandro e Leonardo','João Paulo e Daniel','Rick e Renner','Chico Rey e Paraná','Gino e Geno','Tião Carreiro e Pardinho','Bruno & Marrone','Michel Teló','Almir Sater','Renato Teixeira','Sérgio Reis','Pena Branca e Xavantinho','Miguel Alves'],
+  'Samba':['Alcione','Cartola','Clara Nunes','Zeca Pagodinho','Beth Carvalho','Martinho da Vila','Fundo de Quintal','Jorge Aragão','Dona Ivone Lara','Paulinho da Viola','Xande de Pilares','Péricles','Thiaguinho','Ferrugem','Dilsinho','Mumuzinho','Sorriso Maroto','Exaltasamba','Revelação','Katinguelê','Negritude Junior','Soweto','Raça Negra'],
+  'Rock':['Legião Urbana','Titãs','Paralamas do Sucesso','Barão Vermelho','Cazuza','Renato Russo','Cássia Eller','Jota Quest','Skank','Capital Inicial','Charlie Brown Jr','CPM 22','Los Hermanos','O Rappa','Detonautas','NX Zero','Fresno','The Beatles','John Lennon','Paul McCartney','Rolling Stones','Queen','Freddie Mercury','Led Zeppelin','Pink Floyd','David Bowie','Elton John','Bob Dylan','Nirvana','Pearl Jam','Red Hot Chili Peppers','Metallica','Iron Maiden','AC/DC','Guns N Roses','Aerosmith','Foreigner','Journey','Chicago','Eagles','Fleetwood Mac','Toto','U2','Coldplay','Radiohead'],
+  'MPB':['Chico Buarque','Caetano Veloso','Gilberto Gil','Gal Costa','Maria Bethânia','Elis Regina','Tom Jobim','Vinicius de Moraes','João Gilberto','Marisa Monte','Adriana Calcanhotto','Zélia Duncan','Ana Carolina','Djavan','Emílio Santiago'],
+  'Gospel':['Fernandinha'],
+  'Funk':['Ludmilla','Anitta','MC'],
+  'Axé':['Ivete Sangalo','Claudia Leitte','Bell Marques','Chiclete com Banana','Asa de Águia','Ara Ketu','É o Tchan','Harmonia do Samba'],
+  'Forró':['Brasas do Forró','Augeboys','Wesley Safadão','Leo Santana','Psirico']
+};
+var GENERO_POR_ARTISTA = {};
+Object.keys(GENEROS).forEach(function(g){
+  GENEROS[g].forEach(function(a){ GENERO_POR_ARTISTA[norm(a)] = g; });
+});
+
+var State = {
+  musicas: [],
+  idc: 0,
+  jsonMinificado: false,
+  jsonAtual: '',
+  brain: { lixo:{}, artistas:{}, titulos:{}, regras:[], correcoes:{} },
+  aliases: {},
+  abrev: {},
+  artistasConhecidos: {},
+  artBusca: '',
+  brainTab: 'lixo',
+  cache: { busca:{} },
+  historico: [],
+  histIdx: -1,
+  _tagsCache: (typeof WeakMap!=='undefined')?new WeakMap():null
+};
+
+var KEYS = {
+  brain:'editor_musicas_brain_v26',
+  abrev:'editor_musicas_abrev_v26',
+  art:'editor_musicas_artistas_v26',
+  alias:'editor_musicas_aliases_v26',
+  busca:'editor_musicas_busca_v26'
+};
+
+function $(id){ return document.getElementById(id); }
+function norm(s){
+  return String(s||'').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+function esc(s){
+  return String(s==null?'':s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function escAttr(s){ return String(s==null?'':s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escapeRegex(s){ return String(s).replace(/[.*+?^${}()|[\]\\\-\]]/g,'\\$&'); }
+function comExt(n){ var i=n.lastIndexOf('.'); return i>0?n.slice(i):''; }
+function debounce(fn,ms){ var t; return function(){ var self=this,args=arguments; clearTimeout(t); t=setTimeout(function(){ fn.apply(self,args); },ms); }; }
+
+var _toastCount=0;
+function toast(msg,tipo){
+  var wrap=$('toastWrap'); if(!wrap) return;
+  if(_toastCount>=3){
+    var first=wrap.querySelector('.toast');
+    if(first) first.remove();
+  }
+  var el=document.createElement('div');
+  el.className='toast '+(tipo||'i');
+  var ic={s:'✅',e:'❌',w:'⚠️',i:'ℹ️',b:'🧠',save:'💾'};
+  el.textContent=(ic[tipo]||'ℹ️')+' '+msg;
+  wrap.appendChild(el);
+  _toastCount++;
+  setTimeout(function(){
+    el.style.transition='all .3s';
+    el.style.opacity='0';
+    el.style.transform='translateY(-20px)';
+    setTimeout(function(){ el.remove(); _toastCount=Math.max(0,_toastCount-1); },300);
+  },3200);
+}
+
+var _modalResolve=null;
+function modalConfirm(msg,title,opcoes){
+  opcoes=opcoes||{};
+  return new Promise(function(resolve){
+    if(_modalResolve){ _modalResolve(false); _modalResolve=null; }
+    _modalResolve=resolve;
+    var ov=$('modalOverlay'),tit=$('modalTitle'),m=$('modalMsg');
+    var ok=$('modalOk'),cancel=$('modalCancel');
+    tit.textContent=title||'Confirmação';
+    m.textContent=msg;
+    ok.className = opcoes.perigoso ? 'btn-perigo' : 'btn-ok';
+    ok.textContent = opcoes.perigoso ? '⚠️ Confirmar' : 'OK';
+    ov.classList.add('on');
+    function fechar(v){
+      if(_modalResolve===resolve) _modalResolve=null;
+      ov.classList.remove('on');
+      ok.onclick=null; cancel.onclick=null; ov.onclick=null;
+      document.removeEventListener('keydown',onKey);
+      resolve(v);
+    }
+    function onKey(e){
+      if(e.key==='Escape') fechar(false);
+      if(e.key==='Enter' && !opcoes.perigoso) fechar(true);
+    }
+    document.addEventListener('keydown',onKey);
+    ok.onclick=function(){ fechar(true); };
+    cancel.onclick=function(){ fechar(false); };
+    ov.onclick=function(e){ if(e.target===ov) fechar(false); };
+  });
+}
+
+function setSaveStatus(status){
+  var el=$('saveStatus'); if(!el) return;
+  el.className='save-status '+status;
+  if(status==='saving') el.textContent='⏳ Salvando...';
+  else if(status==='saved'){
+    el.textContent='✅ Salvo!';
+    setTimeout(function(){ el.textContent='💾 Pronto'; el.className='save-status'; },2000);
+  } else el.textContent='💾 Pronto';
+}
+
+function safeSetItem(key,value,aviso){
+  try{
+    localStorage.setItem(key,value);
+    try{ localStorage.setItem(key+'_backup',value); }catch(e){}
+    return true;
+  }catch(e){
+    console.warn('Falha ao salvar '+key+':',e);
+    if(aviso) toast('❌ '+aviso+' (espaço cheio)','e');
+    return false;
+  }
+}
+function safeGetItem(key){
+  try{
+    var v=localStorage.getItem(key);
+    if(v) return v;
+    return localStorage.getItem(key+'_backup');
+  }catch(e){ return null; }
+}
+function salvarBrainReal(){
+  safeSetItem(KEYS.brain, JSON.stringify(State.brain), 'Cérebro não salvo');
+  atualizarBrainStats();
+}
+var salvarBrain = debounce(salvarBrainReal,1500);
+function salvarAbrev(){ safeSetItem(KEYS.abrev, JSON.stringify(State.abrev)); renderAbrev(); }
+function salvarAliases(){ safeSetItem(KEYS.alias, JSON.stringify(State.aliases)); }
+function salvarArtistas(){
+  setSaveStatus('saving');
+  var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; });
+  var ok=safeSetItem(KEYS.art, JSON.stringify(arr), 'Artistas não salvos');
+  setSaveStatus(ok?'saved':'');
+  atualizarDatalist();
+  return ok;
+}
+
+function atualizarDatalist(){
+  var dl=$('listaArtistas'); if(!dl) return;
+  var arr=Object.keys(State.artistasConhecidos).map(function(k){ return State.artistasConhecidos[k]; }).sort();
+  dl.innerHTML = arr.map(function(a){ return '<option value="'+escAttr(a)+'">'; }).join('');
+}
+
+function carregarTudo(){
+  var raw=safeGetItem(KEYS.brain) || safeGetItem('editor_musicas_brain_v25') || safeGetItem('editor_musicas_brain_v24');
+  if(raw){ try{
+    var o=JSON.parse(raw);
+    State.brain.lixo=o.lixo||{};
+    State.brain.artistas=o.artistas||{};
+    State.brain.titulos=o.titulos||{};
+    State.brain.regras=o.regras||[];
+    State.brain.correcoes=o.correcoes||{};
+  }catch(e){} }
+
+  var rawArt=safeGetItem(KEYS.art) || safeGetItem('editor_musicas_artistas_v25') || safeGetItem('editor_musicas_artistas_v24');
+  var arrArt=null;
+  if(rawArt){ try{ arrArt=JSON.parse(rawArt); }catch(e){} }
+  if(Array.isArray(arrArt) && arrArt.length>0){
+    State.artistasConhecidos={};
+    arrArt.forEach(function(a){ if(typeof a==='string') State.artistasConhecidos[norm(a)]=a; });
+  } else {
+    State.artistasConhecidos={};
+    ARTISTAS_BASE.forEach(function(a){ State.artistasConhecidos[norm(a)]=a; });
+    salvarArtistas();
+  }
+
+  var rawAb=safeGetItem(KEYS.abrev) || safeGetItem('editor_musicas_abrev_v25') || safeGetItem('editor_musicas_abrev_v24');
+  if(rawAb){ try{ State.abrev=JSON.parse(rawAb); }catch(e){ State.abrev=Object.assign({},ABREV_PADRAO); } }
+  else State.abrev=Object.assign({},ABREV_PADRAO);
+
+  var rawAl=safeGetItem(KEYS.alias) || safeGetItem('editor_musicas_aliases_v25') || safeGetItem('editor_musicas_aliases_v24');
+  if(rawAl){ try{ State.aliases=JSON.parse(rawAl); }catch(e){ State.aliases={}; } }
+
+  var rawBusca=safeGetItem(KEYS.busca);
+  if(rawBusca){ try{ State.cache.busca=JSON.parse(rawBusca); }catch(e){} }
+}
+
+function snapshot(){
+  var snap = State.musicas.map(function(m){
+    return { id:m.id, artist:m.artist, title:m.title, genero:m.genero, idNum:m.idNum, editada:m.editada };
+  });
+  State.historico = State.historico.slice(0, State.histIdx+1);
+  State.historico.push(JSON.stringify(snap));
+  if(State.historico.length>30) State.historico.shift();
+  State.histIdx = State.historico.length-1;
+}
+function desfazer(){
+  if(State.histIdx<=0){ toast('Nada pra desfazer.','w'); return; }
+  State.histIdx--;
+  aplicarSnapshot(State.historico[State.histIdx]);
+  toast('↶ Desfeito','i');
+}
+function refazer(){
+  if(State.histIdx>=State.historico.length-1){ toast('Nada pra refazer.','w'); return; }
+  State.histIdx++;
+  aplicarSnapshot(State.historico[State.histIdx]);
+  toast('↷ Refeito','i');
+}
+function aplicarSnapshot(str){
+  try{
+    var snap=JSON.parse(str);
+    snap.forEach(function(s){
+      var m=State.musicas.find(function(x){ return x.id===s.id; });
+      if(m){
+        m.artist=s.artist; m.title=s.title; m.genero=s.genero; m.idNum=s.idNum; m.editada=!!s.editada;
+        m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+        m.newName=gerarNome(m,comExt(m.originalName));
+      }
+    });
+    render();
+  }catch(e){}
+}
+
+function adicionarRegra(texto){
+  var t=String(texto||'').trim();
+  if(!t) return false;
+  var regras=State.brain.regras||[];
+  for(var i=0;i<regras.length;i++){ if(norm(regras[i])===norm(t)) return false; }
+  regras.push(t); State.brain.regras=regras; salvarBrain(); return true;
+}
+function removerRegra(texto){
+  var t=norm(texto);
+  State.brain.regras=(State.brain.regras||[]).filter(function(r){ return norm(r)!==t; });
+  salvarBrain();
+}
+function aplicarRegrasTexto(texto){
+  if(!texto) return texto;
+  var regras=State.brain.regras||[];
+  if(regras.length===0) return texto;
+  var s=texto;
+  regras.forEach(function(regra){
+    if(!regra) return;
+    var esq=escapeRegex(regra);
+    var reFim=new RegExp(esq+'$','i');
+    if(reFim.test(s)) s=s.replace(reFim,'').replace(/[\s\-_.]+$/,'');
+    var reIni=new RegExp('^'+esq,'i');
+    if(reIni.test(s)) s=s.replace(reIni,'').replace(/^[\s\-_.]+/,'');
+    var reWord=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])'+esq+'([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
+    s=s.replace(reWord,' ');
+  });
+  return s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.|]+/,'').replace(/[\s\-–—_,;:.|]+$/,'').trim();
+}
+function aplicarRegrasEmTodas(){
+  if(State.musicas.length===0) return 0;
+  var n=0;
+  State.musicas.forEach(function(m){
+    if(m.editada) return;
+    var antesA=m.artist, antesT=m.title;
+    m.artist=aplicarRegrasTexto(m.artist);
+    m.title =aplicarRegrasTexto(m.title);
+    if(m.artist!==antesA || m.title!==antesT) n++;
+    m.corrompido=ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
+    m.newName=gerarNome(m,comExt(m.originalName));
+  });
+  return n;
+}
+
+function removerSimbolos(s){
+  s=s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}]/gu,' ');
+  s=s.replace(/[♪♫♬♭♮♯🎤🎶🎵🎧🎼]/g,' ');
+  s=s.replace(/[\u00A0\u200B\u200C\u200D\uFEFF\u200E\u200F\u2028\u2029]/g,' ');
+  return s;
+}
+function limparPalavras(s){
+  if(!s) return '';
+  var todas=LIXO_BASE.concat(Object.keys(State.brain.lixo));
+  var vistos={};
+  var unicas=todas.filter(function(p){
+    var k=norm(p);
+    if(!k||vistos[k]) return false;
+    vistos[k]=true; return true;
+  }).sort(function(a,b){ return b.length-a.length; });
+  var LOTE=50;
+  for(var i=0;i<unicas.length;i+=LOTE){
+    var lote=unicas.slice(i,i+LOTE);
+    var padrao=lote.map(escapeRegex).join('|');
+    var re=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','gi');
+    s=s.replace(re,' ');
+  }
+  return s;
+}
+function removerNumeros(s){
+  if(!s) return '';
+  var x=String(s);
+  x=x.replace(/^\s*\d{1,3}\s*[-–—.]\s*/,'');
+  x=x.replace(/\s*[-–—.]\s*\d{1,3}\s*$/,'');
+  x=x.replace(/\s*[\(\[\{]\s*\d{1,3}\s*[\)\]\}]\s*$/,'');
+  x=x.replace(/\b\d{2,4}\s*kbps\b/gi,' ');
+  return x.replace(/\s+/g,' ').trim();
+}
+function limpar(txt){
+  if(!txt) return '';
+  var s=String(txt).replace(/_/g,' ');
+  s=removerSimbolos(s);
+  s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s=limparPalavras(s);
+  s=removerNumeros(s);
+  s=s.replace(/[!?'"`´~^*#@$%&=+,;:]+/g,' ');
+  s=s.replace(/\s*[-–—]\s*$/,' ').replace(/^\s*[-–—]\s*/,' ');
+  s=s.replace(/\s+/g,' ').replace(/^[\s\-–—_,;:.]+/,'').replace(/[\s\-–—_,;:]+$/,'');
+  return s.trim();
+}
+function ehLixo(t){
+  if(!t) return true;
+  var x=norm(t);
+  if(!x) return true;
+  if(/^\d+[\s._-]*kbps/.test(x)) return true;
+  if(/^[\d\s.\-_]+$/.test(x)) return true;
+  return false;
+}
+function tagPareceCanal(txt){
+  if(!txt) return false;
+  return /\b(sem filtro|oficial|canal|records|studio|estúdio|estudio|tv|web|play|top|best|hits|coletânea|coletanea|various|compilation|playlist|prod)\b/i.test(txt);
+}
+
+function abreviarPalavra(p){
+  if(!p) return p;
+  var chave=norm(p);
+  if(State.abrev[chave]) return State.abrev[chave];
+  if(p.length<=7) return p;
+  return p.slice(0,5)+'.';
+}
+function abreviarTexto(txt,limite){
+  if(!txt) return '';
+  if(txt.length<=limite) return txt;
+  var palavras=txt.split(/\s+/);
+  var abreviado=palavras.map(function(p){
+    var m=p.match(/^([\/\-–—(]?)([A-Za-zÀ-Ýà-ÿ]+)([\/\-–—),.]?)$/);
+    if(!m) return p;
+    return m[1]+abreviarPalavra(m[2])+m[3];
+  }).join(' ');
+  if(abreviado.length<=limite) return abreviado;
+  var palavras2=abreviado.split(/\s+/);
+  while(palavras2.length>2 && palavras2.join(' ').length>limite) palavras2.pop();
+  abreviado=palavras2.join(' ');
+  if(abreviado.length>limite){
+    var corte=abreviado.slice(0,limite);
+    var ultimoEspaco=corte.lastIndexOf(' ');
+    abreviado=ultimoEspaco>limite*0.5?corte.slice(0,ultimoEspaco):corte;
+  }
+  return abreviado.trim();
+}
+
+function capitalizar(s){
+  if(!s) return '';
+  var siglas={ac:'AC',dc:'DC',mc:'MC',dj:'DJ',jr:'Jr',sr:'Sr',dr:'Dr',dra:'Dra',pe:'Pe',st:'St'};
+  return s.split(/\s+/).map(function(p){
+    var k=norm(p);
+    if(siglas[k]) return siglas[k];
+    if(p.length<=2 && /^(de|da|do|das|dos|e|o|a|os|as|em|no|na)$/i.test(p)) return p.toLowerCase();
+    if(p.length<=4 && p===p.toUpperCase() && /^[A-Z]+$/.test(p)) return p;
+    return p.charAt(0).toUpperCase()+p.slice(1).toLowerCase();
+  }).join(' ');
+}
+
+function normalizarComAlias(nome){
+  if(!nome) return nome;
+  var k=norm(nome);
+  if(State.aliases[k]){
+    var oficial=State.aliases[k];
+    if(!State.artistasConhecidos[norm(oficial)]) aprenderArtista(oficial);
+    return oficial;
+  }
+  if(State.artistasConhecidos[k]) return State.artistasConhecidos[k];
+  return nome;
+}
+function encontrarArtistaEm(txt){
+  if(!txt) return null;
+  var n=norm(txt);
+  var chaves=Object.keys(State.artistasConhecidos).filter(function(k){ return k.length>=3; });
+  chaves.sort(function(a,b){ return b.length-a.length; });
+  var LOTE=50;
+  for(var i=0;i<chaves.length;i+=LOTE){
+    var lote=chaves.slice(i,i+LOTE);
+    var padrao=lote.map(escapeRegex).join('|');
+    var re=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padrao+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i');
+    var m=n.match(re);
+    if(m && State.artistasConhecidos[m[2]]) return State.artistasConhecidos[m[2]];
+  }
+  var chavesAlias=Object.keys(State.aliases);
+  if(chavesAlias.length){
+    var padraoA=chavesAlias.map(escapeRegex).join('|');
+    var reA=new RegExp('(^|[\\s\\-_\\/|,;:.!?()\\[\\]])('+padraoA+')([\\s\\-_\\/|,;:.!?()\\[\\]]|$)','i');
+    var mm=n.match(reA);
+    if(mm && State.aliases[mm[2]]) return State.aliases[mm[2]];
+  }
+  return null;
+}
+function removerArtistaDoInicio(title,artist){
+  if(!title||!artist) return title;
+  var re=new RegExp('^'+escapeRegex(artist)+'\\s*[-–—:/|]\\s*','i');
+  var out=title.replace(re,'').trim();
+  return out.length<3?title:out;
+}
+function dedupArtistaNoTitulo(title,artist){
+  if(!title||!artist) return title;
+  var aP=norm(artist).split(/\s+/);
+  var palavras=title.split(/\s+/);
+  var resultado=[];
+  var i=0,removeu=false;
+  while(i<palavras.length){
+    var casou=true;
+    if(i+aP.length>palavras.length) casou=false;
+    else {
+      for(var j=0;j<aP.length;j++){
+        if(norm(palavras[i+j])!==aP[j]){ casou=false; break; }
+      }
+    }
+    if(casou){
+      i+=aP.length;
+      if(i<palavras.length && /^[-–—:|]$/.test(palavras[i])) i++;
+      removeu=true;
+    } else {
+      resultado.push(palavras[i]); i++;
+    }
+  }
+  var out=resultado.join(' ').replace(/\s+/g,' ').trim();
+  return (removeu && out.length>=3)?out:title;
+}
+
+function assinaturaDe(base){
+  var temTraco = /\s[-\u2013\u2014]\s/.test(base);
+  var temPipe = /\s\|\s/.test(base);
+  var temBarra = /\s\/\s/.test(base);
+  var partes = base.split(/\s+[-\u2013\u2014|]\s+/).filter(Boolean).length;
+  var temFeat = FEAT_RE.test(base);
+  return 'p' + partes + (temTraco?'T':'') + (temPipe?'P':'') + (temBarra?'B':'') + (temFeat?'F':'');
+}
+function scoreCandidato(artist,title){
+  if(!artist || !title) return 0;
+  var sc=0.3;
+  var aK=norm(artist);
+  if(State.artistasConhecidos[aK]) sc+=0.4;
+  else if(State.aliases[aK]) sc+=0.35;
+  else if(State.brain.artistas[aK]) sc+=0.25;
+  var aP=artist.split(/\s+/).length, tP=title.split(/\s+/).length;
+  if(aP<=3 && tP>=2) sc+=0.1;
+  if(tP<aP) sc-=0.1;
+  if(tagPareceCanal(artist)) sc-=0.5;
+  if(/^\d+$/.test(aK)) sc-=0.4;
+  if(/\b(amor|saudade|coracao|paixao|beijo|abraco|vida|ceu|mar|sol|noite|dia|festa|dor)\b/i.test(title)) sc+=0.15;
+  return Math.max(0,Math.min(1,sc));
+}
+function parseNome(nomeOriginal){
+  var base=String(nomeOriginal).replace(/\.[^.]+$/,'');
+  base=aplicarRegrasTexto(base);
+  var assin = assinaturaDe(base);
+  var corr = State.brain.correcoes[assin];
+  if(corr && corr.artist && corr.title){
+    return { a: corr.artist, t: corr.title, sc: 1.0, _aprendido: true };
+  }
+  var s=base.replace(/_/g,' ').replace(/\s+/g,' ').trim();
+  s=s.replace(/\([^)]*\)/g,' ').replace(/\[[^\]]*\]/g,' ');
+  s=limparPalavras(s);
+  s=removerNumeros(s);
+  s=s.replace(/\s+/g,' ').trim();
+  var featMatch=s.match(FEAT_RE);
+  var featTrecho='';
+  if(featMatch){
+    featTrecho=limpar(s.slice(featMatch.index).replace(FEAT_RE,' '));
+    s=s.slice(0,featMatch.index).trim();
+  }
+  var candidatos = [];
+  var matchB = s.match(/^(.*?)\s*-([^-]+)-\s*(.*)$/);
+  if(matchB && (matchB[2]||'').trim()){
+    candidatos.push({ a:limpar(matchB[2]), t:limpar(matchB[1]) });
+  }
+  var partes = s.split(/\s+[|\-–—\/]\s+/).map(function(p){ return p.trim(); }).filter(Boolean);
+  if(partes.length===2){
+    candidatos.push({ a:limpar(partes[0]), t:limpar(partes[1]) });
+    candidatos.push({ a:limpar(partes[1]), t:limpar(partes[0]) });
+  } else if(partes.length>=3){
+    candidatos.push({ a:limpar(partes[1]), t:limpar(partes[0]) });
+    candidatos.push({ a:limpar(partes[0]), t:limpar(partes.slice(1).join(' ')) });
+  } else {
+    var conhec = encontrarArtistaEm(s);
+    if(conhec && norm(conhec)!==norm(s)){
+      candidatos.push({ a:conhec, t:limpar(dedupArtistaNoTitulo(s, conhec)) });
+    } else {
+      candidatos.push({ a:'', t:limpar(s) });
+    }
+  }
+  var melhor=null, melhorScore=-1;
+  candidatos.forEach(function(c){
+    if(c.a) c.a=normalizarComAlias(c.a);
+    if(c.a && c.t && norm(c.a)===norm(c.t)) return;
+    var sc = scoreCandidato(c.a, c.t);
+    if(sc>melhorScore){ melhorScore=sc; melhor={ a:c.a, t:c.t }; }
+  });
+  if(!melhor){ melhor={ a:'', t:limpar(s) }; melhorScore=0; }
+  var artist=melhor.a, title=melhor.t;
+  if(featTrecho && norm(featTrecho)!==norm(artist)){
+    var outroArt=encontrarArtistaEm(featTrecho);
+    if(outroArt && norm(outroArt)!==norm(artist)){
+      artist=artist ? artist+' feat. '+outroArt : outroArt;
+    } else {
+      artist=artist ? artist+' feat. '+featTrecho : featTrecho;
+    }
+  }
+  if(artist){
+    title=dedupArtistaNoTitulo(title,artist);
+    title=removerArtistaDoInicio(title,artist);
+  }
+  if(artist && title && norm(artist)===norm(title)) artist='';
+  if(!title) title=limpar(s);
+  if(!artist && !title) title='Sem título';
+  return { a:capitalizar(artist), t:capitalizar(title), sc:melhorScore };
+}
+
+function lerTags(file,cb){
+  if(!file){ cb(null); return; }
+  var ext=comExt(file.name).toLowerCase();
+  if(['.mp3','.opus','.ogg','.flac'].indexOf(ext)===-1){ cb(null); return; }
+  if(State._tagsCache && State._tagsCache.has(file)){ cb(State._tagsCache.get(file)); return; }
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var buf=e.target.result;
+      var v=new DataView(buf);
+      var bytes=new Uint8Array(buf);
+      var tags={ artist:'', title:'', genre:'', album:'', track:'' };
+      var dec=new TextDecoder('utf-8');
+      if(ext==='.mp3' && v.byteLength>=10 &&
+         v.getUint8(0)===0x49 && v.getUint8(1)===0x44 && v.getUint8(2)===0x33){
+        var tagSize=((v.getUint8(6)&0x7F)<<21)|((v.getUint8(7)&0x7F)<<14)|((v.getUint8(8)&0x7F)<<7)|(v.getUint8(9)&0x7F);
+        var total=Math.min(10+tagSize,v.byteLength);
+        var off=10;
+        while(off<total-10){
+          try{
+            var fid=String.fromCharCode(v.getUint8(off),v.getUint8(off+1),v.getUint8(off+2),v.getUint8(off+3));
+            var fsz=(v.getUint8(off+4)<<24)|(v.getUint8(off+5)<<16)|(v.getUint8(off+6)<<8)|v.getUint8(off+7);
+            if(fsz<1 || off+10+fsz>total) break;
+            if(fid==='TIT2'||fid==='TPE1'||fid==='TCON'||fid==='TALB'||fid==='TRCK'){
+              var enc=v.getUint8(off+10);
+              var len=fsz-1;
+              if(len>0 && off+11+len<=bytes.length){
+                var sub=bytes.subarray(off+11,off+11+len);
+                var txt='';
+                if(enc===0||enc===3) txt=dec.decode(sub);
+                else { var cc=[]; for(var k=0;k+1<sub.length;k+=2) cc.push(String.fromCharCode(sub[k]|(sub[k+1]<<8))); txt=cc.join(''); }
+                txt=txt.replace(/\0/g,'').replace(/^\uFEFF/,'').trim();
+                if(fid==='TIT2') tags.title=txt;
+                if(fid==='TPE1') tags.artist=txt;
+                if(fid==='TCON') tags.genre=txt;
+                if(fid==='TALB') tags.album=txt;
+                if(fid==='TRCK') tags.track=txt;
+              }
+            }
+            off+=10+fsz;
+          }catch(err){ break; }
+        }
+      }
+      if((ext==='.opus'||ext==='.ogg') && v.byteLength>16){
+        var idx=-1;
+        var mOgg=[0x4F,0x70,0x75,0x73,0x54,0x61,0x67,0x73];
+        for(var i=0;i+8<=bytes.length;i++){
+          if(bytes[i]===mOgg[0]&&bytes[i+1]===mOgg[1]&&bytes[i+2]===mOgg[2]&&bytes[i+3]===mOgg[3]&&
+             bytes[i+4]===mOgg[4]&&bytes[i+5]===mOgg[5]&&bytes[i+6]===mOgg[6]&&bytes[i+7]===mOgg[7]){ idx=i+8; break; }
+        }
+        if(idx===-1){
+          var mV=[0x03,0x76,0x6F,0x72,0x62,0x69,0x73];
+          for(var i2=0;i2+7<=bytes.length;i2++){
+            if(bytes[i2]===mV[0]&&bytes[i2+1]===mV[1]&&bytes[i2+2]===mV[2]&&bytes[i2+3]===mV[3]&&
+               bytes[i2+4]===mV[4]&&bytes[i2+5]===mV[5]&&bytes[i2+6]===mV[6]){ idx=i2+7; break; }
+          }
+        }
+        if(idx>=0 && idx+4<=bytes.length){
+          var vendorLen=v.getUint32(idx,true); idx+=4;
+          if(idx+vendorLen+4<=bytes.length){
+            idx+=vendorLen;
+            var count=v.getUint32(idx,true); idx+=4;
+            for(var c=0;c<count && idx+4<=bytes.length;c++){
+              var clen=v.getUint32(idx,true); idx+=4;
+              if(idx+clen>bytes.length) break;
+              var s2=dec.decode(bytes.subarray(idx,idx+clen)); idx+=clen;
+              var eq=s2.indexOf('=');
+              if(eq<=0) continue;
+              var key=s2.slice(0,eq).toUpperCase();
+              var val=s2.slice(eq+1).trim();
+              if(!val) continue;
+              if(key==='TITLE') tags.title=val;
+              if(key==='ARTIST') tags.artist=val;
+              if(key==='GENRE') tags.genre=val;
+              if(key==='ALBUM') tags.album=val;
+              if(key==='TRACKNUMBER') tags.track=val;
+            }
+          }
+        }
+      }
+      if(ext==='.flac' && bytes.length>4){
+        if(bytes[0]===0x66&&bytes[1]===0x4C&&bytes[2]===0x61&&bytes[3]===0x43){
+          var off2=4;
+          while(off2+4<=bytes.length){
+            var header=bytes[off2];
+            var isLast=(header&0x80)!==0;
+            var type=header&0x7F;
+            var flen=(bytes[off2+1]<<16)|(bytes[off2+2]<<8)|bytes[off2+3];
+            off2+=4;
+            if(type===4){
+              if(off2+4<=bytes.length){
+                var vlen=v.getUint32(off2,true); off2+=4+vlen;
+                if(off2+4<=bytes.length){
+                  var fcount=v.getUint32(off2,true); off2+=4;
+                  for(var fc=0;fc<fcount;fc++){
+                    if(off2+4>bytes.length) break;
+                    var fclen=v.getUint32(off2,true); off2+=4;
+                    if(off2+fclen>bytes.length) break;
+                    var fs2=dec.decode(bytes.subarray(off2,off2+fclen)); off2+=fclen;
+                    var feq=fs2.indexOf('=');
+                    if(feq<0) continue;
+                    var fk=fs2.slice(0,feq).toUpperCase();
+                    var fv=fs2.slice(feq+1).trim();
+                    if(!fv) continue;
+                    if(fk==='TITLE') tags.title=fv;
+                    if(fk==='ARTIST') tags.artist=fv;
+                    if(fk==='GENRE') tags.genre=fv;
+                    if(fk==='ALBUM') tags.album=fv;
+                    if(fk==='TRACKNUMBER') tags.track=fv;
+                  }
+                }
+              }
+              break;
+            }
+            off2+=flen;
+            if(isLast) break;
+          }
+        }
+      }
+      if(State._tagsCache) State._tagsCache.set(file, tags);
+      cb(tags);
+    }catch(err){ cb(null); }
+  };
+  reader.onerror=function(){ cb(null); };
+  reader.readAsArrayBuffer(file.slice(0,2*1024*1024));
+}
+function escreverTags(buffer,tags){
+  if(typeof ID3Writer==='undefined') return buffer;
+  try{
+    var w=new ID3Writer(buffer);
+    if(tags.title)  w.setFrame('TIT2',tags.title);
+    if(tags.artist) w.setFrame('TPE1',tags.artist);
+    if(tags.genre)  w.setFrame('TCON',tags.genre);
+    if(tags.album)  w.setFrame('TALB',tags.album);
+    if(tags.track)  w.setFrame('TRCK',tags.track);
+    return w.addTag();
+  }catch(err){ return buffer; }
+}
+
+function sanitizeArtista(s){
+  if(!s) return '';
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  x=x.replace(/&/g,'e').replace(/\+/g,'e').replace(/\//g,'-').replace(/@/g,'');
+  x=x.replace(/[^a-z0-9-]/g,'');
+  x=x.replace(/-+/g,'-').replace(/^-|-$/g,'');
+  return x;
+}
+function sanitizeTitulo(s){
+  if(!s) return '';
+  var x=String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  x=x.replace(/&/g,'e').replace(/\+/g,'e').replace(/@/g,'');
+  x=x.replace(/\b(de|da|do|das|dos|e)\b/g,' ');
+  x=x.replace(/[^a-z0-9\s]/g,'');
+  x=x.replace(/\s+/g,' ');
+  return x.trim();
+}
+function abreviarTitulo(tit){
+  if(!tit) return '';
+  var palavras = tit.split(/\s+/).filter(Boolean);
+  var out = palavras.map(function(p){
+    var k = norm(p);
+    if(State.abrev[k]) return State.abrev[k];
+    if(State.abrev[p]) return State.abrev[p];
+    if(p.length >= 8) return p.slice(0,5);
+    return p;
+  });
+  return out.join('').replace(/\./g,'');
+}
+function gerarNome(m,ext){
+  var extLower = String(ext||'').toLowerCase();
+  var LIMITE = 40;
+  var art = sanitizeArtista(m.artist||'') || 'desconhecido';
+  var tit = sanitizeTitulo(m.title||'') || 'sem_titulo';
+  var artFinal = art;
+  var espacoTit = LIMITE - artFinal.length - 1;
+  if(espacoTit < 4){
+    artFinal = artFinal.slice(0, Math.max(1, LIMITE - 5));
+    espacoTit = LIMITE - artFinal.length - 1;
+  }
+  var titJunto = tit.replace(/\s+/g,'');
+  if(titJunto.length > espacoTit){
+    titJunto = abreviarTitulo(tit);
+    if(titJunto.length > espacoTit){
+      titJunto = titJunto.slice(0, espacoTit);
+    }
+  }
+  var nome = artFinal + '_' + titJunto;
+  if(nome.length > LIMITE){
+    var corte = nome.slice(0, LIMITE);
+    var ultimoUnd = corte.lastIndexOf('_');
+    if(ultimoUnd > artFinal.length + 1) corte = corte.slice(0, ultimoUnd);
+    nome = corte;
+  }
+  nome = nome.replace(/_+$/,'').replace(/^_+/,'');
+  return nome + extLower;
+}
+
 function aprenderArtista(nome){
   if(!nome) return;
   var n=String(nome).trim();
@@ -22,7 +1337,6 @@ function aprenderTitulo(nome){
     salvarBrain();
   }
 }
-/* 🔧 v26 — aprende correção manual (assinatura → par) */
 function aprenderCorrecao(nomeOriginal, artist, title){
   if(!nomeOriginal || !artist || !title) return;
   var base=String(nomeOriginal).replace(/\.[^.]+$/,'');
@@ -35,9 +1349,6 @@ function aprenderCorrecao(nomeOriginal, artist, title){
   salvarBrain();
 }
 
-/* ============================================================
-   🔧 v26 — BUSCA NA REDE (Deezer primeiro, depois MusicBrainz)
-   ============================================================ */
 var _ultimaBuscaRede = 0;
 async function buscarDeezer(termo){
   try{
@@ -69,7 +1380,6 @@ async function buscarArtistaNaRede(termo){
   if(!termo || termo.length<2) return null;
   var k = norm(termo);
   if(State.cache.busca[k]) return State.cache.busca[k];
-  // 🔧 v26 — Deezer primeiro (CORS aberto), MusicBrainz em paralelo
   var resultados = await Promise.allSettled([buscarDeezer(termo), buscarMusicBrainz(termo)]);
   var nomes = [];
   resultados.forEach(function(r){
@@ -106,9 +1416,6 @@ async function buscarNoCard(mid){
   toast('🌐 '+nomes.length+' sugestão(ões)','s');
 }
 
-/* ============================================================
-   🔧 v26 — AÇÕES DE CARD
-   ============================================================ */
 function aplicarSugestao(mid, nome){
   var m = State.musicas.find(function(x){ return x.id === mid; });
   if(!m) return;
@@ -117,7 +1424,6 @@ function aplicarSugestao(mid, nome){
   m.corrompido = ehLixo(m.artist)||ehLixo(m.title)||norm(m.artist)===norm(m.title);
   m.newName = gerarNome(m, comExt(m.originalName));
   aprenderArtista(nome);
-  // 🔧 v26 — aprende correção
   aprenderCorrecao(m.originalName, m.artist, m.title);
   snapshot();
   render();
@@ -196,22 +1502,15 @@ function buscarArtistaPorNome(mid, termo){
   toast('🆕 Artista novo salvo: '+m.artist,'save');
 }
 
-/* ============================================================
-   🔧 v26 — GÊNERO INFERIDO
-   ============================================================ */
 function inferirGenero(artist){
   if(!artist) return 'Music';
   var k=norm(artist);
   if(GENERO_POR_ARTISTA[k]) return GENERO_POR_ARTISTA[k];
-  // tenta prefixo (ex: "MC X" → Funk)
   var partes=k.split(/\s+/);
   if(partes[0]==='mc' || partes[0]==='dj') return 'Funk';
   return 'Music';
 }
 
-/* ============================================================
-   🔧 v26 — ADD ARQUIVOS (com cache e aprendizado)
-   ============================================================ */
 function addArquivos(fileList){
   var arr=[];
   for(var i=0;i<fileList.length;i++){
@@ -223,7 +1522,6 @@ function addArquivos(fileList){
   function concluir(){
     pendentes--;
     if(pendentes===0){
-      detectarPadrao();
       snapshot(); render();
       toast('✅ '+arr.length+' arquivo(s) carregado(s)','s');
     }
@@ -272,22 +1570,6 @@ function addArquivos(fileList){
   });
 }
 
-/* 🔧 v26 — detecta padrão dominante e avisa */
-function detectarPadrao(){
-  if(State.musicas.length<3) return;
-  var comArt=State.musicas.filter(function(m){ return m.artist && m.title; });
-  if(comArt.length<3) return;
-  // conta quantos têm artista batendo com conhecido
-  var batem=0;
-  comArt.forEach(function(m){ if(State.artistasConhecidos[norm(m.artist)]) batem++; });
-  if(batem >= comArt.length*0.7){
-    console.log('🎯 Padrão dominante: '+bates+'/'+comArt.length+' artistas reconhecidos');
-  }
-}
-
-/* ============================================================
-   🔧 v26 — STATS E RENDER
-   ============================================================ */
 function calcularDuplicatas(){
   var mapa={};
   State.musicas.forEach(function(m){ mapa[m.newName]=(mapa[m.newName]||0)+1; });
@@ -332,7 +1614,6 @@ function render(){
     var cls = isDup?'dup':(m.corrompido?'cor':(m.editada?'editada':''));
     var st = isDup?'🔁':(m.corrompido?'⚠️':(m.editada?'✏️':'✅'));
     var numExibir=m.idNum||(i+1);
-    // score badge
     var sc=m.score!=null?m.score:(m.corrompido?0.3:0.7);
     var scCls = m.aprendido?'alt':(sc>=0.7?'alt':(sc>=0.4?'med':'baixo'));
     var scTxt = m.aprendido?'🧠':Math.round(sc*100)+'%';
@@ -405,7 +1686,6 @@ function onInputBlur(e){
   if(!valor) return;
   if(campo==='artist'){
     aprenderArtista(valor);
-    // 🔧 v26 — aprende correção se a música estava corrompida antes
     if(m.corrompido) aprenderCorrecao(m.originalName, m.artist, m.title);
   } else if(campo==='title'){
     aprenderTitulo(valor);
@@ -431,9 +1711,6 @@ function onBuscaArtistaChange(e){
   inp.value='';
 }
 
-/* ============================================================
-   🔧 v26 — JSON
-   ============================================================ */
 function _atualizarJsonReal(){
   var txt=$('jsonTexto'),badge=$('jsonBadge'),info=$('jsonInfo'),tam=$('jsonTamanho');
   if(!txt) return;
@@ -467,9 +1744,6 @@ function _atualizarJsonReal(){
 function atualizarJson(){ _atualizarJsonReal(); }
 var atualizarJsonDebounced=debounce(_atualizarJsonReal,300);
 
-/* ============================================================
-   🔧 v26 — AÇÕES EM LOTE
-   ============================================================ */
 function aplicarGeneroEmTodas(){
   if(State.musicas.length===0){ toast('Nenhuma música.','w'); return; }
   var g=($('generoGeral').value||'').trim();
@@ -581,9 +1855,6 @@ function reanalisar(){
   });
 }
 
-/* ============================================================
-   🔧 v26 — LIXO / ENSINAR
-   ============================================================ */
 function adicionarLixoManual(aplicarAgora){
   var inp=$('lixoManual');
   var val=inp.value.trim();
@@ -664,9 +1935,6 @@ function aplicarRegrasAgora(){
   toast('✅ '+n+' música(s) editada(s)!','s');
 }
 
-/* ============================================================
-   🔧 v26 — LISTAS DE ARTISTAS
-   ============================================================ */
 function renderArtistas(){
   var lista=$('artLista'); if(!lista) return;
   var chaves=Object.keys(State.artistasConhecidos).sort();
@@ -814,9 +2082,6 @@ function adicionarAlias(){
   if(State.musicas.length>0) reanalisar();
 }
 
-/* ============================================================
-   🔧 v26 — ABREVIAÇÕES
-   ============================================================ */
 function renderAbrev(){
   var lista=$('abrevLista'); if(!lista) return;
   var chaves=Object.keys(State.abrev).sort();
@@ -851,9 +2116,6 @@ function resetarAbrev(){
   });
 }
 
-/* ============================================================
-   🔧 v26 — BRAIN PANEL
-   ============================================================ */
 function atualizarBrainStats(){
   var cntL=$('cntLixo'),cntA=$('cntArt'),cntT=$('cntTit'),cntC=$('cntCorr'),cntR=$('cntRegras');
   if(cntL) cntL.textContent=Object.keys(State.brain.lixo).length;
@@ -906,9 +2168,6 @@ function renderBrain(){
   atualizarBrainStats();
 }
 
-/* ============================================================
-   🔧 v26 — ZIP / JSON
-   ============================================================ */
 function baixarZip(){
   var comFile=State.musicas.filter(function(m){ return m.file; });
   if(comFile.length===0){ toast('Nenhum arquivo real.','w'); return; }
@@ -965,9 +2224,6 @@ function copiarJson(){
   });
 }
 
-/* ============================================================
-   🔧 v26 — DEMO / IMPORT BRAIN
-   ============================================================ */
 function testarDemo(){
   var nomes = [
     'Foreigner - I Want To Know What Love Is (Official Music Video).mp3',
@@ -1002,11 +2258,7 @@ function testarDemo(){
   toast('🎯 Demo: '+nomes.length+' músicas de teste','s');
 }
 
-/* ============================================================
-   🔧 v26 — BIND DE EVENTOS (delegação global)
-   ============================================================ */
 function bind(){
-  // arquivos
   $('zona').onclick = function(){ $('inp').click(); };
   $('inp').onchange = function(e){
     if(e.target.files && e.target.files.length){ addArquivos(e.target.files); e.target.value=''; }
@@ -1019,20 +2271,14 @@ function bind(){
       if(ev==='drop' && e.dataTransfer.files.length){ addArquivos(e.dataTransfer.files); }
     });
   });
-
-  // toggles de box
   document.querySelectorAll('[data-toggle]').forEach(function(btn){
     btn.onclick = function(){
       var alvo = $(btn.getAttribute('data-toggle'));
       if(alvo) alvo.classList.toggle('on');
     };
   });
-
-  // lixo
   $('btnAddLixo').onclick = function(){ adicionarLixoManual(false); };
   $('btnAddLixoAplicar').onclick = function(){ adicionarLixoManual(true); };
-
-  // artistas
   $('artBusca').oninput = debounce(function(e){ State.artBusca = e.target.value; renderArtistas(); }, 200);
   $('btnLimparBusca').onclick = function(){ $('artBusca').value=''; State.artBusca=''; renderArtistas(); };
   $('btnAddArt').onclick = adicionarArtistaConhecido;
@@ -1048,17 +2294,11 @@ function bind(){
     if(e.target.files[0]) processarImportArt(e.target.files[0]);
     e.target.value='';
   };
-
-  // abreviações
   $('btnAddAbrev').onclick = adicionarAbrev;
   $('btnResetAbrev').onclick = resetarAbrev;
-
-  // aplicar em todas
   $('btnAplicarGenero').onclick = aplicarGeneroEmTodas;
   $('btnAplicarId').onclick = aplicarIdsEmTodas;
   $('btnAplicarTudo').onclick = aplicarTudoEmTodas;
-
-  // ações principais
   $('btnEnsinar').onclick = abrirEnsinar;
   $('btnLimpar').onclick = limparTodos;
   $('btnReanalisar').onclick = reanalisar;
@@ -1070,8 +2310,6 @@ function bind(){
     p.classList.toggle('on');
     if(p.classList.contains('on')) renderBrain();
   };
-
-  // barra fixa
   $('btnZip').onclick = baixarZip;
   $('btnJson').onclick = baixarJson;
   $('btnToggleJson').onclick = function(){
@@ -1085,8 +2323,6 @@ function bind(){
     atualizarJson();
     toast(State.jsonMinificado?'🔀 Minificado':'🔀 Expandido','i');
   };
-
-  // brain tabs
   document.querySelectorAll('.brain-tab').forEach(function(t){
     t.onclick = function(){
       document.querySelectorAll('.brain-tab').forEach(function(x){ x.classList.remove('on'); });
@@ -1129,50 +2365,32 @@ function bind(){
       toast('🗑️ Cérebro resetado','i');
     });
   };
-
-  // ensinar modal
   $('ensAdd').onclick = addRegraDoInputModal;
   $('ensCancel').onclick = fecharEnsinar;
   $('ensOk').onclick = aplicarRegrasAgora;
-
-  // delegação de cliques nos cards e chips
   document.body.addEventListener('click', function(e){
     var t = e.target;
-    // card: swap
     if(t.dataset.swap){ trocarArtistaTitulo(t.dataset.swap); return; }
     if(t.dataset.salvarArt){ salvarArtistaDoCard(t.dataset.salvarArt); return; }
     if(t.dataset.salvarTit){ salvarTituloDoCard(t.dataset.salvarTit); return; }
     if(t.dataset.net){ buscarNoCard(t.dataset.net); return; }
     if(t.dataset.nome && t.dataset.mid){ aplicarSugestao(t.dataset.mid, t.dataset.nome); return; }
-    // chips de artistas
     if(t.dataset.k && t.parentElement && t.parentElement.parentElement && t.parentElement.parentElement.id==='artLista'){
-      delete State.artistasConhecidos[t.dataset.k];
-      salvarArtistas(); renderArtistas();
-      return;
+      delete State.artistasConhecidos[t.dataset.k]; salvarArtistas(); renderArtistas(); return;
     }
-    // alias
     if(t.dataset.k && t.parentElement && t.parentElement.parentElement && t.parentElement.parentElement.id==='aliasLista'){
-      delete State.aliases[t.dataset.k];
-      salvarAliases(); renderAliases();
-      return;
+      delete State.aliases[t.dataset.k]; salvarAliases(); renderAliases(); return;
     }
-    // abrev
     if(t.dataset.k && t.parentElement && t.parentElement.parentElement && t.parentElement.parentElement.id==='abrevLista'){
-      delete State.abrev[t.dataset.k];
-      salvarAbrev();
-      return;
+      delete State.abrev[t.dataset.k]; salvarAbrev(); return;
     }
-    // regras do modal
     if(t.dataset.regra){ removerRegra(t.dataset.regra); renderListaRegras(); atualizarPreviewEnsinar(); return; }
-    // brain: lixo
     if(t.dataset.brainLixo){ delete State.brain.lixo[t.dataset.brainLixo]; salvarBrain(); renderBrain(); return; }
     if(t.dataset.brainArt){ delete State.brain.artistas[t.dataset.brainArt]; salvarBrain(); renderBrain(); return; }
     if(t.dataset.brainTit){ delete State.brain.titulos[t.dataset.brainTit]; salvarBrain(); renderBrain(); return; }
     if(t.dataset.brainCorr){ delete State.brain.correcoes[t.dataset.brainCorr]; salvarBrain(); renderBrain(); return; }
     if(t.dataset.brainRegra){ removerRegra(t.dataset.brainRegra); renderBrain(); return; }
   });
-
-  // inputs dos cards
   document.body.addEventListener('input', function(e){
     if(e.target.dataset && e.target.dataset.id) onInputEdit(e);
     else if(e.target.dataset && e.target.dataset.buscaId) onBuscaArtistaKey(e);
@@ -1183,8 +2401,6 @@ function bind(){
   document.body.addEventListener('blur', function(e){
     if(e.target.dataset && e.target.dataset.id) onInputBlur(e);
   }, true);
-
-  // atalhos
   document.addEventListener('keydown', function(e){
     if(e.ctrlKey || e.metaKey){
       if(e.key==='z'){ e.preventDefault(); if(e.shiftKey) refazer(); else desfazer(); }
@@ -1193,9 +2409,6 @@ function bind(){
   });
 }
 
-/* ============================================================
-   🔧 v26 — INIT
-   ============================================================ */
 function init(){
   carregarTudo();
   bind();
